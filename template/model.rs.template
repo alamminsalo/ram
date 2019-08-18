@@ -1,0 +1,27 @@
+{{!-- basic Rust model struct template --}}
+use serde::{Serialize,Deserialize};
+{{#has_date}}
+use chrono::Date;
+{{/has_date}}
+{{#has_datetime}}
+use chrono::DateTime;
+{{/has_date}}
+
+#[derive(Serialize,Deserialize)]
+pub struct {{model_name}} {
+{{#fields}}
+{{!-- field tags --}}
+{{#custom_tags}}
+{{tag}}
+{{/custom_tags}}
+{{!-- nullable type --}}
+{{#nullable}}
+pub {{field_name}} Option<{{field_type}}>,
+{{/nullable}}
+{{!-- non-nullable type --}}
+{{^nullable}}
+pub {{field_name}} {{field_type}},
+{{/nullable}}
+{{/fields}}
+}
+

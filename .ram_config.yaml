@@ -1,0 +1,4 @@
+spec: "./res/petstore.yaml"
+lang: "rust"
+models: "models"
+api: "api"
