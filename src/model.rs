@@ -1,5 +1,7 @@
 use openapi::v3_0::{Parameter, Schema};
+use std::collections::BTreeMap;
 
+#[derive(Debug)]
 pub struct Model {
     pub model_name: String,
     pub fields: Vec<Field>,
@@ -11,7 +13,7 @@ impl Model {
     pub fn new(name: String, schema: Schema) -> Self {
         let fields: Vec<Field> = schema
             .properties
-            .expect("no properties in schema ")
+            .unwrap_or(BTreeMap::new())
             .into_iter()
             .map(|(name, schema)| Field {
                 nullable: false,
@@ -48,6 +50,7 @@ impl Model {
     }
 }
 
+#[derive(Debug)]
 pub struct Field {
     pub name: String,
     pub field_type: String,
