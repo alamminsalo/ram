@@ -1,4 +1,4 @@
 spec: "./res/petstore.yaml"
 lang: "rust"
-models: "models"
+template_models: "templates/model.rs.template"
 api: "api"

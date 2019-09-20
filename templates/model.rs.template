@@ -1,0 +1,15 @@
+use serde::{Serialize,Deserialize};
+{{#has_date}}
+use chrono::Date;
+{{/has_date}}
+{{#has_datetime}}
+use chrono::DateTime;
+{{/has_datetime}}
+
+#[derive(Serialize,Deserialize)]
+pub struct {{model_name}} {
+{{#fields}}
+  pub {{ name }}: {{ type }},
+{{/fields}}
+}
+

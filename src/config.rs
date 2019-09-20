@@ -1,4 +1,4 @@
-use failure::{format_err, Error, Fallible};
+use failure::{Fallible};
 use openapi::OpenApi;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -10,7 +10,7 @@ use std::path::Path;
 pub struct Config {
     pub spec: String,
     pub lang: String,
-    pub models: String,
+    pub template_models: String,
     pub api: String,
 }
 

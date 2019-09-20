@@ -1,7 +1,8 @@
-use openapi::v3_0::{Parameter, Schema};
+use openapi::v3_0::{Schema};
 use std::collections::BTreeMap;
+use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct Model {
     pub model_name: String,
     pub fields: Vec<Field>,
@@ -22,7 +23,7 @@ impl Model {
                 is_array: schema.schema_type.clone().into_iter().any(|t|{
                     &t == "array"
                 }),
-                field_type: schema.schema_type.expect("no field type defined"),
+                r#type: schema.schema_type.expect("no field type defined"),
                 name,
             })
             .collect();
@@ -50,10 +51,10 @@ impl Model {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Serialize)]
 pub struct Field {
     pub name: String,
-    pub field_type: String,
+    pub r#type: String,
     pub format: Option<String>,
     pub nullable: bool,
     pub ref_path: Option<String>,
