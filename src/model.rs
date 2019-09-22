@@ -1,13 +1,26 @@
-use openapi::v3_0::{Schema};
-use std::collections::BTreeMap;
+use openapi::v3_0::Schema;
 use serde::Serialize;
+use std::collections::BTreeMap;
+
+// Returns models name from ref path
+fn name_from_ref(ref_path: &str) -> Option<String> {
+    if let Some(idx) = ref_path.rfind('/') {
+        Some(ref_path[idx + 1..].to_string())
+    } else {
+        None
+    }
+}
 
 #[derive(Serialize, Debug)]
 pub struct Model {
     pub model_name: String,
+    pub r#type: String,
     pub fields: Vec<Field>,
+    pub items: Option<Box<Model>>,
     pub has_date: bool,
     pub has_datetime: bool,
+    pub is_array: bool,
+    pub is_object: bool,
 }
 
 impl Model {
@@ -20,13 +33,19 @@ impl Model {
                 nullable: false,
                 format: schema.format,
                 ref_path: schema.ref_path,
-                is_array: schema.schema_type.clone().into_iter().any(|t|{
-                    &t == "array"
-                }),
+                is_array: schema
+                    .schema_type
+                    .clone()
+                    .into_iter()
+                    .any(|t| &t == "array"),
                 r#type: schema.schema_type.expect("no field type defined"),
                 name,
             })
             .collect();
+
+        let r#type = schema.schema_type.unwrap_or("none".into());
+        let is_array = &r#type == "array";
+        let is_object = &r#type == "object";
 
         Self {
             model_name: name,
@@ -46,12 +65,21 @@ impl Model {
                     false
                 }
             }),
+            items: schema.items.map(|s| {
+                Box::new(Model::new(
+                    name_from_ref(&s.ref_path.clone().unwrap()).unwrap(),
+                    *s,
+                ))
+            }),
             fields,
+            r#type,
+            is_array,
+            is_object,
         }
     }
 }
 
-#[derive(Debug,Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Field {
     pub name: String,
     pub r#type: String,

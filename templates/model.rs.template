@@ -1,3 +1,4 @@
+{{#is_object}}
 use serde::{Serialize,Deserialize};
 {{#has_date}}
 use chrono::Date;
@@ -12,4 +13,7 @@ pub struct {{model_name}} {
   pub {{ name }}: {{ type }},
 {{/fields}}
 }
-
+{{/is_object}}
+{{#is_array}}
+pub type {{model_name}} = Vec<{{items.model_name}}>;
+{{/is_array}}
