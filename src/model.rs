@@ -32,7 +32,7 @@ impl Model {
             .into_iter()
             .map(|(name, schema)| {
                 lang.transform_field(Field {
-                    nullable: false,
+                    nullable: schema.nullable.unwrap_or(false),
                     format: schema.format,
                     ref_path: schema.ref_path,
                     is_array: schema

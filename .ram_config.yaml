@@ -9,5 +9,5 @@ lang_spec: "rust"
 
 # Template files
 template:
-  model: "templates/model.rs.template"
-  api: "templates/api.rs.template"
+  model: "templates/model.rs.mustache"
+  api: "templates/api.rs.mustache"
