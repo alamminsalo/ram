@@ -1,3 +1,4 @@
+use super::lang::Lang;
 use openapi::v3_0::Schema;
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -24,22 +25,24 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new(name: String, schema: Schema) -> Self {
+    pub fn new(name: String, schema: Schema, lang: &Lang) -> Self {
         let fields: Vec<Field> = schema
             .properties
             .unwrap_or(BTreeMap::new())
             .into_iter()
-            .map(|(name, schema)| Field {
-                nullable: false,
-                format: schema.format,
-                ref_path: schema.ref_path,
-                is_array: schema
-                    .schema_type
-                    .clone()
-                    .into_iter()
-                    .any(|t| &t == "array"),
-                r#type: schema.schema_type.expect("no field type defined"),
-                name,
+            .map(|(name, schema)| {
+                lang.transform_field(Field {
+                    nullable: false,
+                    format: schema.format,
+                    ref_path: schema.ref_path,
+                    is_array: schema
+                        .schema_type
+                        .clone()
+                        .into_iter()
+                        .any(|t| &t == "array"),
+                    r#type: schema.schema_type.expect("no field type defined"),
+                    name,
+                })
             })
             .collect();
 
@@ -69,6 +72,7 @@ impl Model {
                 Box::new(Model::new(
                     name_from_ref(&s.ref_path.clone().unwrap()).unwrap(),
                     *s,
+                    lang,
                 ))
             }),
             fields,
