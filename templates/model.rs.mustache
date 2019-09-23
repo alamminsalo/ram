@@ -1,19 +1,20 @@
-{{#is_object}}
+{{~#if is_object}}
 use serde::{Serialize,Deserialize};
-{{#has_date}}
+{{~#if has_date}}
 use chrono::Date;
-{{/has_date}}
-{{#has_datetime}}
+{{~/if}}
+{{~#if has_datetime}}
 use chrono::DateTime;
-{{/has_datetime}}
+{{~/if}}
 
 #[derive(Serialize,Deserialize)]
 pub struct {{model_name}} {
-{{#fields}}
+{{~#each fields}}
   pub {{ name }}: {{ type }},
-{{/fields}}
+{{~/each}}
 }
-{{/is_object}}
-{{#is_array}}
+{{~/if}}
+
+{{~#if is_array}}
 pub type {{model_name}} = Vec<{{items.model_name}}>;
-{{/is_array}}
+{{~/if}}
