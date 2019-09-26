@@ -4,6 +4,7 @@ name: rust
 # dynamic templates for things such as nullable types and how they should be formatted
 templates:
   nullable: Option<{{type}}>
+  filename: '{{filename}}.rs'
 
 types:
   integer:

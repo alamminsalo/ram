@@ -25,7 +25,7 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new(name: String, schema: Schema, lang: &Lang) -> Self {
+    pub fn new(name: &str, schema: Schema, lang: &Lang) -> Self {
         let fields: Vec<Field> = schema
             .properties
             .unwrap_or(BTreeMap::new())
@@ -51,7 +51,7 @@ impl Model {
         let is_object = &r#type == "object";
 
         Self {
-            model_name: name,
+            model_name: name.to_string(),
             // checks if any field contains format: date
             has_date: fields.iter().any(|f| {
                 if let Some(fieldformat) = &f.format {
@@ -70,7 +70,7 @@ impl Model {
             }),
             items: schema.items.map(|s| {
                 Box::new(Model::new(
-                    name_from_ref(&s.ref_path.clone().unwrap()).unwrap(),
+                    &name_from_ref(&s.ref_path.clone().unwrap()).unwrap(),
                     *s,
                     lang,
                 ))

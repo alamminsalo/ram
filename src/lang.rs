@@ -23,6 +23,7 @@ pub struct Type {
 #[derive(Debug, Deserialize)]
 struct Templates {
     nullable: Option<String>,
+    filename: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -51,7 +52,7 @@ impl Lang {
     }
 
     // formats nullable value using given language spec template
-    fn format_nullable(&self, data: &Format) -> String {
+    pub fn format_nullable(&self, data: &Format) -> String {
         let nullable = self
             .templates
             .nullable
@@ -62,6 +63,19 @@ impl Lang {
         template
             .render_to_string(&data)
             .expect("failed to format nullable field")
+    }
+
+    // formats filename value using given language spec template
+    pub fn format_filename(&self, data: mustache::Data) -> String {
+        let t = self
+            .templates
+            .filename
+            .clone()
+            .expect("no filename formatting template found");
+        let template = mustache::compile_str(&t).expect("failed to compile nullable template");
+        template
+            .render_data_to_string(&data)
+            .expect("failed to format filename")
     }
 
     pub fn transform_field(&self, f: Field) -> Field {

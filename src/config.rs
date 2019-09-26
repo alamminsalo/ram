@@ -1,4 +1,4 @@
-use super::Lang;
+use super::{Lang, Model};
 use failure::Fallible;
 use openapi::OpenApi;
 use serde::Deserialize;
@@ -48,5 +48,14 @@ impl Config {
         }
 
         Lang::load_file(&lang)
+    }
+
+    // returns model path using lang specs filename property
+    pub fn model_path(&self, model: &Model, lang: &Lang) -> String {
+        lang.format_filename(
+            mustache::MapBuilder::new()
+                .insert_str("filename", model.model_name.to_lowercase())
+                .build(),
+        )
     }
 }
