@@ -1,15 +1,17 @@
 use super::Field;
 use failure::Fallible;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
+use mustache::Template;
 
 #[derive(Debug, Deserialize)]
 pub struct Lang {
     pub name: String,
     pub types: HashMap<String, Type>,
+    templates: Templates,
 }
 
 #[derive(Debug, Deserialize)]
@@ -20,9 +22,14 @@ pub struct Type {
 }
 
 #[derive(Debug, Deserialize)]
+struct Templates {
+    nullable: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Format {
     pub r#type: String,
-    pub nullable: String,
+    pub nullable: Option<String>,
 }
 
 impl Lang {
@@ -34,12 +41,21 @@ impl Lang {
         let ext = path.extension().expect("failed to get extension");
         let ext: &str = ext.to_str().expect("failed to read extension");
 
-        let cfg: Self = match ext {
+        let lang: Self = match ext {
             "yaml" | "yml" => serde_yaml::from_reader(reader)?,
             "json" | _ => serde_json::from_reader(reader)?,
         };
 
-        Ok(cfg)
+        // compile dynamic templates
+
+        Ok(lang)
+    }
+
+    // formats nullable value using given language spec template
+    fn format_nullable(&self, data: &Format) -> String {
+            let nullable = self.templates.nullable.clone().expect("no nullable formatting template found");
+            let template = mustache::compile_str(&nullable).expect("failed to compile nullable template");
+            template.render_to_string(&data).expect("failed to format nullable field")
     }
 
     pub fn transform_field(&self, f: Field) -> Field {
@@ -56,10 +72,11 @@ impl Lang {
             .get(&field_format)
             .expect("failed to find type format");
 
-        let r#type = if f.nullable {
-            lang_format.nullable.clone()
-        } else {
-            lang_format.r#type.clone()
+        // get type for lang spec
+        let mut r#type = lang_format.r#type.clone();
+
+        if f.nullable {
+            r#type = self.format_nullable(&lang_format);
         };
 
         Field { r#type, ..f }

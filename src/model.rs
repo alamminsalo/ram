@@ -46,7 +46,7 @@ impl Model {
             })
             .collect();
 
-        let r#type = schema.schema_type.unwrap_or("none".into());
+        let r#type = schema.schema_type.unwrap_or("object".into());
         let is_array = &r#type == "array";
         let is_object = &r#type == "object";
 
