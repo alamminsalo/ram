@@ -14,8 +14,8 @@ template:
 
 # Used for modules and namespace mapping
 namespace:
-  model: 'petstore_models'
+  model: "petstore_models"
 
 # File paths
 paths:
-  model: 'src/models'
+  model: "src/models"
