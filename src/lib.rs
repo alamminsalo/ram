@@ -28,7 +28,11 @@ fn generate_models(template_path: &Path, lang: Lang, components: Components) {
 pub fn generate(cfg: Config, spec: Spec) {
     let lang = cfg.get_lang().expect("failed to create lang spec!");
     generate_models(
-        Path::new(&cfg.template.get("model").expect("no models template defined")),
+        Path::new(
+            &cfg.template
+                .get("model")
+                .expect("no models template defined"),
+        ),
         lang,
         spec.components.unwrap(),
     );

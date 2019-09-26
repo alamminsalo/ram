@@ -1,11 +1,10 @@
 use super::Field;
 use failure::Fallible;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use mustache::Template;
 
 #[derive(Debug, Deserialize)]
 pub struct Lang {
@@ -53,9 +52,16 @@ impl Lang {
 
     // formats nullable value using given language spec template
     fn format_nullable(&self, data: &Format) -> String {
-            let nullable = self.templates.nullable.clone().expect("no nullable formatting template found");
-            let template = mustache::compile_str(&nullable).expect("failed to compile nullable template");
-            template.render_to_string(&data).expect("failed to format nullable field")
+        let nullable = self
+            .templates
+            .nullable
+            .clone()
+            .expect("no nullable formatting template found");
+        let template =
+            mustache::compile_str(&nullable).expect("failed to compile nullable template");
+        template
+            .render_to_string(&data)
+            .expect("failed to format nullable field")
     }
 
     pub fn transform_field(&self, f: Field) -> Field {
