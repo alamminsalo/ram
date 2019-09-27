@@ -11,7 +11,7 @@ use openapi::v3_0::{Components, ObjectOrReference::Object, Spec};
 use std::collections::HashMap;
 use std::path::Path;
 
-fn generate_models(cfg: &Config, components: Components) -> HashMap<String, String> {
+pub fn generate_models(cfg: &Config, components: Components) -> HashMap<String, String> {
     // compile models template
     let template_path = Path::new(
         cfg.template
@@ -44,7 +44,9 @@ fn generate_models(cfg: &Config, components: Components) -> HashMap<String, Stri
         .collect()
 }
 
-pub fn generate(cfg: Config, spec: Spec) {
+pub fn generate_files(cfg: Config, spec: Spec) {
     let models = generate_models(&cfg, spec.components.unwrap());
-    util::write_files(models);
+    // write models into specified path
+    let models_path = Path::new(cfg.paths.get("model").expect("models path not defined"));
+    util::write_files(&models_path, models);
 }
