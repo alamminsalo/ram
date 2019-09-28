@@ -12,9 +12,11 @@ use std::path::Path;
 pub struct Lang {
     pub name: String,
     pub types: HashMap<String, Type>,
-    templates: Templates,
+    #[serde(default)]
+    pub format: HashMap<String, String>,
     pub files: Vec<ExtraFile>,
-    paths: HashMap<String, String>,
+    pub paths: HashMap<String, String>,
+    pub templates: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -30,12 +32,6 @@ pub struct Type {
     #[serde(default)]
     pub alias: Vec<String>,
     pub format: HashMap<String, Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Templates {
-    nullable: Option<String>,
-    filename: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -57,16 +53,14 @@ impl Lang {
             "json" | _ => serde_json::from_reader(reader)?,
         };
 
-        // compile dynamic templates
-
         Ok(lang)
     }
 
     // formats nullable value using given language spec template
     pub fn format_nullable(&self, value: &str) -> String {
         let nullable = self
-            .templates
-            .nullable
+            .format
+            .get("nullable")
             .clone()
             .expect("no nullable formatting template found");
         let template =
@@ -79,8 +73,8 @@ impl Lang {
     // formats filename value using given language spec template
     pub fn format_filename(&self, value: &str) -> String {
         let t = self
-            .templates
-            .filename
+            .format
+            .get("filename")
             .clone()
             .expect("no filename formatting template found");
         let template = mustache::compile_str(&t).expect("failed to compile nullable template");
@@ -124,6 +118,13 @@ impl Lang {
         self.paths
             .get(path)
             .expect(&format!("failed to find default path: {}", path))
+            .clone()
+    }
+
+    pub fn default_template(&self, path: &str) -> String {
+        self.templates
+            .get(path)
+            .expect(&format!("failed to find default template: {}", path))
             .clone()
     }
 }

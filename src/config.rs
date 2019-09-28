@@ -68,4 +68,12 @@ impl Config {
             .clone();
         Path::new(&root).join(&path).to_str().unwrap().to_string()
     }
+
+    // Returns template or language default
+    pub fn get_template(&self, path_key: &str, lang: &Lang) -> String {
+        self.templates
+            .get(path_key)
+            .unwrap_or(&lang.default_template(path_key))
+            .clone()
+    }
 }

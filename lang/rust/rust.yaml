@@ -1,8 +1,8 @@
 # rust lang spec file
 name: rust
 
-# dynamic templates for things such as nullable types and how they should be formatted
-templates:
+# dynamic formatting templates for things such as nullable types
+format:
   nullable: Option<{{type}}>
   filename: "{{filename}}.rs"
 
@@ -15,10 +15,13 @@ files:
     # or 'path' for absolute path to template
     # path: path/to/template/template.mustache
 
+# default templates which can be overridden if needed
+templates:
+  model: "lang/rust/model.mustache"
+# default file paths
 paths:
   root: "src"
   model: "models"
-  api: "api"
 
 # primitive type mapping
 types:

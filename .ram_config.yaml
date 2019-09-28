@@ -7,10 +7,5 @@ openapi: "./res/petstore.yaml"
 # Can be file or built-in yaml spec
 lang: "rust"
 
-# Template files
-templates:
-  model: "templates/model.rs.mustache"
-  api: "templates/api.rs.mustache"
-
 paths:
   root: "output/src"

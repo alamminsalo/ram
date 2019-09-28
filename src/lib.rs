@@ -16,20 +16,26 @@ use std::collections::HashMap;
 use std::path::Path;
 
 pub fn generate_files(cfg: Config, spec: Spec) {
+    println!("generating files...");
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");
 
+    println!("generating models...");
     let models = generate_models(&lang, spec.components.unwrap());
 
     // create state for post-processing purposes
     let state = State { cfg, models };
 
     // write models into specified path
+    println!("writing models...");
     let models_path = state.cfg.get_path("model", &lang);
     util::write_files(Path::new(&models_path), render_models(&state, &lang));
 
     // extra files
+    println!("writing extra files...");
     util::write_files_nopath(render_extra_files(&state, &lang));
+
+    println!("generation OK")
 }
 
 fn generate_models(lang: &Lang, components: Components) -> Vec<Model> {
@@ -48,13 +54,7 @@ fn generate_models(lang: &Lang, components: Components) -> Vec<Model> {
 
 fn render_models(state: &State, lang: &Lang) -> HashMap<String, String> {
     // compile models template
-    let template_path = Path::new(
-        state
-            .cfg
-            .templates
-            .get("model")
-            .expect("no models template defined"),
-    );
+    let template_path = state.cfg.get_template("model", &lang);
     let template = mustache::compile_path(template_path).unwrap();
 
     // iterate components and generate models
