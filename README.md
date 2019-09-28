@@ -17,7 +17,7 @@ openapi: "./res/petstore.yaml"
 lang: "rust"
 
 # Template files, optional and used for overriding built-in templates
-template:
+templates:
   # Path for model template file
   model: "templates/model.rs.mustache"
   # API template path
