@@ -8,12 +8,12 @@ use chrono::DateTime;
 {{/has_datetime}}
 
 #[derive(Serialize,Deserialize)]
-pub struct {{model_name}} {
+pub struct {{name}} {
 {{#fields}}
   pub {{ name }}: {{ type }},
 {{/fields}}
 }
 {{/is_object}}
 {{#is_array}}
-pub type {{model_name}} = Vec<{{items.model_name}}>;
+pub type {{name}} = Vec<{{items.name}}>;
 {{/is_array}}

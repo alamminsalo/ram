@@ -1,13 +1,13 @@
 use super::{Lang, Model};
 use failure::Fallible;
 use openapi::OpenApi;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub openapi: Option<String>,
     pub lang: Option<String>,
@@ -44,7 +44,7 @@ impl Config {
         // naive check if lang spec is not a file path
         // if not, assume it's one of the built-in lang specs
         if !lang.contains(".") {
-            lang = format!("lang/{}.yaml", &lang);
+            lang = format!("lang/{lang}/{lang}.yaml", lang = &lang);
         }
 
         Lang::load_file(&lang)
@@ -54,7 +54,7 @@ impl Config {
     pub fn model_path(&self, model: &Model, lang: &Lang) -> String {
         lang.format_filename(
             mustache::MapBuilder::new()
-                .insert_str("filename", model.model_name.to_lowercase())
+                .insert_str("filename", model.name.to_lowercase())
                 .build(),
         )
     }

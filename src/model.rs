@@ -1,6 +1,6 @@
 use super::lang::Lang;
 use openapi::v3_0::Schema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 // Returns models name from ref path
@@ -12,9 +12,10 @@ fn name_from_ref(ref_path: &str) -> Option<String> {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Model {
-    pub model_name: String,
+    pub name: String,
+    pub name_lowercase: String,
     pub r#type: String,
     pub fields: Vec<Field>,
     pub items: Option<Box<Model>>,
@@ -51,7 +52,8 @@ impl Model {
         let is_object = &r#type == "object";
 
         Self {
-            model_name: name.to_string(),
+            name: name.to_string(),
+            name_lowercase: name.to_lowercase(),
             // checks if any field contains format: date
             has_date: fields.iter().any(|f| {
                 if let Some(fieldformat) = &f.format {
@@ -83,7 +85,7 @@ impl Model {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Field {
     pub name: String,
     pub r#type: String,

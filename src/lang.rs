@@ -1,4 +1,4 @@
-use super::Field;
+use super::{Field, State};
 use failure::Fallible;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -6,21 +6,30 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Lang {
     pub name: String,
     pub types: HashMap<String, Type>,
     templates: Templates,
+    pub files: Vec<ExtraFile>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ExtraFile {
+    pub filename: String,
+    pub template: String,
+    pub r#in: Option<String>,
+    pub path: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Type {
     #[serde(default)]
     pub alias: Vec<String>,
     pub format: HashMap<String, Format>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct Templates {
     nullable: Option<String>,
     filename: Option<String>,

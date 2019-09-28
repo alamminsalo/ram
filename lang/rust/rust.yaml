@@ -4,8 +4,18 @@ name: rust
 # dynamic templates for things such as nullable types and how they should be formatted
 templates:
   nullable: Option<{{type}}>
-  filename: '{{filename}}.rs'
+  filename: "{{filename}}.rs"
 
+# extra files to generate, these files are given the complete application state for free templating usage
+files:
+  - filename: "mod.rs"
+    template: "lang/rust/mod_model.mustache"
+    # use either 'in' to specify file path from ram config
+    in: model
+    # or 'path' for absolute path to template
+    # path: path/to/template/template.mustache
+
+# primitive type mapping
 types:
   integer:
     alias:
