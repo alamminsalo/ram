@@ -1,4 +1,4 @@
-use super::{Field, State};
+use super::Field;
 use failure::Fallible;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

@@ -1,4 +1,4 @@
-use super::{Config, Lang, Model, API};
+use super::{Config, Lang, Model};
 use serde::{Deserialize, Serialize};
 
 // full model generation state, to contain processed models and apis
