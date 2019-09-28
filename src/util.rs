@@ -7,7 +7,6 @@ pub fn write_files(path: &Path, map: HashMap<String, String>) {
     // make sure directory exists
     fs::create_dir_all(path).expect("failed to create directory");
     map.iter().for_each(|(file, data)| {
-        println!("{}: {}", &file, &data);
         fs::write(path.join(&file), data).expect(&format!("failed to write file {}", &file));
     });
 }
