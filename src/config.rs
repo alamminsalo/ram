@@ -1,4 +1,4 @@
-use super::{Lang, Model};
+use super::Lang;
 use failure::Fallible;
 use openapi::OpenApi;
 use serde::{Deserialize, Serialize};
@@ -10,9 +10,13 @@ use std::path::Path;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub openapi: Option<String>,
+
     pub lang: Option<String>,
-    pub template: HashMap<String, String>,
-    pub namespace: HashMap<String, String>,
+
+    #[serde(default)]
+    pub templates: HashMap<String, String>,
+
+    #[serde(default)]
     pub paths: HashMap<String, String>,
 }
 
@@ -50,8 +54,18 @@ impl Config {
         Lang::load_file(&lang)
     }
 
-    // returns model path using lang specs filename property
-    pub fn model_path(&self, model: &Model, lang: &Lang) -> String {
-        lang.format_filename(&model.name_lowercase)
+    // Returns formatted path according to config / lang spec defaults
+    pub fn get_path(&self, path_key: &str, lang: &Lang) -> String {
+        let root: String = self
+            .paths
+            .get("root")
+            .unwrap_or(&lang.default_path("root"))
+            .clone();
+        let path: String = self
+            .paths
+            .get(path_key)
+            .unwrap_or(&lang.default_path(path_key))
+            .clone();
+        Path::new(&root).join(&path).to_str().unwrap().to_string()
     }
 }

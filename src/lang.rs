@@ -14,6 +14,7 @@ pub struct Lang {
     pub types: HashMap<String, Type>,
     templates: Templates,
     pub files: Vec<ExtraFile>,
+    paths: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -117,5 +118,12 @@ impl Lang {
             r#type: translated_type,
             ..f
         }
+    }
+
+    pub fn default_path(&self, path: &str) -> String {
+        self.paths
+            .get(path)
+            .expect(&format!("failed to find default path: {}", path))
+            .clone()
     }
 }

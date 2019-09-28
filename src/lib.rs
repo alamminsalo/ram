@@ -22,20 +22,14 @@ pub fn generate_files(cfg: Config, spec: Spec) {
     let models = generate_models(&lang, spec.components.unwrap());
 
     // create state for post-processing purposes
-    let state = State { cfg, models, lang };
+    let state = State { cfg, models };
 
     // write models into specified path
-    let models_path = Path::new(
-        state
-            .cfg
-            .paths
-            .get("model")
-            .expect("models path not defined"),
-    );
-    util::write_files(&models_path, render_models(&state));
+    let models_path = state.cfg.get_path("model", &lang);
+    util::write_files(Path::new(&models_path), render_models(&state, &lang));
 
     // extra files
-    util::write_files_nopath(render_extra_files(&state));
+    util::write_files_nopath(render_extra_files(&state, &lang));
 }
 
 fn generate_models(lang: &Lang, components: Components) -> Vec<Model> {
@@ -52,12 +46,12 @@ fn generate_models(lang: &Lang, components: Components) -> Vec<Model> {
         .collect()
 }
 
-fn render_models(state: &State) -> HashMap<String, String> {
+fn render_models(state: &State, lang: &Lang) -> HashMap<String, String> {
     // compile models template
     let template_path = Path::new(
         state
             .cfg
-            .template
+            .templates
             .get("model")
             .expect("no models template defined"),
     );
@@ -71,16 +65,14 @@ fn render_models(state: &State) -> HashMap<String, String> {
             let render = template.render_to_string(&model).unwrap();
             // rendering encodes special html characters, so let's decode them
             let decoded = htmlescape::decode_html(&render).unwrap();
-            (state.cfg.model_path(&model, &state.lang), decoded)
+            (lang.format_filename(&model.name_lowercase), decoded)
         })
         .collect()
 }
 
 // Renders extra files
-pub fn render_extra_files(state: &State) -> HashMap<String, String> {
-    state
-        .lang
-        .files
+pub fn render_extra_files(state: &State, lang: &Lang) -> HashMap<String, String> {
+    lang.files
         .iter()
         .map(|f: &ExtraFile| {
             // compile template
@@ -99,7 +91,8 @@ pub fn render_extra_files(state: &State) -> HashMap<String, String> {
                 abspath.clone()
             } else if let Some(ref inpath) = f.r#in {
                 // get location from 'in' using config.files
-                let dir = Path::new(state.cfg.paths.get(inpath).unwrap());
+                let path = state.cfg.get_path(inpath, lang);
+                let dir = Path::new(&path);
                 dir.join(&f.filename).to_str().unwrap().into()
             } else {
                 panic!("failed to get file render path")

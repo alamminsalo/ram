@@ -8,14 +8,9 @@ openapi: "./res/petstore.yaml"
 lang: "rust"
 
 # Template files
-template:
+templates:
   model: "templates/model.rs.mustache"
   api: "templates/api.rs.mustache"
 
-# Used for modules and namespace mapping
-namespace:
-  model: "petstore_models"
-
-# File paths
 paths:
-  model: "output/src/models"
+  root: "output/src"

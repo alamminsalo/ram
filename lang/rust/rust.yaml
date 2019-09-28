@@ -15,6 +15,11 @@ files:
     # or 'path' for absolute path to template
     # path: path/to/template/template.mustache
 
+paths:
+  root: "src"
+  model: "models"
+  api: "api"
+
 # primitive type mapping
 types:
   integer:
