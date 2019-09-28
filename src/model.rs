@@ -1,16 +1,8 @@
 use super::lang::Lang;
+use super::util;
 use openapi::v3_0::Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-
-// Returns models name from ref path
-fn name_from_ref(ref_path: &str) -> Option<String> {
-    if let Some(idx) = ref_path.rfind('/') {
-        Some(ref_path[idx + 1..].to_string())
-    } else {
-        None
-    }
-}
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Model {
@@ -25,6 +17,16 @@ pub struct Model {
     pub is_object: bool,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Field {
+    pub name: String,
+    pub r#type: String,
+    pub format: Option<String>,
+    pub nullable: bool,
+    pub ref_path: Option<String>,
+    pub is_array: bool,
+}
+
 impl Model {
     pub fn new(name: &str, schema: Schema, lang: &Lang) -> Self {
         let fields: Vec<Field> = schema
@@ -32,7 +34,9 @@ impl Model {
             .unwrap_or(BTreeMap::new())
             .into_iter()
             .map(|(name, schema)| {
-                lang.transform_field(Field {
+                dbg!(&name, &schema);
+                // translate using language spec
+                lang.translate(Field {
                     nullable: schema.nullable.unwrap_or(false),
                     format: schema.format,
                     ref_path: schema.ref_path,
@@ -41,7 +45,7 @@ impl Model {
                         .clone()
                         .into_iter()
                         .any(|t| &t == "array"),
-                    r#type: schema.schema_type.expect("no field type defined"),
+                    r#type: schema.schema_type.unwrap_or("object".into()),
                     name,
                 })
             })
@@ -72,7 +76,7 @@ impl Model {
             }),
             items: schema.items.map(|s| {
                 Box::new(Model::new(
-                    &name_from_ref(&s.ref_path.clone().unwrap()).unwrap(),
+                    &util::model_name_from_ref(&s.ref_path.clone().unwrap()).unwrap(),
                     *s,
                     lang,
                 ))
@@ -83,14 +87,4 @@ impl Model {
             is_object,
         }
     }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Field {
-    pub name: String,
-    pub r#type: String,
-    pub format: Option<String>,
-    pub nullable: bool,
-    pub ref_path: Option<String>,
-    pub is_array: bool,
 }

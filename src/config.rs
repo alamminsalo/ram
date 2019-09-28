@@ -52,10 +52,6 @@ impl Config {
 
     // returns model path using lang specs filename property
     pub fn model_path(&self, model: &Model, lang: &Lang) -> String {
-        lang.format_filename(
-            mustache::MapBuilder::new()
-                .insert_str("filename", model.name.to_lowercase())
-                .build(),
-        )
+        lang.format_filename(&model.name_lowercase)
     }
 }

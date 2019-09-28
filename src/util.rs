@@ -21,3 +21,12 @@ pub fn write_files_nopath(map: HashMap<String, String>) {
         fs::write(file, data).expect(&format!("failed to write file {}", &file));
     });
 }
+
+// Returns model name from ref path
+pub fn model_name_from_ref(ref_path: &str) -> Option<String> {
+    if let Some(idx) = ref_path.rfind('/') {
+        Some(ref_path[idx + 1..].to_string())
+    } else {
+        None
+    }
+}

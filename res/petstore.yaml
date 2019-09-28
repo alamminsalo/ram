@@ -110,3 +110,8 @@ components:
         message:
           type: string
           nullable: true
+    Foo:
+      properties:
+        pet: 
+          $ref: '#/components/schemas/Pet'
+          nullable: true

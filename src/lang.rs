@@ -1,5 +1,7 @@
+use super::util;
 use super::Field;
 use failure::Fallible;
+use mustache::MapBuilder;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
@@ -38,7 +40,6 @@ struct Templates {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Format {
     pub r#type: String,
-    pub nullable: Option<String>,
 }
 
 impl Lang {
@@ -61,7 +62,7 @@ impl Lang {
     }
 
     // formats nullable value using given language spec template
-    pub fn format_nullable(&self, data: &Format) -> String {
+    pub fn format_nullable(&self, value: &str) -> String {
         let nullable = self
             .templates
             .nullable
@@ -70,12 +71,12 @@ impl Lang {
         let template =
             mustache::compile_str(&nullable).expect("failed to compile nullable template");
         template
-            .render_to_string(&data)
+            .render_data_to_string(&MapBuilder::new().insert_str("type", value).build())
             .expect("failed to format nullable field")
     }
 
     // formats filename value using given language spec template
-    pub fn format_filename(&self, data: mustache::Data) -> String {
+    pub fn format_filename(&self, value: &str) -> String {
         let t = self
             .templates
             .filename
@@ -83,31 +84,38 @@ impl Lang {
             .expect("no filename formatting template found");
         let template = mustache::compile_str(&t).expect("failed to compile nullable template");
         template
-            .render_data_to_string(&data)
+            .render_data_to_string(&MapBuilder::new().insert_str("filename", value).build())
             .expect("failed to format filename")
     }
 
-    pub fn transform_field(&self, f: Field) -> Field {
-        let lang_type = self
-            .types
-            .iter()
-            .find(|(name, t)| *name == &f.r#type || t.alias.contains(&f.r#type))
-            .map(|(_, t)| t)
-            .expect(&format!("couldn't find field type: {}", &f.name));
-
-        let field_format = f.format.clone().unwrap_or("default".into());
-        let lang_format = lang_type
-            .format
-            .get(&field_format)
-            .expect("failed to find type format");
-
-        // get type for lang spec
-        let mut r#type = lang_format.r#type.clone();
-
-        if f.nullable {
-            r#type = self.format_nullable(&lang_format);
+    pub fn translate(&self, f: Field) -> Field {
+        let mut translated_type: String = if let Some(ref refpath) = f.ref_path {
+            // this is a reference to another object
+            util::model_name_from_ref(&refpath).expect("failed to get model name from ref")
+        } else {
+            // this is a primitive language type
+            let primitive_type = self
+                .types
+                .iter()
+                .find(|(name, t)| *name == &f.r#type || t.alias.contains(&f.r#type))
+                .map(|(_, t)| t)
+                .expect(&format!("failed to find primitive type: {}", f.r#type));
+            let type_format = f.format.clone().unwrap_or("default".into());
+            primitive_type
+                .format
+                .get(&type_format)
+                .expect(&format!("failed to find primitive type: {}", &f.r#type))
+                .r#type
+                .clone()
         };
 
-        Field { r#type, ..f }
+        if f.nullable {
+            translated_type = self.format_nullable(&translated_type);
+        };
+
+        Field {
+            r#type: translated_type,
+            ..f
+        }
     }
 }
