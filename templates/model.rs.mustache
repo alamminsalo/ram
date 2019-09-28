@@ -11,8 +11,14 @@ use chrono::DateTime;
 #[derive(Serialize,Deserialize)]
 pub struct {{name}} {
 {{#fields}}
-  pub {{ name }}: {{ type }},
+    pub {{name}}: {{& type}},
 {{/fields}}
+{{#additional_fields}}
+{{#fields}}
+    #[serde(skip)]
+    pub {{name}}: {{& type}},
+{{/fields}}
+{{/additional_fields}}
 }
 {{/is_object}}
 {{#is_array}}

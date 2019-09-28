@@ -63,9 +63,7 @@ fn render_models(state: &State, lang: &Lang) -> HashMap<String, String> {
         .iter()
         .map(|model| {
             let render = template.render_to_string(&model).unwrap();
-            // rendering encodes special html characters, so let's decode them
-            let decoded = htmlescape::decode_html(&render).unwrap();
-            (lang.format_filename(&model.name_lowercase), decoded)
+            (lang.format_filename(&model.name_lowercase), render)
         })
         .collect()
 }

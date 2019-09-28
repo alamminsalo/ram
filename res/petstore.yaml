@@ -115,3 +115,7 @@ components:
         pet: 
           $ref: '#/components/schemas/Pet'
           nullable: true
+      additionalProperties:
+        properties:
+          bar:
+            type: int

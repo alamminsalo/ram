@@ -1,6 +1,6 @@
 use super::lang::Lang;
 use super::util;
-use openapi::v3_0::Schema;
+use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -10,6 +10,7 @@ pub struct Model {
     pub name_lowercase: String,
     pub r#type: String,
     pub fields: Vec<Field>,
+    pub additional_fields: Option<Box<Model>>,
     pub items: Option<Box<Model>>,
     pub has_date: bool,
     pub has_datetime: bool,
@@ -34,7 +35,6 @@ impl Model {
             .unwrap_or(BTreeMap::new())
             .into_iter()
             .map(|(name, schema)| {
-                dbg!(&name, &schema);
                 // translate using language spec
                 lang.translate(Field {
                     nullable: schema.nullable.unwrap_or(false),
@@ -50,6 +50,14 @@ impl Model {
                 })
             })
             .collect();
+
+        let additional_fields: Option<Box<Model>> =
+            schema
+                .additional_properties
+                .and_then(|obj_or_ref| match obj_or_ref {
+                    ObjectOrReference::Object(s) => Some(Box::new(Model::new("", *s, &lang))),
+                    _ => None,
+                });
 
         let r#type = schema.schema_type.unwrap_or("object".into());
         let is_array = &r#type == "array";
@@ -82,6 +90,7 @@ impl Model {
                 ))
             }),
             fields,
+            additional_fields,
             r#type,
             is_array,
             is_object,
