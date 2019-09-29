@@ -16,6 +16,7 @@ pub struct Model {
     pub has_datetime: bool,
     pub is_array: bool,
     pub is_object: bool,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -89,6 +90,7 @@ impl Model {
                     lang,
                 ))
             }),
+            description: schema.description,
             fields,
             additional_fields,
             r#type,

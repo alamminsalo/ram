@@ -82,6 +82,10 @@ paths:
 components:
   schemas:
     Pet:
+      description: |
+        asd
+        basd
+        description
       type: object
       required:
         - id

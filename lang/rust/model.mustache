@@ -8,6 +8,10 @@ use chrono::Date;
 use chrono::DateTime;
 {{/has_datetime}}
 
+{{#description}}
+/*
+{{description}}*/
+{{/description}}
 #[derive(Serialize,Deserialize)]
 pub struct {{name}} {
 {{#fields}}
