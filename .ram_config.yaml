@@ -1,7 +1,7 @@
 # Example ram config file
 
 # OpenAPI specification file
-openapi: "example/petstore.yaml"
+openapi: "example/farm.yaml"
 
 # Target lang spec
 # Can be file or built-in yaml spec
