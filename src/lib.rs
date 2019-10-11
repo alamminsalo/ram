@@ -61,7 +61,7 @@ fn render_models(state: &State, lang: &Lang) -> HashMap<String, String> {
         .iter()
         .map(|model| {
             let render = template.render_to_string(&model).unwrap();
-            (lang.format_filename(&model.name_lowercase), render)
+            (lang.format("filename", &model.name_lowercase), render)
         })
         .collect()
 }

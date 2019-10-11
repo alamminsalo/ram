@@ -1,7 +1,8 @@
 use super::util;
 use super::Field;
 use failure::Fallible;
-use mustache::MapBuilder;
+use inflector::Inflector;
+use mustache::{Data, MapBuilder};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
@@ -17,6 +18,7 @@ pub struct Lang {
     pub files: Vec<ExtraFile>,
     pub paths: HashMap<String, String>,
     pub templates: HashMap<String, String>,
+    pub reserved: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -39,6 +41,18 @@ pub struct Format {
     pub r#type: String,
 }
 
+// returns common variations map from given field name + value
+fn common_variables(value: &str) -> Data {
+    MapBuilder::new()
+        .insert_str("value", value)
+        .insert_str("value_lowercase", value.to_lowercase())
+        .insert_str("value_uppercase", value.to_uppercase())
+        .insert_str("value_pascalcase", value.to_pascal_case())
+        .insert_str("value_snakecase", value.to_snake_case())
+        .insert_str("value_screamingsnakecase", value.to_screaming_snake_case())
+        .build()
+}
+
 impl Lang {
     pub fn load_file(path: &str) -> Fallible<Self> {
         let path = Path::new(path);
@@ -56,30 +70,15 @@ impl Lang {
         Ok(lang)
     }
 
-    // formats nullable value using given language spec template
-    pub fn format_nullable(&self, value: &str) -> String {
-        let nullable = self
-            .format
-            .get("nullable")
-            .clone()
-            .expect("no nullable formatting template found");
-        let template =
-            mustache::compile_str(&nullable).expect("failed to compile nullable template");
-        template
-            .render_data_to_string(&MapBuilder::new().insert_str("type", value).build())
-            .expect("failed to format nullable field")
-    }
-
-    // formats filename value using given language spec template
-    pub fn format_filename(&self, value: &str) -> String {
+    pub fn format(&self, template_key: &str, value: &str) -> String {
         let t = self
             .format
-            .get("filename")
+            .get(template_key)
             .clone()
-            .expect("no filename formatting template found");
-        let template = mustache::compile_str(&t).expect("failed to compile nullable template");
+            .expect("no formatting template found");
+        let template = mustache::compile_str(&t).expect("failed to compile filename template");
         template
-            .render_data_to_string(&MapBuilder::new().insert_str("filename", value).build())
+            .render_data_to_string(&common_variables(value))
             .expect("failed to format filename")
     }
 
@@ -104,12 +103,20 @@ impl Lang {
                 .clone()
         };
 
+        // format name if needed
+        let name = if self.reserved.contains(&f.name) {
+            self.format("reserved", &f.name)
+        } else {
+            f.name.clone()
+        };
+
         if f.nullable {
-            translated_type = self.format_nullable(&translated_type);
+            translated_type = self.format("nullable", &translated_type);
         };
 
         Field {
             r#type: translated_type,
+            name,
             ..f
         }
     }

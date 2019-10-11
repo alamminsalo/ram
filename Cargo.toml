@@ -19,4 +19,5 @@ failure = "0.1.5"
 serde_yaml = "0.8.9"
 mustache = "0.9.0"
 openapi = { git = "https://github.com/alamminsalo/openapi", branch = "schema_collect" }
+Inflector = "0.11.4"
 #openapi = { path = "../openapi" }

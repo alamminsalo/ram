@@ -3,8 +3,9 @@ name: rust
 
 # dynamic formatting templates for things such as nullable types
 format:
-  nullable: Option<{{type}}>
-  filename: "{{filename}}.rs"
+  nullable: Option<{{value}}>
+  filename: "{{value_lowercase}}.rs"
+  reserved: "r#{{value}}"
 
 # extra files to generate, these files are given the complete application state for free templating usage
 files:
@@ -57,3 +58,58 @@ types:
         type: f32
       double:
         type: f64
+
+# list of reserved words
+reserved:
+  - as
+  - break
+  - const
+  - continue
+  - crate
+  - else
+  - enum
+  - extern
+  - "false"
+  - fn
+  - for
+  - if
+  - impl
+  - in
+  - let
+  - loop
+  - match
+  - mod
+  - move
+  - mut
+  - pub
+  - ref
+  - return
+  - self
+  - Self
+  - static
+  - struct
+  - super
+  - trait
+  - "true"
+  - type
+  - unsafe
+  - use
+  - where
+  - while
+  - dyn
+  - abstract
+  - become
+  - box
+  - do
+  - final
+  - macro
+  - override
+  - priv
+  - typeof
+  - unsized
+  - virtual
+  - yield
+  - async
+  - await
+  - try
+  - union
