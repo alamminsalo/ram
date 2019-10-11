@@ -11,9 +11,9 @@ pub use lang::{ExtraFile, Lang};
 pub use model::{Field, Model};
 pub use state::State;
 
-use openapi::v3_0::{Components, ObjectOrReference::Object, Spec};
+use openapi::v3_0::Spec;
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub fn generate_files(cfg: Config, spec: Spec) {
     println!("generating files...");
@@ -21,7 +21,7 @@ pub fn generate_files(cfg: Config, spec: Spec) {
     let lang = cfg.get_lang().expect("failed to create lang spec!");
 
     println!("generating models...");
-    let models = generate_models(&lang, spec.components.unwrap());
+    let models = generate_models(&cfg, &lang, &spec);
 
     // create state for post-processing purposes
     let state = State { cfg, models };
@@ -38,17 +38,15 @@ pub fn generate_files(cfg: Config, spec: Spec) {
     println!("generation OK")
 }
 
-fn generate_models(lang: &Lang, components: Components) -> Vec<Model> {
-    // iterate components and generate models
-    components
-        .schemas
-        .unwrap()
+fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
+    // get openapi dir path
+    let mut rootpath = PathBuf::from(cfg.openapi.as_ref().expect("no openapi spec defined"));
+    rootpath.pop();
+    // iterate components + collected schemas and generate models
+    spec.collect_schemas(&rootpath)
+        .expect("failed to collect schemas")
         .into_iter()
-        .map(|(key, schema)| match schema {
-            Object(s) => Ok(Model::new(&key, s, &lang)),
-            _ => Err(()),
-        })
-        .filter_map(Result::ok)
+        .map(|(key, schema)| Model::new(&key, schema, &lang))
         .collect()
 }
 
