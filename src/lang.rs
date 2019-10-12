@@ -14,9 +14,11 @@ pub struct Lang {
     pub types: HashMap<String, Type>,
     #[serde(default)]
     pub format: HashMap<String, String>,
+    #[serde(default)]
     pub additional_files: Vec<AddFile>,
     pub paths: HashMap<String, String>,
     pub templates: HashMap<String, String>,
+    #[serde(default)]
     pub reserved: Vec<String>,
 }
 
