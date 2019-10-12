@@ -1,4 +1,5 @@
 mod api;
+mod assets;
 mod config;
 mod lang;
 mod model;
@@ -6,8 +7,9 @@ mod state;
 mod util;
 
 pub use api::API;
+use assets::Assets;
 pub use config::Config;
-pub use lang::{ExtraFile, Lang};
+pub use lang::{AddFile, Lang};
 pub use model::{Field, Model};
 pub use state::State;
 
@@ -53,26 +55,33 @@ fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
 fn render_models(state: &State, lang: &Lang) -> HashMap<String, String> {
     // compile models template
     let template_path = state.cfg.get_template("model", &lang);
-    let template = mustache::compile_path(template_path).unwrap();
+
+    // get data from assets and compile it
+    let data = Assets::read_file(&template_path).unwrap();
+    let t = mustache::compile_str(&data).expect("failed to compile models template");
 
     // iterate components and generate models
     state
         .models
         .iter()
         .map(|model| {
-            let render = template.render_to_string(&model).unwrap();
-            (lang.format("filename", &model.name_lowercase), render)
+            let render = t.render_to_string(&model).unwrap();
+            (
+                lang.format("filename", &model.filename).unwrap(),
+                htmlescape::decode_html(&render).unwrap()
+            )
         })
         .collect()
 }
 
 // Renders extra files
 pub fn render_extra_files(state: &State, lang: &Lang) -> HashMap<String, String> {
-    lang.files
+    lang.additional_files
         .iter()
-        .map(|f: &ExtraFile| {
-            // compile template
-            let t = mustache::compile_path(&f.template).expect(&format!(
+        .map(|f: &AddFile| {
+            // get data from assets and compile it
+            let data = Assets::read_file(&f.template).unwrap();
+            let t = mustache::compile_str(&data).expect(&format!(
                 "failed to compile extra file template: {}",
                 &f.template
             ));
@@ -94,7 +103,7 @@ pub fn render_extra_files(state: &State, lang: &Lang) -> HashMap<String, String>
                 panic!("failed to get file render path")
             };
 
-            (path, render)
+            (path, htmlescape::decode_html(&render).unwrap())
         })
         .collect()
 }

@@ -1,5 +1,6 @@
 use super::lang::Lang;
 use super::util;
+use inflector::Inflector;
 use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -8,6 +9,9 @@ use std::collections::BTreeMap;
 pub struct Model {
     pub name: String,
     pub name_lowercase: String,
+    pub name_pascalcase: String,
+    pub name_snakecase: String,
+    pub filename: String,
     pub r#type: String,
     pub fields: Vec<Field>,
     pub additional_fields: Option<Box<Model>>,
@@ -65,8 +69,20 @@ impl Model {
         let is_object = &r#type == "object";
 
         Self {
-            name: name.to_string(),
-            name_lowercase: name.to_lowercase(),
+            // TODO: sense
+            name: lang
+                .format("reserved", &name.to_string())
+                .unwrap_or(name.into()),
+            name_lowercase: lang
+                .format("reserved", &name.to_lowercase())
+                .unwrap_or(name.to_lowercase()),
+            name_pascalcase: lang
+                .format("reserved", &name.to_pascal_case())
+                .unwrap_or(name.to_pascal_case()),
+            name_snakecase: lang
+                .format("reserved", &name.to_snake_case())
+                .unwrap_or(name.to_snake_case()),
+            filename: name.to_snake_case(),
             // checks if any field contains format: date
             has_date: fields.iter().any(|f| {
                 if let Some(fieldformat) = &f.format {

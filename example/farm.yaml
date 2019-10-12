@@ -24,11 +24,6 @@ components:
         properties:
           cat:
             $ref: "extra/animals.yaml#/Cat"
-
-    RecursiveFarm:
-      properties:
-        farm:
-          $ref: "#components/schemas/RecursiveFarm"
-        loop:
-          $ref: "extra/loop.yaml#/Loop"
-
+          loop:
+            $ref: "extra/loop.yaml#/Loop"
+            nullable: true

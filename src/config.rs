@@ -43,14 +43,7 @@ impl Config {
     }
 
     pub fn get_lang(&self) -> Fallible<Lang> {
-        let mut lang = self.lang.clone().expect("no lang spec defined");
-
-        // naive check if lang spec is not a file path
-        // if not, assume it's one of the built-in lang specs
-        if !lang.contains(".") {
-            lang = format!("lang/{lang}/{lang}.yaml", lang = &lang);
-        }
-
+        let lang = self.lang.as_ref().expect("no lang spec defined");
         Lang::load_file(&lang)
     }
 
