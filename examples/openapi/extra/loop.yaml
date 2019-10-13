@@ -1,6 +1,6 @@
 Loop:
   properties:
-    loop:
+    next:
       $ref: "loop2.yaml#/Loop2"
       nullable: true
 

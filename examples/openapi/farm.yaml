@@ -16,12 +16,12 @@ components:
   schemas:
     Farm:
       properties:
-        dog:
+        d:
           $ref: "extra/animals.yaml#/Dog"
       additionalProperties:
         properties:
-          cat:
+          c:
             $ref: "extra/animals.yaml#/Cat"
-          loop:
+          l:
             $ref: "extra/loop.yaml#/Loop"
             nullable: true

@@ -1,0 +1,27 @@
+package models
+
+{{#if has_date}}
+import (
+  "time"
+)
+{{else}}{{#if has_datetime}}
+import (
+  "time"
+)
+{{/if}}{{/if}}
+
+{{#if is_object}}
+type {{pascalcase name}} struct {
+{{#each fields}}
+  {{ pascalcase name }} {{ type }} `json:"{{ snakecase name }}"`
+{{/each}}
+{{#if additional_fields}}
+{{#each additional.fields}}
+    {{ pascalcase name }} {{type}} `json:"-"`
+{{/each}}
+{{/if}}
+}
+{{/if}}
+{{#if is_array}}
+type {{name}} {{items.name}}
+{{/if}}

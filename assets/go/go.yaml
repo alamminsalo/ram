@@ -1,0 +1,81 @@
+# Rust lang spec file
+name: go
+
+# Dynamic formatting templates for things such as nullable types
+format:
+  # Formats nullable fields, optional
+  nullable: "*{{value}}"
+  # Formats filenames
+  filename: "{{snakecase value}}.go"
+
+# default templates which can be overridden if needed
+templates:
+  model: "go/model.template"
+
+# default file paths
+paths:
+  root: "src"
+  model: "models"
+
+# primitive type mapping
+types:
+  integer:
+    alias:
+      - int
+    format:
+      default:
+        type: int
+      int32: 
+        type: int32
+      int64: 
+        type: int64
+
+  string:
+    format:
+      default:
+        type: string
+      date:
+        type: time.Date
+      date-time:
+        type: time.Date
+      binary:
+        type: "[]byte"
+      byte:
+        type: "[]byte"
+
+  number:
+    format:
+      default:
+        type: float32
+      float:
+        type: float32
+      double:
+        type: float64
+
+# list of reserved words
+reserved:
+  - break
+  - default
+  - func
+  - interface
+  - select
+  - case
+  - defer
+  - go
+  - map
+  - struct
+  - chan 
+  - else 
+  - goto 
+  - package 
+  - switch
+  - const 
+  - fallthrough 
+  - if 
+  - range 
+  - type 
+  - continue 
+  - for 
+  - import 
+  - return 
+  - var
