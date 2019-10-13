@@ -71,7 +71,7 @@ Template white-space formatting can be a bit fiddly, so usage of a language form
 
 # Helpers
 
-Tool includes some built-in [helpers](https://handlebarsjs.com/block_helpers.html), which can be used in templates:
+Includes some built-in [helpers](https://handlebarsjs.com/block_helpers.html), which can be used in templates:
 ```
 * lowercase - lowercase
 * uppercase - UPPERCASE
