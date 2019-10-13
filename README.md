@@ -77,8 +77,9 @@ Includes some built-in [custom helpers](https://handlebars-draft.knappi.org/guid
 * uppercase - UPPERCASE
 * snakecase - snake_case
 * pascalcase - PascalCase
-* classcase - ClassCase
 * screamingcase - SCREAMING_SNAKE_CASE
+* camelcase - camelCase
+* kebabcase - kebab-case
 * r - Formats reserved keywords according to language spec (Rust example: type -> r#type). Kept short for convenience.
 ```
 
