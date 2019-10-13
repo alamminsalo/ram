@@ -16,9 +16,11 @@ type {{pascalcase name}} struct {
   {{ pascalcase name }} {{ type }} `json:"{{ snakecase name }}"`
 {{/each}}
 {{#if additional_fields}}
-{{#each additional.fields}}
-    {{ pascalcase name }} {{type}} `json:"-"`
+{{#with additional_fields}}
+{{#each fields}}
+  {{ pascalcase name }} {{type}} `json:"-"`
 {{/each}}
+{{/with}}
 {{/if}}
 }
 {{/if}}

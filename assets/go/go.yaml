@@ -14,7 +14,7 @@ templates:
 
 # default file paths
 paths:
-  root: "src"
+  root: ""
   model: "models"
 
 # primitive type mapping

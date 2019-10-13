@@ -1,4 +1,4 @@
-name: Rust
+name: Build and test
 
 on: [push]
 
@@ -24,6 +24,15 @@ jobs:
 
     - name: Generate Rust
       run: |
-        cd examples/rust && ram
+        cd examples/rust 
+        ram
         cargo build
 
+    - name: Generate go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+      run: |
+        cd examples/go 
+        ram
+        go build main.go
