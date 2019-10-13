@@ -2,11 +2,12 @@ use super::assets::Assets;
 use super::util;
 use super::Field;
 use failure::{format_err, Fallible};
+use handlebars::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Lang {
     pub name: String,
     pub types: HashMap<String, Type>,
@@ -20,7 +21,7 @@ pub struct Lang {
     pub reserved: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AddFile {
     pub filename: String,
     pub template: String,
@@ -28,14 +29,14 @@ pub struct AddFile {
     pub path: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Type {
     #[serde(default)]
     pub alias: Vec<String>,
     pub format: HashMap<String, Format>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Format {
     pub r#type: String,
 }
@@ -80,14 +81,16 @@ impl Lang {
     }
 
     pub fn format(&self, template_key: &str, value: &str) -> Fallible<String> {
-        let hb = util::handlebars();
+        let mut hb = util::handlebars();
+        self.add_helpers(&mut hb);
+
         let v = value.to_owned();
         if template_key == "reserved" && !self.reserved.contains(&v) {
             Ok(v)
         } else {
             self.format
                 .get(template_key)
-                .and_then(|t| hb.render_template(&t, &Value::from(value)).ok())
+                .and_then(|template| hb.render_template(template, &Value::from(value)).ok())
                 .ok_or(format_err!("failed to format template {}", template_key))
         }
     }
@@ -115,9 +118,6 @@ impl Lang {
                 .clone()
         };
 
-        // format name if needed
-        let name = self.format("reserved", &f.name).unwrap_or(f.name);
-
         if f.nullable {
             translated_type = self
                 .format("nullable", &translated_type)
@@ -126,7 +126,6 @@ impl Lang {
 
         Field {
             r#type: translated_type,
-            name,
             ..f
         }
     }
@@ -143,5 +142,24 @@ impl Lang {
             .get(path)
             .expect(&format!("failed to find default template: {}", path))
             .clone()
+    }
+
+    // adds helpers to handlebars instance
+    pub fn add_helpers(&self, hb: &mut Handlebars) {
+        {
+            let lang = self.clone();
+            let reserved = move |h: &Helper,
+                                 _: &Handlebars,
+                                 _: &Context,
+                                 _: &mut RenderContext,
+                                 out: &mut dyn Output|
+                  -> HelperResult {
+                // get parameter from helper or throw an error
+                let param = h.param(0).and_then(|v| v.value().as_str()).unwrap_or("");
+                out.write(&lang.format("reserved", &param).unwrap_or(param.to_string()))?;
+                Ok(())
+            };
+            hb.register_helper("r", Box::new(reserved));
+        }
     }
 }

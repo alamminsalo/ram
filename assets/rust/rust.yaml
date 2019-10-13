@@ -10,21 +10,21 @@ format:
   # Formats reserved language keywords, optional
   reserved: "r#{{value}}"
   # Formats filenames
-  filename: "{{value_snakecase}}.rs"
+  filename: "{{snakecase value}}.rs"
 
 # Additional files to generate, optional
 # These files are given the complete application state for free templating usage
 additional_files:
   - filename: "mod.rs"
-    template: "rust/mod_model.mustache"
+    template: "rust/mod_model.template"
     # Use either 'in' to specify file path from ram config
     in: model
     # Or 'path' for absolute path to template
-    # path: path/to/template/template.mustache
+    # path: path/to/template/template.template
 
 # default templates which can be overridden if needed
 templates:
-  model: "rust/model.mustache"
+  model: "rust/model.template"
 
 # default file paths
 paths:

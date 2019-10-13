@@ -1,0 +1,28 @@
+use super::*;
+{{#if is_object}}
+use serde::{Serialize,Deserialize};
+{{#if has_date}}
+use chrono::Date;
+{{/if}}
+{{#if has_datetime}}
+use chrono::DateTime;
+{{/if}}
+
+{{#if description}} /*{{description}}*/ {{/if}}
+
+#[derive(Serialize,Deserialize,Default)]
+pub struct {{name}} {
+{{#each fields}}
+    pub {{r name}}: {{type}},
+{{/each}}
+{{#if additional_fields}}
+{{#each fields}}
+    #[serde(skip)]
+    pub {{r name}}: {{type}},
+{{/each}}
+{{/if}}
+}
+{{/if}}
+{{#if is_array}}
+pub type {{name}} = Vec<{{items.name}}>;
+{{/if}}

@@ -20,11 +20,14 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 pub fn generate_files(cfg: Config, spec: Spec) {
+    println!("generating files...");
     let mut hb = util::handlebars();
 
-    println!("generating files...");
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");
+
+    // add lang helpers to hb
+    lang.add_helpers(&mut hb);
 
     println!("generating models...");
     let models = generate_models(&cfg, &lang, &spec);
@@ -40,9 +43,11 @@ pub fn generate_files(cfg: Config, spec: Spec) {
         render_models(&mut hb, &state, &lang),
     );
 
-    // extra files
-    println!("writing extra files...");
-    util::write_files_nopath(render_additional_files(&mut hb, &state, &lang));
+    // additional files
+    if !lang.additional_files.is_empty() {
+        println!("writing additional files...");
+        util::write_files_nopath(render_additional_files(&mut hb, &state, &lang));
+    }
 
     println!("generation OK")
 }
