@@ -2,7 +2,7 @@ use ram::Config;
 use std::panic;
 
 fn main() {
-    let cfg = Config::load_file(".ram_config.yaml").unwrap();
+    let cfg = Config::load_file(".ramconfig.yaml").unwrap();
     let spec = cfg.get_openapi().unwrap();
 
     match spec {

@@ -4,7 +4,7 @@ Generates API models from openapi spec using language-agnostic templating and sp
 
 # Usage
 
-Start off with a `.ram_config` file like this:
+Start off with a `.ramconfig` file like this:
 
 ```
 # Example ram config file
