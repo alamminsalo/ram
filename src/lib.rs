@@ -5,6 +5,7 @@ mod lang;
 mod model;
 mod state;
 mod util;
+//mod helpers;
 
 pub use api::API;
 use assets::Assets;
@@ -13,31 +14,14 @@ pub use lang::{AddFile, Lang};
 pub use model::{Field, Model};
 pub use state::State;
 
+use handlebars::Handlebars;
 use openapi::v3_0::Spec;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use handlebars::Handlebars;
-
-// fn gen_models_oa3(template_path: &Path, lang: Lang, components: Components) {
-//     let mut hb = Handlebars::new();
-//     hb.register_template_file("model", template_path).unwrap();
-//     let template = mustache::compile_path(template_path).unwrap();
-//     for (key, schema) in components.schemas.unwrap().into_iter() {
-//         match schema {
-//             Object(s) => {
-//                 let model = Model::new(key, s, &lang);
-//                 let render = hb.render("model", &model).unwrap();
-//                 // let render = template.render_to_string(&model).unwrap();
-//                 // decode special characters
-//                 let decoded = htmlescape::decode_html(&render).unwrap();
-//                 println!("{}", &decoded);
-//             }
-//             _ => {}
-//         }
-//     }
-// }
 
 pub fn generate_files(cfg: Config, spec: Spec) {
+    let mut hb = util::handlebars();
+
     println!("generating files...");
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");
@@ -51,11 +35,14 @@ pub fn generate_files(cfg: Config, spec: Spec) {
     // write models into specified path
     println!("writing models...");
     let models_path = state.cfg.get_path("model", &lang);
-    util::write_files(Path::new(&models_path), render_models(&state, &lang));
+    util::write_files(
+        Path::new(&models_path),
+        render_models(&mut hb, &state, &lang),
+    );
 
     // extra files
     println!("writing extra files...");
-    util::write_files_nopath(render_extra_files(&state, &lang));
+    util::write_files_nopath(render_additional_files(&mut hb, &state, &lang));
 
     println!("generation OK")
 }
@@ -72,44 +59,43 @@ fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
         .collect()
 }
 
-fn render_models(state: &State, lang: &Lang) -> HashMap<String, String> {
+fn render_models(hb: &mut Handlebars, state: &State, lang: &Lang) -> HashMap<String, String> {
     // compile models template
     let template_path = state.cfg.get_template("model", &lang);
 
     // get data from assets and compile it
     let data = Assets::read_file(&template_path).unwrap();
-    let t = mustache::compile_str(&data).expect("failed to compile models template");
+    hb.register_template_string("model", &data)
+        .expect("failed to compile models template");
 
     // iterate components and generate models
     state
         .models
         .iter()
         .map(|model| {
-            let render = t.render_to_string(&model).unwrap();
+            let render = hb.render("model", &model).unwrap();
             (
                 lang.format("filename", &model.filename).unwrap(),
-                htmlescape::decode_html(&render).unwrap()
+                htmlescape::decode_html(&render).unwrap(),
             )
         })
         .collect()
 }
 
 // Renders extra files
-pub fn render_extra_files(state: &State, lang: &Lang) -> HashMap<String, String> {
+pub fn render_additional_files(
+    hb: &mut Handlebars,
+    state: &State,
+    lang: &Lang,
+) -> HashMap<String, String> {
     lang.additional_files
         .iter()
         .map(|f: &AddFile| {
-            // get data from assets and compile it
-            let data = Assets::read_file(&f.template).unwrap();
-            let t = mustache::compile_str(&data).expect(&format!(
-                "failed to compile extra file template: {}",
-                &f.template
-            ));
-            // render template
-            let render = t
-                .render_to_string(state)
-                .expect("failed to format extra file template");
-
+            // get data from assets and render it
+            let template = Assets::read_file(&f.template).unwrap();
+            let render = hb
+                .render_template(&template, &state)
+                .expect("failed to render additional file template");
             // make path
             let path = if let Some(ref abspath) = f.path {
                 // get from absolute path

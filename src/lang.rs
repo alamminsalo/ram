@@ -2,8 +2,6 @@ use super::assets::Assets;
 use super::util;
 use super::Field;
 use failure::{format_err, Fallible};
-use inflector::Inflector;
-use mustache::{Data, MapBuilder};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
@@ -42,16 +40,16 @@ pub struct Format {
     pub r#type: String,
 }
 
-// returns common variations map from given field name + value
-fn common_variables(value: &str) -> Data {
-    MapBuilder::new()
-        .insert_str("value", value)
-        .insert_str("value_lowercase", value.to_lowercase())
-        .insert_str("value_uppercase", value.to_uppercase())
-        .insert_str("value_pascalcase", value.to_pascal_case())
-        .insert_str("value_snakecase", value.to_snake_case())
-        .insert_str("value_screamingsnakecase", value.to_screaming_snake_case())
-        .build()
+// Value type for formatting
+#[derive(Serialize, Deserialize)]
+struct Value {
+    pub value: String,
+}
+
+impl From<&str> for Value {
+    fn from(a: &str) -> Value {
+        Value { value: a.into() }
+    }
 }
 
 impl Lang {
@@ -82,14 +80,14 @@ impl Lang {
     }
 
     pub fn format(&self, template_key: &str, value: &str) -> Fallible<String> {
+        let hb = util::handlebars();
         let v = value.to_owned();
         if template_key == "reserved" && !self.reserved.contains(&v) {
             Ok(v)
         } else {
             self.format
                 .get(template_key)
-                .and_then(|t| mustache::compile_str(&t).ok())
-                .and_then(|t| t.render_data_to_string(&common_variables(value)).ok())
+                .and_then(|t| hb.render_template(&t, &Value::from(value)).ok())
                 .ok_or(format_err!("failed to format template {}", template_key))
         }
     }

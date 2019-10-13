@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use handlebars::Handlebars;
 
 // writes files in map
 pub fn write_files(path: &Path, map: HashMap<String, String>) {
@@ -29,4 +30,16 @@ pub fn model_name_from_ref(ref_path: &str) -> Option<String> {
     } else {
         None
     }
+}
+
+pub fn handlebars() -> Handlebars {
+    let mut hb = Handlebars::new();
+
+    // set strict mode (fails on field not found)
+    hb.set_strict_mode(true);
+
+    // disable html escaping
+    hb.register_escape_fn(handlebars::no_escape);
+
+    hb
 }
