@@ -98,3 +98,4 @@ src/some/**/*.rs
 * Implement API generation from openapi paths-section
 * Add more lang-specs for most used languages
 * Test suite
+* Document template context objects
