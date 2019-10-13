@@ -2,7 +2,7 @@
 
 Generates API models from openapi spec using language-agnostic templating and spec system. When ready, should support any or most of the programming languages.
 
-# Usage
+## Usage
 
 Start off with a `.ram_config` file like this:
 
@@ -30,7 +30,7 @@ paths:
 
 With configuration file in-place, run `ram` in the directory to generate models from the spec.
 
-# Templating
+## Templating
 
 Supports using built-in or custom templates by configuration.
 
@@ -69,7 +69,7 @@ pub type {{name}} = Vec<{{items.name}}>;
 
 Template white-space formatting can be a bit fiddly, so usage of a language formatter in Makefile or something similar is recommended.
 
-# Helpers
+## Helpers
 
 Includes some built-in [custom helpers](https://handlebars-draft.knappi.org/guide/#custom-helpers), which can be used in templates:
 ```
@@ -83,7 +83,7 @@ Includes some built-in [custom helpers](https://handlebars-draft.knappi.org/guid
 * r - Formats reserved keywords according to language spec (Rust example: type -> r#type). Kept short for convenience.
 ```
 
-# Ignoring files
+## Ignoring files
 
 Ignoring files can be done with `.ramignore`, which follows `.gitignore` format:
 
@@ -93,7 +93,7 @@ src/some/files/to/ignore/*.rs
 src/some/**/*.rs
 ```
 
-# TODO:
+## TODO:
 * Implement more formatting helpers
 * Implement API generation from openapi paths-section
 * Add more lang-specs for most used languages
