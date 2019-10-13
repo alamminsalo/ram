@@ -16,16 +16,14 @@ jobs:
 
   generate:
     runs-on: ubuntu-latest
-    env:
-      PATH: "$PATH:$(pwd)/target/release"
     steps:
     - uses: actions/checkout@v1
-    - name: Release build
-      run: | 
-        cargo build --release
+
+    - name: Install bin
+      run: cargo install --path .
+
     - name: Generate Rust
       run: |
-        cd examples/rust
-        ram
+        cd examples/rust && ram
         cargo build
 
