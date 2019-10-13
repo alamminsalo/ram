@@ -1,7 +1,8 @@
+use super::helper;
+use handlebars::Handlebars;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use handlebars::Handlebars;
 
 // writes files in map
 pub fn write_files(path: &Path, map: HashMap<String, String>) {
@@ -40,6 +41,12 @@ pub fn handlebars() -> Handlebars {
 
     // disable html escaping
     hb.register_escape_fn(handlebars::no_escape);
+
+    hb.register_helper("lowercase", Box::new(helper::lowercase));
+    hb.register_helper("uppercase", Box::new(helper::uppercase));
+    hb.register_helper("pascalcase", Box::new(helper::pascalcase));
+    hb.register_helper("snakecase", Box::new(helper::snakecase));
+    hb.register_helper("screamingcase", Box::new(helper::screamingcase));
 
     hb
 }

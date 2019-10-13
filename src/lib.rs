@@ -1,11 +1,11 @@
 mod api;
 mod assets;
 mod config;
+mod helper;
 mod lang;
 mod model;
 mod state;
 mod util;
-//mod helpers;
 
 pub use api::API;
 use assets::Assets;
