@@ -32,7 +32,7 @@ paths:
 
 Supports using built-in or custom templates by configuration.
 
-Templating uses (handlebars)[https://handlebars-draft.knappi.org/guide] syntax, though (some features are missing in templating library)[https://github.com/sunng87/handlebars-rust#limited-but-essential-control-structure-built-in].
+Templating uses [handlebars](https://handlebars-draft.knappi.org/guide) syntax, though [some features are missing in templating library](https://github.com/sunng87/handlebars-rust#limited-but-essential-control-structure-built-in).
 
 Example template file (default Rust model template):
 
@@ -69,5 +69,11 @@ Template white-space formatting can be a bit fiddly, so usage of language format
 
 # Ignoring files
 
-Ignoring files can be done with `.ramignore`, which follows `.gitignore` format.
+Ignoring files can be done with `.ramignore`, which follows `.gitignore` format:
+
+```
+src/some/file/to/ignore.rs
+src/some/files/to/ignore/*.rs
+src/some/**/*.rs
+```
 
