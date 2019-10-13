@@ -67,7 +67,7 @@ pub type {{name}} = Vec<{{items.name}}>;
 {{/if}}
 ```
 
-Template white-space formatting can be a bit fiddly, so usage of language formatter with Makefile or something similar is recommended.
+Template white-space formatting can be a bit fiddly, so usage of language formatter in tandem with Makefile or something similar is recommended.
 
 # Helpers
 
