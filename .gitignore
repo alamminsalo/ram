@@ -1,4 +1,4 @@
 /target
 **/*.rs.bk
-/example/src/models
-/example/target
+/examples/rust/src/models
+/examples/rust/target

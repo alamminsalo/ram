@@ -1,7 +1,7 @@
 # Example ram config file
 
 # OpenAPI specification file
-openapi: "openapi/farm.yaml"
+openapi: "../openapi/farm.yaml"
 
 # Target lang spec
 # Can be file or built-in yaml spec

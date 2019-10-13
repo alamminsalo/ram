@@ -9,7 +9,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+
     - name: Build
       run: cargo build --verbose
+
     - name: Run tests
       run: cargo test --verbose
+
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Release build
+      run: | 
+        cargo build --release
+        export "PATH=$PATH:`pwd`/target/release"
+
+    - name: Generate Rust
+      run: |
+        cd examples/rust
+        ram
+        cargo build
+
