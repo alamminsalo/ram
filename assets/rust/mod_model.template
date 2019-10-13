@@ -1,6 +1,6 @@
 {{#each models}}
-mod {{r name_snakecase}};
+mod {{r (snakecase name)}};
 {{/each}}
 {{#each models}}
-pub use {{r snakecase name}}::{{name}};
+pub use {{r (snakecase name)}}::{{name}};
 {{/each}}

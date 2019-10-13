@@ -1,15 +1,22 @@
 [package]
 name = "ram"
+description = "Rusty API Modeler. Generates models from openapi spec."
+license = "MIT"
+homepage = "https://github.com/alamminsalo/ram"
+repository = "https://github.com/alamminsalo/ram"
 version = "0.5.0"
 authors = ["alamminsalo <antti.lamminsalo@protonmail.com>"]
 edition = "2018"
+exclude = [
+    "example/"
+]
 
 [lib]
 name = "ram"
 path = "src/lib.rs"
 
 [[bin]]
-name = "ram-cli"
+name = "ram"
 path = "src/main.rs"
 
 [dependencies]

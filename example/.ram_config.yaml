@@ -1,11 +1,8 @@
 # Example ram config file
 
 # OpenAPI specification file
-openapi: "example/farm.yaml"
+openapi: "openapi/farm.yaml"
 
 # Target lang spec
 # Can be file or built-in yaml spec
 lang: "rust"
-
-paths:
-  root: "output/src"

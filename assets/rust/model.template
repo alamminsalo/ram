@@ -16,10 +16,12 @@ pub struct {{name}} {
     pub {{r name}}: {{type}},
 {{/each}}
 {{#if additional_fields}}
+{{#with additional_fields}}
 {{#each fields}}
     #[serde(skip)]
     pub {{r name}}: {{type}},
 {{/each}}
+{{/with}}
 {{/if}}
 }
 {{/if}}

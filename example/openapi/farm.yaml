@@ -18,8 +18,6 @@ components:
       properties:
         dog:
           $ref: "extra/animals.yaml#/Dog"
-      items:
-          $ref: "extra/animals.yaml#/Cow"
       additionalProperties:
         properties:
           cat:
