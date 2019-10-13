@@ -1,0 +1,122 @@
+# Rust lang spec file
+name: rust
+
+# Dynamic formatting templates for things such as nullable types
+format:
+  # Formats fields of object type, optional
+  object_field: "Box<{{value}}>"
+  # Formats nullable fields, optional
+  nullable: "Option<{{value}}>"
+  # Formats reserved language keywords, optional
+  reserved: "r#{{value}}"
+  # Formats filenames
+  filename: "{{value_snakecase}}.rs"
+
+# Additional files to generate, optional
+# These files are given the complete application state for free templating usage
+additional_files:
+  - filename: "mod.rs"
+    template: "rust/mod_model.mustache"
+    # Use either 'in' to specify file path from ram config
+    in: model
+    # Or 'path' for absolute path to template
+    # path: path/to/template/template.mustache
+
+# default templates which can be overridden if needed
+templates:
+  model: "rust/model.mustache"
+
+# default file paths
+paths:
+  root: "src"
+  model: "models"
+
+# primitive type mapping
+types:
+  integer:
+    alias:
+      - int
+    format:
+      default:
+        type: i32
+      int32: 
+        type: i32
+      int64: 
+        type: i64
+
+  string:
+    format:
+      default:
+        type: String
+      date:
+        type: Date
+      date-time:
+        type: DateTime
+      binary:
+        type: Vec<u8>
+      byte:
+        type: Vec<u8>
+
+  number:
+    format:
+      default:
+        type: f32
+      float:
+        type: f32
+      double:
+        type: f64
+
+# list of reserved words
+reserved:
+  - as
+  - break
+  - const
+  - continue
+  - crate
+  - else
+  - enum
+  - extern
+  - "false"
+  - fn
+  - for
+  - if
+  - impl
+  - in
+  - let
+  - loop
+  - match
+  - mod
+  - move
+  - mut
+  - pub
+  - ref
+  - return
+  - self
+  - Self
+  - static
+  - struct
+  - super
+  - trait
+  - "true"
+  - type
+  - unsafe
+  - use
+  - where
+  - while
+  - dyn
+  - abstract
+  - become
+  - box
+  - do
+  - final
+  - macro
+  - override
+  - priv
+  - typeof
+  - unsized
+  - virtual
+  - yield
+  - async
+  - await
+  - try
+  - union

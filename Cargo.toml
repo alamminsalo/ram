@@ -1,6 +1,6 @@
 [package]
 name = "ram"
-version = "0.1.0"
+version = "0.5.0"
 authors = ["alamminsalo <antti.lamminsalo@protonmail.com>"]
 edition = "2018"
 
@@ -17,7 +17,10 @@ serde = {version = "1.0.98", features = ["derive"] }
 serde_json = "1.0.40"
 failure = "0.1.5"
 serde_yaml = "0.8.9"
-openapi = { path = "../openapi" }
-mustache = "0.9.0"
+openapi = { git = "https://github.com/alamminsalo/openapi", branch = "schema_collect" }
+Inflector = "0.11.4"
+rust-embed = "5.1.0"
 htmlescape = "0.3.1"
 handlebars = "2.0.2"
+mustache = "0.9.0"
+#openapi = { path = "../openapi" }

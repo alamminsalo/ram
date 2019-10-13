@@ -1,13 +1,11 @@
 # Example ram config file
 
 # OpenAPI specification file
-openapi_spec: "./res/petstore.yaml"
+openapi: "example/farm.yaml"
 
 # Target lang spec
 # Can be file or built-in yaml spec
-lang_spec: "rust"
+lang: "rust"
 
-# Template files
-template:
-  model: "templates/model.rs.mustache"
-  api: "templates/api.rs.mustache"
+paths:
+  root: "output/src"
