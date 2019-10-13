@@ -21,7 +21,8 @@ jobs:
     - name: Release build
       run: | 
         cargo build --release
-        export "PATH=$PATH:`pwd`/target/release"
+        export PATH="$PATH:$(pwd)/target/release"
+        echo $PATH
 
     - name: Generate Rust
       run: |
