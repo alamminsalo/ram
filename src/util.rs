@@ -1,27 +1,51 @@
 use super::helper;
+use glob::Pattern;
 use handlebars::Handlebars;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+// returns ignore patterns from '.ramignore'
+fn ignore_patterns() -> Vec<Pattern> {
+    fs::read_to_string(".ramignore")
+        .and_then(|contents| {
+            Ok(contents
+                .split("\n")
+                .filter_map(|line| Pattern::new(line).ok())
+                .collect())
+        })
+        .unwrap_or(vec![])
+}
+
 // writes files in map
 pub fn write_files(path: &Path, map: HashMap<String, String>) {
+    let ignored = ignore_patterns();
     // make sure directory exists
     fs::create_dir_all(path).expect("failed to create directory");
-    map.iter().for_each(|(file, data)| {
-        fs::write(path.join(&file), data).expect(&format!("failed to write file {}", &file));
-    });
+    for (file, data) in map.iter() {
+        let path = path.join(&file);
+        if ignored.iter().any(|p| p.matches_path(&path)) {
+            println!("ignoring file {}", path.to_str().unwrap_or(""));
+            continue;
+        }
+        fs::write(path, data).expect(&format!("failed to write file {}", &file));
+    }
 }
 
 pub fn write_files_nopath(map: HashMap<String, String>) {
-    map.iter().for_each(|(file, data)| {
+    let ignored = ignore_patterns();
+    for (file, data) in map.iter() {
+        let mut path = PathBuf::from(file);
+        if ignored.iter().any(|p| p.matches_path(&path)) {
+            println!("ignoring file {}", path.to_str().unwrap_or(""));
+            continue;
+        }
         // create directory from file path
-        let mut pathbuf = PathBuf::from(file);
-        pathbuf.pop();
-        fs::create_dir_all(pathbuf).expect("failed to create directory");
+        path.pop();
+        fs::create_dir_all(path).expect("failed to create directory");
         // write file
         fs::write(file, data).expect(&format!("failed to write file {}", &file));
-    });
+    }
 }
 
 // Returns model name from ref path

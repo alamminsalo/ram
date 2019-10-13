@@ -47,13 +47,16 @@ impl Config {
         Lang::load_file(&lang)
     }
 
-    // Returns formatted path according to config / lang spec defaults
-    pub fn get_path(&self, path_key: &str, lang: &Lang) -> String {
-        let root: String = self
-            .paths
+    pub fn get_rootpath(&self, lang: &Lang) -> String {
+        self.paths
             .get("root")
             .unwrap_or(&lang.default_path("root"))
-            .clone();
+            .clone()
+    }
+
+    // Returns formatted path according to config / lang spec defaults
+    pub fn get_path(&self, path_key: &str, lang: &Lang) -> String {
+        let root = self.get_rootpath(lang);
         let path: String = self
             .paths
             .get(path_key)

@@ -22,4 +22,5 @@ Inflector = "0.11.4"
 rust-embed = "5.1.0"
 htmlescape = "0.3.1"
 handlebars = "2.0.2"
+glob = "0.3.0"
 #openapi = { path = "../openapi" }
