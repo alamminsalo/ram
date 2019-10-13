@@ -79,8 +79,7 @@ Tool includes some built-in [helpers](https://handlebarsjs.com/block_helpers.htm
 * pascalcase - PascalCase
 * classcase - ClassCase
 * screamingcase - SCREAMING_SNAKE_CASE
-* `r` - formats reserved keywords according to language spec
-    * Rust example: (type -> r#type)
+* `r` - formats reserved keywords according to language spec (Rust example: type -> r#type)
 ```
 
 # Ignoring files
