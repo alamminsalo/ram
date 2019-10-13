@@ -4,7 +4,7 @@ Generates API models from openapi spec using language-agnostic templating and sp
 
 # Usage
 
-Start off with a configuration file like this:
+Start off with a `.ram_config` file like this:
 
 ```
 # Example ram config file
@@ -27,6 +27,8 @@ paths:
   root: "src",
   model: "models"
 ```
+
+With configuration file in-place, run `ram` in the directory to generate models from the spec.
 
 # Templating
 
@@ -67,6 +69,20 @@ pub type {{name}} = Vec<{{items.name}}>;
 
 Template white-space formatting can be a bit fiddly, so usage of language formatter with Makefile or something similar is recommended.
 
+# Helpers
+
+Tool includes some built-in [helpers](https://handlebarsjs.com/block_helpers.html), which can be used in templates:
+```
+* lowercase - lowercase
+* uppercase - UPPERCASE
+* snakecase - snake_case
+* pascalcase - PascalCase
+* classcase - ClassCase
+* screamingcase - SCREAMING_SNAKE_CASE
+* `r` - formats reserved keywords according to language spec
+    * Rust example: (type -> r#type)
+```
+
 # Ignoring files
 
 Ignoring files can be done with `.ramignore`, which follows `.gitignore` format:
@@ -77,3 +93,8 @@ src/some/files/to/ignore/*.rs
 src/some/**/*.rs
 ```
 
+# TODO:
+* Implement more formatting helpers
+* Implement API generation from openapi paths-section
+* Add more lang-specs for most used languages
+* Test suite
