@@ -11,7 +11,7 @@ pub use api::API;
 use assets::Assets;
 pub use config::Config;
 pub use lang::{AddFile, Lang};
-pub use model::{Field, Model};
+pub use model::Model;
 pub use state::State;
 
 use handlebars::Handlebars;
@@ -59,8 +59,8 @@ fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
     // iterate components + collected schemas and generate models
     spec.collect_schemas(&rootpath)
         .expect("failed to collect schemas")
-        .into_iter()
-        .map(|(key, schema)| Model::new(&key, schema, &lang))
+        .iter()
+        .map(|(key, schema)| Model::new(key, schema, &lang))
         .collect()
 }
 

@@ -1,6 +1,6 @@
 use super::assets::Assets;
 use super::util;
-use super::Field;
+use super::Model;
 use failure::{format_err, Fallible};
 use handlebars::*;
 use serde::{Deserialize, Serialize};
@@ -80,27 +80,59 @@ impl Lang {
         Ok(lang)
     }
 
+    // fn is_primitive(&self, t: &str) -> bool {
+    // }
+
     pub fn format(&self, template_key: &str, value: &str) -> Fallible<String> {
         let mut hb = util::handlebars();
         self.add_helpers(&mut hb);
-
         let v = value.to_owned();
-        if template_key == "reserved" && !self.reserved.contains(&v) {
-            Ok(v)
-        } else {
-            self.format
+        match template_key {
+            "reserved" if !self.reserved.contains(&v) => Ok(v),
+            // "classname" if self.is_primitive(&v) => Ok(v),
+            _ => self
+                .format
                 .get(template_key)
                 .and_then(|template| hb.render_template(template, &Value::from(value)).ok())
-                .ok_or(format_err!("failed to format template {}", template_key))
+                .ok_or(format_err!("failed to format template {}", template_key)),
         }
     }
 
-    pub fn translate(&self, f: Field) -> Field {
-        let mut translated_type: String = if let Some(ref refpath) = f.ref_path {
+    pub fn translate(&self, f: Model) -> Model {
+        let mut translated_type: String = if f.is_array {
+            let child_type = f
+                .items
+                .as_ref()
+                .map(|s| {
+                    s.ref_path
+                        .as_ref()
+                        .map(|ref_path| {
+                            self.format(
+                                "classname",
+                                &util::model_name_from_ref(&ref_path)
+                                    .expect("failed to get model name from ref_path"),
+                            )
+                            .expect("failed to format classname")
+                        })
+                        .unwrap_or(s.r#type.clone())
+                })
+                .expect("array child type not defined!");
+            // format as array<child type>
+            self.format("array_field", &child_type)
+                .expect("no array formatter defined!")
+        } else if let Some(ref refpath) = f.ref_path {
             // this is a reference to another object
-            let t = util::model_name_from_ref(&refpath).expect("failed to get model name from ref");
+            let t = util::model_name_from_ref(&refpath)
+                .map(|t| {
+                    self.format("classname", &t)
+                        .expect("classname formatting failed")
+                })
+                .expect("failed to get model name from ref");
             // object field is not mandatory formatter rule
             self.format("object_field", &t).unwrap_or(t)
+        } else if f.is_object {
+            // this is an inline object, which is not yet supported
+            panic!("{}: inline objects are not supported", f.name);
         } else {
             // this is a primitive language type
             let primitive_type = self
@@ -108,12 +140,18 @@ impl Lang {
                 .iter()
                 .find(|(name, t)| *name == &f.r#type || t.alias.contains(&f.r#type))
                 .map(|(_, t)| t)
-                .expect(&format!("failed to find primitive type: {}", f.r#type));
+                .expect(&format!(
+                    "Error while processing {}: failed to find primitive type {}",
+                    &f.name, f.r#type
+                ));
             let type_format = f.format.clone().unwrap_or("default".into());
             primitive_type
                 .format
                 .get(&type_format)
-                .expect(&format!("failed to find primitive type: {}", &f.r#type))
+                .expect(&format!(
+                    "Error while processing {}: failed to find primitive type {}",
+                    &f.name, &f.r#type
+                ))
                 .r#type
                 .clone()
         };
@@ -124,7 +162,7 @@ impl Lang {
                 .unwrap_or(translated_type)
         };
 
-        Field {
+        Model {
             r#type: translated_type,
             ..f
         }
