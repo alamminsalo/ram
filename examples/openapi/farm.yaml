@@ -16,12 +16,21 @@ components:
   schemas:
     Farm:
       properties:
-        d:
+        tails:
           $ref: "extra/animals.yaml#/Dog"
+        claws:
+          $ref: "extra/animals.yaml#/Cat"
+          nullable: true
+        herd: 
+          type: array
+          items:
+            $ref: "extra/animals.yaml#/Cow"
       additionalProperties:
         properties:
-          c:
-            $ref: "extra/animals.yaml#/Cat"
-          l:
+          hidden:
             $ref: "extra/loop.yaml#/Loop"
             nullable: true
+          numbers:
+            type: array
+            items:
+              type: integer
