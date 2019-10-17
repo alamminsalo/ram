@@ -2,6 +2,12 @@
 
 Generates API models from openapi spec using language-agnostic templating and spec system. When ready, should support any or most of the programming languages.
 
+Currently supports following languages out-of-box:
+* Rust
+* Go
+
+However, a language can be implemented by supplying a language yaml file and some needed templates for generation. Contributions are welcome!
+
 ## Usage
 
 Start off with a `.ramconfig` file like this:
