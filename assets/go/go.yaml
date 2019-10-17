@@ -3,6 +3,10 @@ name: go
 
 # Dynamic formatting templates for things such as nullable types
 format:
+  # How struct/class type definition names are formatted
+  classname: "{{pascalcase value}}"
+  # Array field format
+  array_field: "[]{{value}}"
   # Formats nullable fields, optional
   nullable: "*{{value}}"
   # Formats filenames
@@ -34,10 +38,12 @@ types:
     format:
       default:
         type: string
+      email:
+        type: string
       date:
-        type: time.Date
+        type: time.Time
       date-time:
-        type: time.Date
+        type: time.Time
       binary:
         type: "[]byte"
       byte:

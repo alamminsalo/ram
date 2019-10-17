@@ -25,38 +25,13 @@ pub struct Model {
     pub ref_path: Option<String>,
 }
 
-// #[derive(Debug, Deserialize, Serialize)]
-// pub struct Field {
-//     pub name: String,
-//     pub r#type: String,
-//     pub format: Option<String>,
-//     pub nullable: bool,
-//     pub ref_path: Option<String>,
-//     pub is_array: bool,
-// }
-
 impl Model {
     pub fn new(name: &str, schema: &Schema, lang: &Lang) -> Self {
         let fields: Vec<Box<Model>> = schema
             .properties
             .iter()
             .flatten()
-            .map(|(name, schema)| {
-                // translate using language spec
-                // {
-                //     nullable: schema.nullable.unwrap_or(false),
-                //     format: schema.format,
-                //     ref_path: schema.ref_path,
-                //     is_array: schema
-                //         .schema_type
-                //         .clone()
-                //         .into_iter()
-                //         .any(|t| &t == "array"),
-                //     r#type: schema.schema_type.unwrap_or("object".into()),
-                //     name,
-                // })
-                Box::new(lang.translate(Model::new(&name, schema, lang)))
-            })
+            .map(|(name, schema)| Box::new(lang.translate(Model::new(&name, schema, lang))))
             .collect();
 
         let additional_fields: Option<Box<Model>> =
@@ -113,12 +88,9 @@ impl Model {
                     .ref_path
                     .as_ref()
                     .map(|ref_path| {
-                        lang.format(
-                            "classname",
-                            &util::model_name_from_ref(&ref_path)
-                                .expect("failed to get model name from ref_path"),
-                        )
-                        .expect("failed to format classname")
+                        let name = util::model_name_from_ref(&ref_path)
+                            .expect("failed to get model name from ref_path");
+                        lang.format("classname", &name).unwrap_or(name)
                     })
                     .unwrap_or(String::new());
                 Box::new(lang.translate(Model::new(&name, &s, lang)))

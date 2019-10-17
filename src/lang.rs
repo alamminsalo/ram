@@ -80,16 +80,12 @@ impl Lang {
         Ok(lang)
     }
 
-    // fn is_primitive(&self, t: &str) -> bool {
-    // }
-
     pub fn format(&self, template_key: &str, value: &str) -> Fallible<String> {
         let mut hb = util::handlebars();
         self.add_helpers(&mut hb);
         let v = value.to_owned();
         match template_key {
             "reserved" if !self.reserved.contains(&v) => Ok(v),
-            // "classname" if self.is_primitive(&v) => Ok(v),
             _ => self
                 .format
                 .get(template_key)
@@ -107,12 +103,9 @@ impl Lang {
                     s.ref_path
                         .as_ref()
                         .map(|ref_path| {
-                            self.format(
-                                "classname",
-                                &util::model_name_from_ref(&ref_path)
-                                    .expect("failed to get model name from ref_path"),
-                            )
-                            .expect("failed to format classname")
+                            let name = util::model_name_from_ref(&ref_path)
+                                .expect("failed to get model name from ref_path");
+                            self.format("classname", &name).unwrap_or(name)
                         })
                         .unwrap_or(s.r#type.clone())
                 })
@@ -123,10 +116,7 @@ impl Lang {
         } else if let Some(ref refpath) = f.ref_path {
             // this is a reference to another object
             let t = util::model_name_from_ref(&refpath)
-                .map(|t| {
-                    self.format("classname", &t)
-                        .expect("classname formatting failed")
-                })
+                .map(|t| self.format("classname", &t).unwrap_or(t))
                 .expect("failed to get model name from ref");
             // object field is not mandatory formatter rule
             self.format("object_field", &t).unwrap_or(t)
