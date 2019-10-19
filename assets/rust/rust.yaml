@@ -8,7 +8,7 @@ format:
   # Formats fields of object type, optional
   object_field: "Box<{{value}}>"
   # Array field format
-  array_field: "Vec<{{value}}>"
+  array: "Vec<{{type}}>"
   # Formats nullable fields, optional
   nullable: "Option<{{value}}>"
   # Formats reserved language keywords, optional

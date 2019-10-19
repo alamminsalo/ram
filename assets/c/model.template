@@ -1,0 +1,17 @@
+{{#if is_object}}
+struct {{pascalcase name}} {
+{{#each fields}}
+  {{type}} {{snakecase name}};
+{{/each}}
+{{#if additional_fields}}
+{{#with additional_fields}}
+{{#each fields}}
+  {{type}} {{snakecase name}};
+{{/each}}
+{{/with}}
+{{/if}}
+};
+{{/if}}
+{{#if is_array}}
+typedef {{items.name}} {{name}};
+{{/if}}

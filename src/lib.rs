@@ -60,7 +60,8 @@ fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
     spec.collect_schemas(&rootpath)
         .expect("failed to collect schemas")
         .iter()
-        .map(|(key, schema)| Model::new(key, schema, &lang))
+        .map(|(key, schema)| Model::new(key, schema))
+        .map(|m| lang.translate_model(m))
         .collect()
 }
 
@@ -80,7 +81,7 @@ fn render_models(hb: &mut Handlebars, state: &State, lang: &Lang) -> HashMap<Str
         .map(|model| {
             let render = hb.render("model", &model).unwrap();
             (
-                lang.format("filename", &model.filename).unwrap(),
+                lang.format("filename", &model.name).unwrap(),
                 htmlescape::decode_html(&render).unwrap(),
             )
         })

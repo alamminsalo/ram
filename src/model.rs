@@ -1,16 +1,10 @@
-use super::lang::Lang;
 use super::util;
-use inflector::Inflector;
 use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Model {
     pub name: String,
-    pub name_lowercase: String,
-    pub name_pascalcase: String,
-    pub name_snakecase: String,
-    pub filename: String,
     pub r#type: String,
     pub fields: Vec<Box<Model>>,
     pub additional_fields: Option<Box<Model>>,
@@ -26,12 +20,12 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new(name: &str, schema: &Schema, lang: &Lang) -> Self {
+    pub fn new(name: &str, schema: &Schema) -> Self {
         let fields: Vec<Box<Model>> = schema
             .properties
             .iter()
             .flatten()
-            .map(|(name, schema)| Box::new(lang.translate(Model::new(&name, schema, lang))))
+            .map(|(name, schema)| Box::new(Model::new(&name, schema)))
             .collect();
 
         let additional_fields: Option<Box<Model>> =
@@ -39,33 +33,21 @@ impl Model {
                 .additional_properties
                 .as_ref()
                 .and_then(|obj_or_ref| match obj_or_ref {
-                    ObjectOrReference::Object(s) => Some(Box::new(Model::new("", &s, &lang))),
+                    ObjectOrReference::Object(s) => Some(Box::new(Model::new("", &s))),
                     _ => None,
                 });
 
-        let r#type = schema
+        let t = schema
             .schema_type
             .as_ref()
             .unwrap_or(&String::from("object"))
             .to_owned();
-        let is_array = &r#type == "array";
-        let is_object = &r#type == "object";
+        let is_array = &t == "array";
+        let is_object = &t == "object";
 
         Self {
             // TODO: sense
-            name: lang
-                .format("reserved", &name.to_string())
-                .unwrap_or(name.into()),
-            name_lowercase: lang
-                .format("reserved", &name.to_lowercase())
-                .unwrap_or(name.to_lowercase()),
-            name_pascalcase: lang
-                .format("reserved", &name.to_pascal_case())
-                .unwrap_or(name.to_pascal_case()),
-            name_snakecase: lang
-                .format("reserved", &name.to_snake_case())
-                .unwrap_or(name.to_snake_case()),
-            filename: name.to_snake_case(),
+            name: name.into(),
             // checks if any field contains format: date
             has_date: fields.iter().any(|f| {
                 if let Some(fieldformat) = &f.format {
@@ -88,19 +70,18 @@ impl Model {
                     .ref_path
                     .as_ref()
                     .map(|ref_path| {
-                        let name = util::model_name_from_ref(&ref_path)
-                            .expect("failed to get model name from ref_path");
-                        lang.format("classname", &name).unwrap_or(name)
+                        util::model_name_from_ref(&ref_path)
+                            .expect("failed to get model name from ref_path")
                     })
                     .unwrap_or(String::new());
-                Box::new(lang.translate(Model::new(&name, &s, lang)))
+                Box::new(Model::new(&name, &s))
             }),
             nullable: schema.nullable.unwrap_or(false),
             description: schema.description.clone(),
             format: schema.format.clone(),
+            r#type: t,
             fields,
             additional_fields,
-            r#type,
             is_array,
             is_object,
         }

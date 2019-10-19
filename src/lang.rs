@@ -3,6 +3,7 @@ use super::util;
 use super::Model;
 use failure::{format_err, Fallible};
 use handlebars::*;
+use maplit::hashmap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
@@ -41,18 +42,6 @@ pub struct Format {
     pub r#type: String,
 }
 
-// Value type for formatting
-#[derive(Serialize, Deserialize)]
-struct Value {
-    pub value: String,
-}
-
-impl From<&str> for Value {
-    fn from(a: &str) -> Value {
-        Value { value: a.into() }
-    }
-}
-
 impl Lang {
     pub fn load_file(path: &str) -> Fallible<Self> {
         let data = {
@@ -80,84 +69,6 @@ impl Lang {
         Ok(lang)
     }
 
-    pub fn format(&self, template_key: &str, value: &str) -> Fallible<String> {
-        let mut hb = util::handlebars();
-        self.add_helpers(&mut hb);
-        let v = value.to_owned();
-        match template_key {
-            "reserved" if !self.reserved.contains(&v) => Ok(v),
-            _ => self
-                .format
-                .get(template_key)
-                .and_then(|template| hb.render_template(template, &Value::from(value)).ok())
-                .ok_or(format_err!("failed to format template {}", template_key)),
-        }
-    }
-
-    pub fn translate(&self, f: Model) -> Model {
-        let mut translated_type: String = if f.is_array {
-            let child_type = f
-                .items
-                .as_ref()
-                .map(|s| {
-                    s.ref_path
-                        .as_ref()
-                        .map(|ref_path| {
-                            let name = util::model_name_from_ref(&ref_path)
-                                .expect("failed to get model name from ref_path");
-                            self.format("classname", &name).unwrap_or(name)
-                        })
-                        .unwrap_or(s.r#type.clone())
-                })
-                .expect("array child type not defined!");
-            // format as array<child type>
-            self.format("array_field", &child_type)
-                .expect("no array formatter defined!")
-        } else if let Some(ref refpath) = f.ref_path {
-            // this is a reference to another object
-            let t = util::model_name_from_ref(&refpath)
-                .map(|t| self.format("classname", &t).unwrap_or(t))
-                .expect("failed to get model name from ref");
-            // object field is not mandatory formatter rule
-            self.format("object_field", &t).unwrap_or(t)
-        } else if f.is_object {
-            // this is an inline object, which is not yet supported
-            panic!("{}: inline objects are not supported", f.name);
-        } else {
-            // this is a primitive language type
-            let primitive_type = self
-                .types
-                .iter()
-                .find(|(name, t)| *name == &f.r#type || t.alias.contains(&f.r#type))
-                .map(|(_, t)| t)
-                .expect(&format!(
-                    "Error while processing {}: failed to find primitive type {}",
-                    &f.name, f.r#type
-                ));
-            let type_format = f.format.clone().unwrap_or("default".into());
-            primitive_type
-                .format
-                .get(&type_format)
-                .expect(&format!(
-                    "Error while processing {}: failed to find primitive type {}",
-                    &f.name, &f.r#type
-                ))
-                .r#type
-                .clone()
-        };
-
-        if f.nullable {
-            translated_type = self
-                .format("nullable", &translated_type)
-                .unwrap_or(translated_type)
-        };
-
-        Model {
-            r#type: translated_type,
-            ..f
-        }
-    }
-
     pub fn default_path(&self, path: &str) -> String {
         self.paths
             .get(path)
@@ -172,6 +83,136 @@ impl Lang {
             .clone()
     }
 
+    /*
+     * Formatter functions
+     */
+    pub fn format(&self, template_key: &str, value: &String) -> Fallible<String> {
+        match template_key {
+            "reserved" if !self.reserved.contains(&value) => Ok(value.clone()),
+            _ => {
+                let mut map = HashMap::new();
+                map.insert("value", value.as_str());
+                self.format_map(template_key, &map)
+            }
+        }
+    }
+
+    pub fn format_map(&self, template_key: &str, map: &HashMap<&str, &str>) -> Fallible<String> {
+        dbg!(&map);
+        let mut hb = util::handlebars();
+        self.add_helpers(&mut hb);
+        self.format
+            .get(template_key)
+            .and_then(|template| hb.render_template(template, map).ok())
+            .ok_or(format_err!("failed to format template {}", template_key))
+    }
+
+    /*
+     * Model translation functions
+     */
+    /// Translates top-level model
+    pub fn translate_model(&self, m: Model) -> Model {
+        Model {
+            r#type: self.translate_modelname(&m.name),
+            fields: m
+                .fields
+                .into_iter()
+                .map(|m| Box::new(self.translate(*m)))
+                .collect(),
+            additional_fields: m
+                .additional_fields
+                .and_then(|m| Some(Box::new(self.translate(*m)))),
+            ..m
+        }
+    }
+
+    /// Translates model field type
+    fn translate(&self, f: Model) -> Model {
+        // TODO: enum & match
+        let mut translated_type: String = if f.is_array {
+            self.translate_array(&f)
+        } else if f.is_object {
+            if let Some(ref refpath) = f.ref_path {
+                // this is a reference to another object
+                // get model name from ref_path
+                util::model_name_from_ref(&refpath)
+                    .map(|t| self.translate_modelname(&t))
+                    .expect("failed to get model name from ref")
+            } else {
+                // this is an inline object, which is not yet supported
+                dbg!(&f);
+                panic!("{}: inline objects are not supported", f.name);
+            }
+        } else {
+            // this is a primitive language type
+            self.translate_primitive(
+                &f.r#type,
+                f.format.as_ref().unwrap_or(&String::from("default")),
+            )
+        };
+
+        // format if nullable
+        if f.nullable {
+            translated_type = self
+                .format("nullable", &translated_type)
+                .unwrap_or(translated_type)
+        };
+
+        Model {
+            r#type: translated_type,
+            fields: f
+                .fields
+                .into_iter()
+                .map(|m| Box::new(self.translate(*m)))
+                .collect(),
+            additional_fields: f
+                .additional_fields
+                .and_then(|m| Some(Box::new(self.translate(*m)))),
+            ..f
+        }
+    }
+
+    // applies `classname` and `object_field` to input str
+    fn translate_modelname(&self, name: &String) -> String {
+        // format using `classname` formatter if present
+        let modelname = self.format("classname", &name).unwrap_or(name.clone());
+        // format using `object_field` formatter if present
+        self.format("object_field", &modelname).unwrap_or(modelname)
+    }
+
+    // translates to array type by child item
+    fn translate_array(&self, m: &Model) -> String {
+        dbg!("translating array");
+        dbg!(&m);
+        // translate child
+        let child = self.translate(*m.items.as_ref().expect("array child type is None").clone());
+        // array formatter
+        self.format_map(
+            "array",
+            &hashmap!["type" => child.r#type.as_str(), "name" => m.name.as_str()],
+        )
+        .expect("no array formatter defined!")
+    }
+
+    // returns translated primitive type
+    fn translate_primitive(&self, _type: &String, format: &String) -> String {
+        self.types
+            .iter()
+            .find(|(name, t)| *name == _type || t.alias.contains(_type))
+            .and_then(|(_, t)| t.format.get(format))
+            .map(|f| f.r#type.clone())
+            //      .or_else(|| {
+            //          // final check whether this field was already translated before giving up
+            //          self.lang_types()
+            //              .find(|t| t == _type)
+            //              .map(|t| t.to_string())
+            //      })
+            .expect(&format!(
+                "Error while processing {}: failed to find primitive type {}",
+                _type, format
+            ))
+    }
+
     // adds helpers to handlebars instance
     pub fn add_helpers(&self, hb: &mut Handlebars) {
         {
@@ -183,11 +224,23 @@ impl Lang {
                                  out: &mut dyn Output|
                   -> HelperResult {
                 // get parameter from helper or throw an error
-                let param = h.param(0).and_then(|v| v.value().as_str()).unwrap_or("");
-                out.write(&lang.format("reserved", &param).unwrap_or(param.to_string()))?;
+                let param = h
+                    .param(0)
+                    .and_then(|v| v.value().as_str())
+                    .unwrap_or("")
+                    .to_string();
+                out.write(&lang.format("reserved", &param).unwrap_or(param))?;
                 Ok(())
             };
             hb.register_helper("r", Box::new(reserved));
         }
     }
+
+    // Returns list of target lang types
+    // fn lang_types<'a>(&'a self) -> impl Iterator<Item = &'a str> {
+    //     self.types
+    //         .values()
+    //         .flat_map(|t| t.format.values())
+    //         .map(|f| f.r#type.as_str())
+    // }
 }

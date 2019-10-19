@@ -26,5 +26,5 @@ pub struct {{pascalcase name}} {
 }
 {{/if}}
 {{#if is_array}}
-pub type {{pascalcase name}} = Vec<{{items.name}}>;
+pub type {{pascalcase name}} = {{ type }};
 {{/if}}

@@ -1,0 +1,95 @@
+name: c
+
+# Dynamic formatting templates for things such as nullable types
+format:
+  # How struct/class type definition names are formatted
+  classname: "{{pascalcase value}}"
+  # Array field format
+  array_field: "{{type}} {{value}}[]"
+  # Formats nullable fields, optional
+  nullable: "{{value}}*"
+  # Formats filenames
+  filename: "{{snakecase value}}.h"
+
+# default templates which can be overridden if needed
+templates:
+  model: "c/model.template"
+
+# default file paths
+paths:
+  root: "src"
+  model: "structs"
+
+# primitive type mapping
+types:
+  integer:
+    alias:
+      - int
+    format:
+      default:
+        type: long
+      int32: 
+        type: long
+      int64: 
+        type: long long
+
+  string:
+    format:
+      default:
+        type: char*
+      email:
+        type: char*
+      date:
+        type: char*
+      date-time:
+        type: char*
+      binary:
+        type: char*
+      byte:
+        type: char*
+
+  number:
+    format:
+      default:
+        type: float
+      float:
+        type: float
+      double:
+        type: double
+
+# list of reserved words
+reserved:
+  - auto
+  - break
+  - case
+  - char
+  - const
+  - continue
+  - default
+  - do
+  - double
+  - else
+  - enum
+  - extern
+  - float
+  - for
+  - goto
+  - if
+  - inline
+  - int
+  - long
+  - register
+  - restrict
+  - return
+  - short
+  - signed
+  - sizeof
+  - static
+  - struct
+  - switch
+  - typedef
+  - union
+  - unsigned
+  - void
+  - volatile
+  - while 
