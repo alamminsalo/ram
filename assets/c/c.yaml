@@ -5,7 +5,7 @@ format:
   # How struct/class type definition names are formatted
   classname: "{{pascalcase value}}"
   # Array field format
-  array_field: "{{type}} {{value}}[]"
+  array: "{{type}}*"
   # Formats nullable fields, optional
   nullable: "{{value}}*"
   # Formats filenames

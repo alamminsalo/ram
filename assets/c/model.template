@@ -13,5 +13,5 @@ struct {{pascalcase name}} {
 };
 {{/if}}
 {{#if is_array}}
-typedef {{items.name}} {{name}};
+typedef {{type}}
 {{/if}}
