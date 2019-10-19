@@ -98,7 +98,6 @@ impl Lang {
     }
 
     pub fn format_map(&self, template_key: &str, map: &HashMap<&str, &str>) -> Fallible<String> {
-        dbg!(&map);
         let mut hb = util::handlebars();
         self.add_helpers(&mut hb);
         self.format
@@ -112,8 +111,13 @@ impl Lang {
      */
     /// Translates top-level model
     pub fn translate_model(&self, m: Model) -> Model {
+        let translated_type: String = if m.is_array {
+            self.translate_array(&m)
+        } else {
+            self.translate_modelname(&m.name)
+        };
         Model {
-            r#type: self.translate_modelname(&m.name),
+            r#type: translated_type,
             fields: m
                 .fields
                 .into_iter()
@@ -140,7 +144,6 @@ impl Lang {
                     .expect("failed to get model name from ref")
             } else {
                 // this is an inline object, which is not yet supported
-                dbg!(&f);
                 panic!("{}: inline objects are not supported", f.name);
             }
         } else {
@@ -182,8 +185,6 @@ impl Lang {
 
     // translates to array type by child item
     fn translate_array(&self, m: &Model) -> String {
-        dbg!("translating array");
-        dbg!(&m);
         // translate child
         let child = self.translate(*m.items.as_ref().expect("array child type is None").clone());
         // array formatter
@@ -201,12 +202,6 @@ impl Lang {
             .find(|(name, t)| *name == _type || t.alias.contains(_type))
             .and_then(|(_, t)| t.format.get(format))
             .map(|f| f.r#type.clone())
-            //      .or_else(|| {
-            //          // final check whether this field was already translated before giving up
-            //          self.lang_types()
-            //              .find(|t| t == _type)
-            //              .map(|t| t.to_string())
-            //      })
             .expect(&format!(
                 "Error while processing {}: failed to find primitive type {}",
                 _type, format
@@ -235,12 +230,4 @@ impl Lang {
             hb.register_helper("r", Box::new(reserved));
         }
     }
-
-    // Returns list of target lang types
-    // fn lang_types<'a>(&'a self) -> impl Iterator<Item = &'a str> {
-    //     self.types
-    //         .values()
-    //         .flat_map(|t| t.format.values())
-    //         .map(|f| f.r#type.as_str())
-    // }
 }
