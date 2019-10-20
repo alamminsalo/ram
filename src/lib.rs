@@ -61,7 +61,7 @@ fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
         .expect("failed to collect schemas")
         .iter()
         .map(|(key, schema)| Model::new(key, schema))
-        .map(|m| lang.translate_model(m))
+        .map(|m| lang.translate(m))
         .collect()
 }
 

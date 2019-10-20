@@ -109,13 +109,37 @@ impl Lang {
     /*
      * Model translation functions
      */
-    /// Translates top-level model
-    pub fn translate_model(&self, m: Model) -> Model {
-        let translated_type: String = if m.is_array {
+    /// Translates model
+    pub fn translate(&self, m: Model) -> Model {
+        // TODO: enum & match
+        let mut translated_type: String = if m.is_array {
             self.translate_array(&m)
+        } else if m.is_object {
+            if let Some(ref refpath) = m.ref_path {
+                // this is a reference to another object
+                // get model name from ref_path
+                util::model_name_from_ref(&refpath)
+                    .map(|t| self.translate_modelname(&t))
+                    .expect("failed to get model name from ref")
+            } else {
+                // this is an inline object, which we name by it's key
+                self.translate_modelname(&m.name)
+            }
         } else {
-            self.translate_modelname(&m.name)
+            // this is a primitive language type
+            self.translate_primitive(
+                &m.r#type,
+                m.format.as_ref().unwrap_or(&String::from("default")),
+            )
         };
+
+        // format if nullable
+        if m.nullable {
+            translated_type = self
+                .format("nullable", &translated_type)
+                .unwrap_or(translated_type)
+        };
+
         Model {
             r#type: translated_type,
             fields: m
@@ -127,51 +151,6 @@ impl Lang {
                 .additional_fields
                 .and_then(|m| Some(Box::new(self.translate(*m)))),
             ..m
-        }
-    }
-
-    /// Translates model field type
-    fn translate(&self, f: Model) -> Model {
-        // TODO: enum & match
-        let mut translated_type: String = if f.is_array {
-            self.translate_array(&f)
-        } else if f.is_object {
-            if let Some(ref refpath) = f.ref_path {
-                // this is a reference to another object
-                // get model name from ref_path
-                util::model_name_from_ref(&refpath)
-                    .map(|t| self.translate_modelname(&t))
-                    .expect("failed to get model name from ref")
-            } else {
-                // this is an inline object, which is not yet supported
-                panic!("{}: inline objects are not supported", f.name);
-            }
-        } else {
-            // this is a primitive language type
-            self.translate_primitive(
-                &f.r#type,
-                f.format.as_ref().unwrap_or(&String::from("default")),
-            )
-        };
-
-        // format if nullable
-        if f.nullable {
-            translated_type = self
-                .format("nullable", &translated_type)
-                .unwrap_or(translated_type)
-        };
-
-        Model {
-            r#type: translated_type,
-            fields: f
-                .fields
-                .into_iter()
-                .map(|m| Box::new(self.translate(*m)))
-                .collect(),
-            additional_fields: f
-                .additional_fields
-                .and_then(|m| Some(Box::new(self.translate(*m)))),
-            ..f
         }
     }
 

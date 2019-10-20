@@ -25,5 +25,5 @@ type {{pascalcase name}} struct {
 }
 {{/if}}
 {{#if is_array}}
-type {{name}} {{items.name}}
+type {{name}} {{type}}
 {{/if}}

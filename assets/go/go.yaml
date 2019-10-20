@@ -1,5 +1,4 @@
-# Rust lang spec file
-name: go
+name: javascript
 
 # Dynamic formatting templates for things such as nullable types
 format:
