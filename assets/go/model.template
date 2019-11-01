@@ -13,12 +13,12 @@ import (
 {{#if is_object}}
 type {{pascalcase name}} struct {
 {{#each fields}}
-  {{ pascalcase name }} {{ type }} `json:"{{ snakecase name }}"`
+  {{ pascalcase name }} {{ type }} `json:"{{ snakecase name }}" {{ ext "x-go-custom-tag" }}`
 {{/each}}
 {{#if additional_fields}}
 {{#with additional_fields}}
 {{#each fields}}
-  {{ pascalcase name }} {{type}} `json:"-"`
+  {{ pascalcase name }} {{type}} `json:"-" {{ ext "x-go-custom-tag" }}`
 {{/each}}
 {{/with}}
 {{/if}}

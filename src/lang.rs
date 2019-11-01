@@ -5,7 +5,7 @@ use failure::{format_err, Fallible};
 use handlebars::*;
 use maplit::hashmap;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::path::Path;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -207,6 +207,39 @@ impl Lang {
                 Ok(())
             };
             hb.register_helper("r", Box::new(reserved));
+        }
+        {
+            let ext = move |h: &Helper,
+                            _: &Handlebars,
+                            c: &Context,
+                            r: &mut RenderContext,
+                            out: &mut dyn Output|
+                  -> HelperResult {
+                // get parameter from helper or throw an error
+                let param = h
+                    .param(0)
+                    .and_then(|v| v.value().as_str())
+                    .unwrap_or("")
+                    .to_string();
+                // get value {param} from local context extensions
+                let value: String = c
+                    .navigate(".", &VecDeque::new(), &r.get_path(), &VecDeque::new())
+                    .map(|local| {
+                        local
+                            .as_json()
+                            .get("extensions")
+                            .and_then(|ext| ext.as_object())
+                            .and_then(|ext| ext.get(&param))
+                            .and_then(|val| val.as_str())
+                            .unwrap_or("")
+                            .to_owned()
+                    })
+                    .unwrap_or_default();
+                // write out value
+                out.write(&value)?;
+                Ok(())
+            };
+            hb.register_helper("ext", Box::new(ext));
         }
     }
 }

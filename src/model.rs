@@ -1,6 +1,7 @@
 use super::util;
 use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Model {
@@ -17,6 +18,7 @@ pub struct Model {
     pub format: Option<String>,
     pub nullable: bool,
     pub ref_path: Option<String>,
+    pub extensions: HashMap<String, String>,
 }
 
 impl Model {
@@ -79,6 +81,7 @@ impl Model {
             nullable: schema.nullable.unwrap_or(false),
             description: schema.description.clone(),
             format: schema.format.clone(),
+            extensions: schema.extensions.clone(),
             r#type: t,
             fields,
             additional_fields,
