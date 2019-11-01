@@ -1,17 +1,17 @@
-mod api;
 mod assets;
 mod config;
 mod helper;
 mod lang;
 mod model;
+mod resource;
 mod state;
 mod util;
 
-pub use api::API;
 use assets::Assets;
 pub use config::Config;
 pub use lang::{AddFile, Lang};
 pub use model::Model;
+pub use resource::Resource;
 pub use state::State;
 
 use handlebars::Handlebars;
