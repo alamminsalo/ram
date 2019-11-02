@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use openapi::v3_0::{Operation, PathItem};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -43,31 +44,58 @@ pub struct ResourceGroup {
     pub name: String,
     /// Resources under this group
     pub resources: Vec<Resource>,
+    /// Grouping strategy used
+    pub grouping_strategy: GroupingStrategy,
 }
 
-impl ResourceGroup {
-    pub fn new(name: &str, paths: BTreeMap<&str, &PathItem>) -> ResourceGroup {
-        ResourceGroup {
-            name: name.into(),
-            resources: paths
-                .iter()
-                .flat_map(|(path, item)| {
-                    [
-                        ("GET", item.get.as_ref()),
-                        ("PUT", item.put.as_ref()),
-                        ("POST", item.post.as_ref()),
-                        ("DELETE", item.delete.as_ref()),
-                        ("OPTIONS", item.options.as_ref()),
-                        ("HEAD", item.head.as_ref()),
-                        ("PATCH", item.patch.as_ref()),
-                        ("TRACE", item.trace.as_ref()),
-                    ]
-                    .into_iter()
-                    .filter(|(_, op)| op.is_some())
-                    .map(move |(method, op)| Resource::new(&path, method, &op.unwrap()))
-                    .collect::<Vec<Resource>>()
-                })
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub enum GroupingStrategy {
+    FirstTag,
+    Path,
+    Separate,
+}
+
+/// Groups resources with given grouping strategy
+pub fn group_resources(
+    paths: &BTreeMap<String, PathItem>,
+    grouping_strategy: GroupingStrategy,
+) -> Vec<ResourceGroup> {
+    let iter = paths.iter().flat_map(|(path, item)| {
+        vec![
+            (path.clone(), "GET", item.get.as_ref()),
+            (path.clone(), "PUT", item.put.as_ref()),
+            (path.clone(), "POST", item.post.as_ref()),
+            (path.clone(), "DELETE", item.delete.as_ref()),
+            (path.clone(), "OPTIONS", item.options.as_ref()),
+            (path.clone(), "HEAD", item.head.as_ref()),
+            (path.clone(), "PATCH", item.patch.as_ref()),
+            (path.clone(), "TRACE", item.trace.as_ref()),
+        ]
+        .into_iter()
+        .filter_map(|(path, method, op)| op.and_then(|op| Some((path, method, op))))
+    });
+    let strat_iter = match grouping_strategy {
+        GroupingStrategy::FirstTag => iter
+            .filter_map(|(path, method, op)| {
+                op.tags
+                    .as_ref()
+                    .and_then(|tags| tags.get(0))
+                    .and_then(|tag| Some((path, method, op, tag)))
+            })
+            .group_by(|(_, _, _, tag)| tag.clone()),
+        _ => panic!("not implemented"),
+    };
+
+    // collect resourcegroups
+    strat_iter
+        .into_iter()
+        .map(|(key, group)| ResourceGroup {
+            name: key.into(),
+            resources: group
+                .into_iter()
+                .map(|(path, method, op, _)| Resource::new(path.as_str(), method, op))
                 .collect(),
-        }
-    }
+            grouping_strategy,
+        })
+        .collect()
 }

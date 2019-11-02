@@ -1,33 +1,37 @@
 [package]
-name = "ram"
+authors = ["alamminsalo <antti.lamminsalo@protonmail.com>"]
 description = "Rusty API Modeler. Generates models from openapi spec."
-license = "MIT"
+edition = "2018"
+exclude = ["example/"]
 homepage = "https://github.com/alamminsalo/ram"
+license = "MIT"
+name = "ram"
 repository = "https://github.com/alamminsalo/ram"
 version = "0.5.0"
-authors = ["alamminsalo <antti.lamminsalo@protonmail.com>"]
-edition = "2018"
-exclude = [
-    "example/"
-]
-
-[lib]
-name = "ram"
-path = "src/lib.rs"
-
 [[bin]]
 name = "ram"
 path = "src/main.rs"
 
 [dependencies]
-serde = {version = "1.0.98", features = ["derive"] }
-serde_json = "1.0.40"
-failure = "0.1.5"
-serde_yaml = "0.8.9"
-openapi = { git = "https://github.com/alamminsalo/openapi", branch = "schema_collect" }
 Inflector = "0.11.4"
-rust-embed = "5.1.0"
-htmlescape = "0.3.1"
-handlebars = "2.0.2"
+failure = "0.1.5"
 glob = "0.3.0"
+handlebars = "2.0.2"
+htmlescape = "0.3.1"
+itertools = "*"
 maplit = "1.0.2"
+rust-embed = "5.1.0"
+serde_json = "1.0.40"
+serde_yaml = "0.8.9"
+
+[dependencies.openapi]
+branch = "schema_collect"
+git = "https://github.com/alamminsalo/openapi"
+
+[dependencies.serde]
+features = ["derive"]
+version = "1.0.98"
+
+[lib]
+name = "ram"
+path = "src/lib.rs"

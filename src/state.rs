@@ -1,4 +1,4 @@
-use super::{Config, Model};
+use super::{Config, Model, ResourceGroup};
 use serde::{Deserialize, Serialize};
 
 // full model generation state, to contain processed models and apis
@@ -7,5 +7,5 @@ pub struct State {
     pub models: Vec<Model>,
     pub cfg: Config,
     // pub lang: Lang,
-    // apis: Vec<API>,
+    pub resource_groups: Vec<ResourceGroup>,
 }

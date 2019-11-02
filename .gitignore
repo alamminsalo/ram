@@ -1,5 +1,6 @@
 /target
 **/*.rs.bk
 /examples/rust/src/models
+/examples/rust/src/api
 /examples/rust/target
 /examples/go/models

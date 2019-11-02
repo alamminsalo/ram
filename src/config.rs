@@ -60,8 +60,9 @@ impl Config {
         let path: String = self
             .paths
             .get(path_key)
-            .unwrap_or(&lang.default_path(path_key))
-            .clone();
+            .and_then(|p| Some(p.clone()))
+            .or_else(|| Some(lang.default_path(path_key)))
+            .unwrap();
         Path::new(&root).join(&path).to_str().unwrap().to_string()
     }
 
@@ -69,7 +70,8 @@ impl Config {
     pub fn get_template(&self, path_key: &str, lang: &Lang) -> String {
         self.templates
             .get(path_key)
-            .unwrap_or(&lang.default_template(path_key))
-            .clone()
+            .and_then(|t| Some(t.clone()))
+            .or_else(|| Some(lang.default_template(path_key)))
+            .unwrap()
     }
 }

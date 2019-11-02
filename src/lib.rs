@@ -11,7 +11,7 @@ use assets::Assets;
 pub use config::Config;
 pub use lang::{AddFile, Lang};
 pub use model::Model;
-pub use resource::Resource;
+pub use resource::{GroupingStrategy, Resource, ResourceGroup};
 pub use state::State;
 
 use handlebars::Handlebars;
@@ -31,21 +31,39 @@ pub fn generate_files(cfg: Config, spec: Spec) {
 
     println!("generating models...");
     let models = generate_models(&cfg, &lang, &spec);
+    dbg!(&models.iter().map(|m| &m.name).collect::<Vec<&String>>());
 
-    // create state for post-processing purposes
-    let state = State { cfg, models };
-
-    // write models into specified path
+    // write models
     println!("writing models...");
-    let models_path = state.cfg.get_path("model", &lang);
+    let models_path = cfg.get_path("model", &lang);
     util::write_files(
         Path::new(&models_path),
-        render_models(&mut hb, &state, &lang),
+        render_models(&mut hb, &cfg, &lang, &models),
     );
+
+    let mut resource_groups = vec![];
+
+    // write resources
+    if cfg.templates.contains_key("resource") {
+        println!("generating resource groups...");
+        resource_groups = resource::group_resources(&spec.paths, GroupingStrategy::FirstTag);
+        println!("writing resources...");
+        let resources_path = cfg.get_path("resource", &lang);
+        util::write_files(
+            Path::new(&resources_path),
+            render_resources(&mut hb, &cfg, &lang, &resource_groups),
+        );
+    }
 
     // additional files
     if !lang.additional_files.is_empty() {
         println!("writing additional files...");
+        let state = State {
+            cfg,
+            models,
+            resource_groups,
+        };
+        dbg!(&state.models.iter().map(|m| &m.name).collect::<Vec<&String>>());
         util::write_files_nopath(render_additional_files(&mut hb, &state, &lang));
     }
 
@@ -65,23 +83,54 @@ fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
         .collect()
 }
 
-fn render_models(hb: &mut Handlebars, state: &State, lang: &Lang) -> HashMap<String, String> {
+fn render_models(
+    hb: &mut Handlebars,
+    cfg: &Config,
+    lang: &Lang,
+    models: &Vec<Model>,
+) -> HashMap<String, String> {
     // compile models template
-    let template_path = state.cfg.get_template("model", &lang);
+    let template_path = cfg.get_template("model", &lang);
 
     // get data from assets and compile it
     let data = Assets::read_file(&template_path).unwrap();
     hb.register_template_string("model", &data)
         .expect("failed to compile models template");
 
-    // iterate components and generate models
-    state
-        .models
+    // render items
+    models
         .iter()
         .map(|model| {
             let render = hb.render("model", &model).unwrap();
             (
                 lang.format("filename", &model.name).unwrap(),
+                htmlescape::decode_html(&render).unwrap(),
+            )
+        })
+        .collect()
+}
+
+fn render_resources(
+    hb: &mut Handlebars,
+    cfg: &Config,
+    lang: &Lang,
+    resource_groups: &Vec<ResourceGroup>,
+) -> HashMap<String, String> {
+    // compile models template
+    let template_path = cfg.get_template("resource", &lang);
+
+    // get data from assets and compile it
+    let data = Assets::read_file(&template_path).unwrap();
+    hb.register_template_string("resource", &data)
+        .expect("failed to compile models template");
+
+    // render items
+    resource_groups
+        .iter()
+        .map(|rg| {
+            let render = hb.render("resource", &rg).unwrap();
+            (
+                lang.format("filename", &rg.name).unwrap(),
                 htmlescape::decode_html(&render).unwrap(),
             )
         })

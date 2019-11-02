@@ -329,6 +329,7 @@ dependencies = [
  "glob 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "handlebars 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "htmlescape 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "itertools 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "maplit 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "openapi 0.1.5 (git+https://github.com/alamminsalo/openapi?branch=schema_collect)",
  "rust-embed 5.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
