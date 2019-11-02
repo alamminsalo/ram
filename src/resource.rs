@@ -1,9 +1,11 @@
+use super::util;
+use super::Lang;
 use itertools::Itertools;
 use openapi::v3_0::{Operation, PathItem};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Resource {
     /// Resource URI
     pub path: String,
@@ -35,9 +37,17 @@ impl Resource {
             description: op.description.clone(),
         }
     }
+
+    pub fn format(&self, lang: &Lang) -> Resource {
+        let s = self.clone();
+        Resource {
+            path: lang.format_path(s.path),
+            ..s
+        }
+    }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResourceGroup {
     /// Group name
     /// Resources are grouped by first tag on them

@@ -3,10 +3,12 @@ use super::util;
 use super::Model;
 use failure::{format_err, Fallible};
 use handlebars::*;
+use itertools::Itertools;
 use maplit::hashmap;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Lang {
@@ -241,5 +243,33 @@ impl Lang {
             };
             hb.register_helper("ext", Box::new(ext));
         }
+    }
+
+    /// Formats all path paramers in form of {param} with given formatter if any
+    pub fn format_path(&self, p: String) -> String {
+        // TODO: clean this mess
+        let re = Regex::new(r"^\{(\w+)\}$").unwrap();
+        self.format
+            .get("pathparam")
+            .map(|_| {
+                format!(
+                    "/{}",
+                    &Path::new(&p)
+                        .iter()
+                        .skip(1) // leave out preceding '/', which is in the standard
+                        .map(|part| part.to_str().unwrap())
+                        .map(|part| {
+                            dbg!(&part);
+                            if let Some(cap) = re.captures_iter(part).next() {
+                                self.format("pathparam", &cap[1].to_owned())
+                                    .unwrap_or(part.to_string())
+                            } else {
+                                part.to_string()
+                            }
+                        })
+                        .join("/")
+                )
+            })
+            .unwrap_or(p)
     }
 }

@@ -125,6 +125,12 @@ fn render_resources(
     // render items
     resource_groups
         .iter()
+        // run format on all resources
+        .map(|rg| {
+            let mut rg2 = rg.clone();
+            rg2.resources = rg2.resources.into_iter().map(|r| r.format(lang)).collect();
+            rg2
+        })
         .map(|rg| {
             let render = hb.render("resource", &rg).unwrap();
             (

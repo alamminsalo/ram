@@ -19,6 +19,10 @@ pub struct Config {
     #[serde(default)]
     pub paths: HashMap<String, String>,
 
+    // custom formatters, these are added to lang formatters
+    #[serde(default)]
+    pub format: HashMap<String, String>,
+
     /// Additional files to generate
     pub additional_files: Vec<AddFile>,
 }
@@ -46,8 +50,13 @@ impl Config {
     }
 
     pub fn get_lang(&self) -> Fallible<Lang> {
-        let lang = self.lang.as_ref().expect("no lang spec defined");
-        Lang::load_file(&lang)
+        let f = self.lang.as_ref().expect("no lang spec defined");
+        // load lang file
+        Lang::load_file(&f).and_then(|mut lang| {
+            // add custom formatters to lang formatters
+            lang.format.extend(self.format.clone());
+            Ok(lang)
+        })
     }
 
     pub fn get_rootpath(&self, lang: &Lang) -> String {
