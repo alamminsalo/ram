@@ -1,9 +1,6 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-#[macro_use] extern crate rocket;
-
 {{#each resources}}
-#[{{method}}("{{path}}")]
-fn {{name}}() -> String {
+#[{{lowercase method}}("{{path}}")]
+pub fn {{name}}() -> String {
   "".into()
 }
 {{/each}}

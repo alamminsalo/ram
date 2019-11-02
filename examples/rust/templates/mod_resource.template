@@ -1,0 +1,11 @@
+{{#each resource_groups}}
+mod {{r (snakecase name)}};
+{{/each}}
+{{#each resource_groups}}
+pub use {{r (snakecase name)}}::{
+  {{#each resources}}
+    {{name}}
+  {{/each}}
+};
+{{/each}}
+

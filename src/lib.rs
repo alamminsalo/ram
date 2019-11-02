@@ -31,7 +31,6 @@ pub fn generate_files(cfg: Config, spec: Spec) {
 
     println!("generating models...");
     let models = generate_models(&cfg, &lang, &spec);
-    dbg!(&models.iter().map(|m| &m.name).collect::<Vec<&String>>());
 
     // write models
     println!("writing models...");
@@ -57,13 +56,12 @@ pub fn generate_files(cfg: Config, spec: Spec) {
 
     // additional files
     if !lang.additional_files.is_empty() {
-        println!("writing additional files...");
+        println!("writing additional lang files...");
         let state = State {
             cfg,
             models,
             resource_groups,
         };
-        dbg!(&state.models.iter().map(|m| &m.name).collect::<Vec<&String>>());
         util::write_files_nopath(render_additional_files(&mut hb, &state, &lang));
     }
 
@@ -75,7 +73,7 @@ fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
     let mut rootpath = PathBuf::from(cfg.openapi.as_ref().expect("no openapi spec defined"));
     rootpath.pop();
     // iterate components + collected schemas and generate models
-    spec.collect_schemas(&rootpath)
+    util::collect_schemas(spec, &rootpath)
         .expect("failed to collect schemas")
         .iter()
         .map(|(key, schema)| Model::new(key, schema))
@@ -145,6 +143,7 @@ pub fn render_additional_files(
 ) -> HashMap<String, String> {
     lang.additional_files
         .iter()
+        .chain(state.cfg.additional_files.iter())
         .map(|f: &AddFile| {
             // get data from assets and render it
             let template = Assets::read_file(&f.template).unwrap();

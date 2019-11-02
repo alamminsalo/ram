@@ -1,4 +1,4 @@
-use super::Lang;
+use super::{AddFile, Lang};
 use failure::Fallible;
 use openapi::OpenApi;
 use serde::{Deserialize, Serialize};
@@ -18,6 +18,9 @@ pub struct Config {
 
     #[serde(default)]
     pub paths: HashMap<String, String>,
+
+    /// Additional files to generate
+    pub additional_files: Vec<AddFile>,
 }
 
 impl Config {
