@@ -1,0 +1,18 @@
+BEGIN;
+
+{{#each models}}
+{{#if is_object}}
+DROP TABLE IF EXISTS {{snakecase name}};
+CREATE TABLE {{snakecase name}} (
+  {{~#each fields}}
+  {{~#if is_array}}
+  {{snakecase name}} bigint {{#unless nullable}}NOT NULL{{/unless}} references {{snakecase name}}_{{snakecase items.name}}(id) {{ext "x-sql"}},
+  {{~else}}
+  {{snakecase name}} {{type}} {{#unless nullable}}NOT NULL{{/unless}} {{ext "x-sql"}},
+  {{~/if}}
+  {{/each}}
+);
+{{/if}}
+{{/each}}
+
+COMMIT;

@@ -1,0 +1,59 @@
+name: postgresql 
+
+# Dynamic formatting templates for things such as nullable types
+format:
+ # Array field format
+ array: "bigint {{type}}"
+ reserved: 'aaa{{value}}'
+
+paths:
+  root: db
+
+# Additional files to generate, optional
+# These files are given the complete application state for free templating usage
+additional_files:
+  - filename: "schema.sql"
+    template: "postgresql/schema.template"
+    in: root
+
+# primitive type mapping
+types:
+  integer:
+    alias:
+      - int
+    format:
+      default:
+        type: int
+      int32: 
+        type: int
+      int64: 
+        type: bigint
+
+  string:
+    format:
+      default:
+        type: text
+      email:
+        type: text
+      date:
+        type: date
+      date-time:
+        type: timestamp
+      binary:
+        type: bytea
+      byte:
+        type: bytea
+
+  number:
+    format:
+      default:
+        type: real
+      float:
+        type: real
+      double:
+        type: real
+
+
+reserved:
+  - timestamp
+  - number
