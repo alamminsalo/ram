@@ -1,4 +1,3 @@
-use super::util;
 use super::Lang;
 use itertools::Itertools;
 use openapi::v3_0::{Operation, PathItem};

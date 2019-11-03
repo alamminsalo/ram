@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -24,6 +24,7 @@ pub struct Config {
     pub format: HashMap<String, String>,
 
     /// Additional files to generate
+    #[serde(default)]
     pub additional_files: Vec<AddFile>,
 }
 
@@ -75,7 +76,11 @@ impl Config {
             .and_then(|p| Some(p.clone()))
             .or_else(|| Some(lang.default_path(path_key)))
             .unwrap();
-        Path::new(&root).join(&path).to_str().unwrap().to_string()
+        let mut p = PathBuf::from(&root);
+        if path_key != "root" {
+            p = p.join(&path);
+        }
+        p.to_str().unwrap().to_string()
     }
 
     // Returns template or language default

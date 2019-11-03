@@ -22,6 +22,7 @@ use std::path::{Path, PathBuf};
 pub fn generate_files(cfg: Config, spec: Spec) {
     println!("generating files...");
     let mut hb = util::handlebars();
+    let mut resource_groups = vec![];
 
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");
@@ -29,18 +30,19 @@ pub fn generate_files(cfg: Config, spec: Spec) {
     // add lang helpers to hb
     lang.add_helpers(&mut hb);
 
-    println!("generating models...");
     let models = generate_models(&cfg, &lang, &spec);
 
-    // write models
-    println!("writing models...");
-    let models_path = cfg.get_path("model", &lang);
-    util::write_files(
-        Path::new(&models_path),
-        render_models(&mut hb, &cfg, &lang, &models),
-    );
+    if lang.templates.contains_key("model") {
+        println!("generating models...");
 
-    let mut resource_groups = vec![];
+        // write models
+        println!("writing models...");
+        let models_path = cfg.get_path("model", &lang);
+        util::write_files(
+            Path::new(&models_path),
+            render_models(&mut hb, &cfg, &lang, &models),
+        );
+    }
 
     // write resources
     if cfg.templates.contains_key("resource") {

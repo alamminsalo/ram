@@ -1,24 +1,27 @@
 use super::assets::Assets;
 use super::util;
 use super::Model;
-use failure::{format_err, Fallible};
+use failure::Fallible;
 use handlebars::*;
 use itertools::Itertools;
 use maplit::hashmap;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Lang {
     pub name: String,
+    #[serde(default)]
     pub types: HashMap<String, Type>,
     #[serde(default)]
     pub format: HashMap<String, String>,
     #[serde(default)]
     pub additional_files: Vec<AddFile>,
+    #[serde(default)]
     pub paths: HashMap<String, String>,
+    #[serde(default)]
     pub templates: HashMap<String, String>,
     #[serde(default)]
     pub reserved: Vec<String>,
@@ -94,18 +97,18 @@ impl Lang {
             _ => {
                 let mut map = HashMap::new();
                 map.insert("value", value.as_str());
-                self.format_map(template_key, &map)
+                Ok(self.format_map(template_key, &map))
             }
         }
     }
 
-    pub fn format_map(&self, template_key: &str, map: &HashMap<&str, &str>) -> Fallible<String> {
+    pub fn format_map(&self, template_key: &str, map: &HashMap<&str, &str>) -> String {
         let mut hb = util::handlebars();
         self.add_helpers(&mut hb);
         self.format
             .get(template_key)
             .and_then(|template| hb.render_template(template, map).ok())
-            .ok_or(format_err!("failed to format template {}", template_key))
+            .unwrap_or_else(|| map.get("value").unwrap().to_string())
     }
 
     /*
@@ -173,7 +176,6 @@ impl Lang {
             "array",
             &hashmap!["type" => child.r#type.as_str(), "name" => m.name.as_str()],
         )
-        .expect("no array formatter defined!")
     }
 
     // returns translated primitive type
@@ -259,7 +261,6 @@ impl Lang {
                         .skip(1) // leave out preceding '/', which is in the standard
                         .map(|part| part.to_str().unwrap())
                         .map(|part| {
-                            dbg!(&part);
                             if let Some(cap) = re.captures_iter(part).next() {
                                 self.format("pathparam", &cap[1].to_owned())
                                     .unwrap_or(part.to_string())
