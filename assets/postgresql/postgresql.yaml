@@ -4,7 +4,7 @@ name: postgresql
 format:
  # Array field format
  array: "bigint {{type}}"
- reserved: 'aaa{{value}}'
+ reserved: '"{{value}}"'
 
 paths:
   root: db
