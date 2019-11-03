@@ -1,4 +1,4 @@
-name: javascript
+name: go
 
 # Dynamic formatting templates for things such as nullable types
 format:
