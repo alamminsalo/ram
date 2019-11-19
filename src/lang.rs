@@ -8,7 +8,7 @@ use maplit::hashmap;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Lang {
@@ -48,17 +48,19 @@ pub struct Format {
 }
 
 impl Lang {
-    pub fn load_file(path: &str) -> Fallible<Self> {
+    pub fn load_file(path: &Path) -> Fallible<Self> {
         let data = {
-            let mut path = path.to_string();
-            // naive check if lang spec is not a file path
-            // if not, assume it's one of the built-in lang specs
-            if !path.contains("/") {
+            let mut path = path.to_owned();
+            // if not file, assume it's one of the built-in lang specs
+            if !path.is_file() {
                 // load from assets
-                path = format!("{lang}/{lang}.yaml", lang = &path);
+                path = PathBuf::from(&format!(
+                    "{lang}/{lang}.yaml",
+                    lang = &path.to_str().unwrap()
+                ));
             }
 
-            Assets::read_file(&path)?
+            Assets::read_file(&PathBuf::from(&path))?
         };
 
         let ext = Path::new(path)
@@ -74,18 +76,22 @@ impl Lang {
         Ok(lang)
     }
 
-    pub fn default_path(&self, path: &str) -> String {
-        self.paths
-            .get(path)
-            .expect(&format!("failed to find default path: {}", path))
-            .clone()
+    pub fn default_path(&self, path: &str) -> PathBuf {
+        PathBuf::from(
+            &self
+                .paths
+                .get(path)
+                .expect(&format!("failed to find default path: {}", path)),
+        )
     }
 
-    pub fn default_template(&self, path: &str) -> String {
-        self.templates
-            .get(path)
-            .expect(&format!("failed to find default template: {}", path))
-            .clone()
+    pub fn default_template(&self, path: &str) -> PathBuf {
+        PathBuf::from(
+            &self
+                .templates
+                .get(path)
+                .expect(&format!("failed to find default template: {}", path)),
+        )
     }
 
     /*

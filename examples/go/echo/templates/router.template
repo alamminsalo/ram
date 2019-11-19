@@ -1,0 +1,14 @@
+package api
+
+import (
+  "github.com/labstack/echo"
+)
+
+func AddRouter(e *echo.Echo) *echo.Echo {
+  {{#each resource_groups}}
+  {{#each resources}}
+  e.{{uppercase method}}("{{path}}", {{name}})
+  {{/each}}
+  {{/each}}
+  return e
+}

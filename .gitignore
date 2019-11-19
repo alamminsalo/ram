@@ -3,4 +3,5 @@
 /examples/rust/src/models
 /examples/rust/src/api
 /examples/rust/target
-/examples/go/models
+/examples/go/**/model
+/examples/go/**/api

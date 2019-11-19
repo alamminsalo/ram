@@ -1,0 +1,12 @@
+package api
+
+import (
+  "github.com/labstack/echo"
+)
+
+{{#each resources}}
+// {{uppercase method}} {{path}}
+func {{name}}(c echo.Context) error {
+  return c.NoContent(501)
+}
+{{/each}}

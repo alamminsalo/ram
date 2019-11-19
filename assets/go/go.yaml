@@ -17,8 +17,7 @@ templates:
 
 # default file paths
 paths:
-  root: ""
-  model: "models"
+  model: "model"
 
 # primitive type mapping
 types:

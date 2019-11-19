@@ -24,6 +24,7 @@ regex = "*"
 rust-embed = "5.1.0"
 serde_json = "1.0.40"
 serde_yaml = "0.8.9"
+structopt = "*"
 
 [dependencies.openapi]
 branch = "ram"

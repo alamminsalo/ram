@@ -19,10 +19,27 @@ use openapi::v3_0::Spec;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-pub fn generate_files(cfg: Config, spec: Spec) {
+pub fn generate_models_v3(spec: &Spec, rootpath: &Path) -> Vec<Model> {
+    // iterate components + collected schemas and generate models
+    util::collect_schemas(spec, rootpath)
+        .expect("failed to collect schemas")
+        .iter()
+        .map(|(key, schema)| Model::new(key, schema))
+        .collect()
+}
+
+pub fn generate_resources_v3(spec: &Spec) -> Vec<ResourceGroup> {
+    resource::group_resources(&spec.paths, GroupingStrategy::FirstTag)
+}
+
+pub fn generate_files(
+    cfg: Config,
+    mut models: Vec<Model>,
+    mut resource_groups: Vec<ResourceGroup>,
+    output: &Path, // output folder
+) {
     println!("generating files...");
     let mut hb = util::handlebars();
-    let mut resource_groups = vec![];
 
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");
@@ -30,7 +47,9 @@ pub fn generate_files(cfg: Config, spec: Spec) {
     // add lang helpers to hb
     lang.add_helpers(&mut hb);
 
-    let models = generate_models(&cfg, &lang, &spec);
+    // translate and format models and resource groups
+    models = translate_models(&lang, models);
+    resource_groups = format_resource_groups(&lang, resource_groups);
 
     if lang.templates.contains_key("model") {
         println!("generating models...");
@@ -39,7 +58,7 @@ pub fn generate_files(cfg: Config, spec: Spec) {
         println!("writing models...");
         let models_path = cfg.get_path("model", &lang);
         util::write_files(
-            Path::new(&models_path),
+            &output.join(&models_path),
             render_models(&mut hb, &cfg, &lang, &models),
         );
     }
@@ -47,39 +66,46 @@ pub fn generate_files(cfg: Config, spec: Spec) {
     // write resources
     if cfg.templates.contains_key("resource") {
         println!("generating resource groups...");
-        resource_groups = resource::group_resources(&spec.paths, GroupingStrategy::FirstTag);
         println!("writing resources...");
         let resources_path = cfg.get_path("resource", &lang);
         util::write_files(
-            Path::new(&resources_path),
+            &output.join(&resources_path),
             render_resources(&mut hb, &cfg, &lang, &resource_groups),
         );
     }
 
     // additional files
-    if !lang.additional_files.is_empty() {
+    let additional_files: Vec<AddFile> = cfg.get_additional_files(&lang);
+    if !additional_files.is_empty() {
         println!("writing additional lang files...");
         let state = State {
             cfg,
             models,
             resource_groups,
         };
-        util::write_files_nopath(render_additional_files(&mut hb, &state, &lang));
+        util::write_files(
+            &output,
+            render_additional_files(&mut hb, &state, &lang, additional_files),
+        );
     }
 
     println!("generation OK")
 }
 
-fn generate_models(cfg: &Config, lang: &Lang, spec: &Spec) -> Vec<Model> {
-    // get openapi dir path
-    let mut rootpath = PathBuf::from(cfg.openapi.as_ref().expect("no openapi spec defined"));
-    rootpath.pop();
-    // iterate components + collected schemas and generate models
-    util::collect_schemas(spec, &rootpath)
-        .expect("failed to collect schemas")
-        .iter()
-        .map(|(key, schema)| Model::new(key, schema))
-        .map(|m| lang.translate(m))
+fn translate_models(lang: &Lang, models: Vec<Model>) -> Vec<Model> {
+    // runs lang translations on all models
+    models.into_iter().map(|m| lang.translate(m)).collect()
+}
+
+fn format_resource_groups(lang: &Lang, resource_groups: Vec<ResourceGroup>) -> Vec<ResourceGroup> {
+    resource_groups
+        .into_iter()
+        // run format on all resources
+        .map(|rg| {
+            let mut rg2 = rg.clone();
+            rg2.resources = rg2.resources.into_iter().map(|r| r.format(lang)).collect();
+            rg2
+        })
         .collect()
 }
 
@@ -93,7 +119,7 @@ fn render_models(
     let template_path = cfg.get_template("model", &lang);
 
     // get data from assets and compile it
-    let data = Assets::read_file(&template_path).unwrap();
+    let data = Assets::read_file(&PathBuf::from(&template_path)).unwrap();
     hb.register_template_string("model", &data)
         .expect("failed to compile models template");
 
@@ -120,19 +146,14 @@ fn render_resources(
     let template_path = cfg.get_template("resource", &lang);
 
     // get data from assets and compile it
-    let data = Assets::read_file(&template_path).unwrap();
+    let data = Assets::read_file(&PathBuf::from(&template_path)).unwrap();
+
     hb.register_template_string("resource", &data)
         .expect("failed to compile models template");
 
     // render items
     resource_groups
         .iter()
-        // run format on all resources
-        .map(|rg| {
-            let mut rg2 = rg.clone();
-            rg2.resources = rg2.resources.into_iter().map(|r| r.format(lang)).collect();
-            rg2
-        })
         .map(|rg| {
             let render = hb.render("resource", &rg).unwrap();
             (
@@ -144,17 +165,17 @@ fn render_resources(
 }
 
 // Renders extra files
-pub fn render_additional_files(
+fn render_additional_files(
     hb: &mut Handlebars,
     state: &State,
     lang: &Lang,
+    additional_files: Vec<AddFile>,
 ) -> HashMap<String, String> {
-    lang.additional_files
-        .iter()
-        .chain(state.cfg.additional_files.iter())
-        .map(|f: &AddFile| {
+    additional_files
+        .into_iter()
+        .map(|f: AddFile| {
             // get data from assets and render it
-            let template = Assets::read_file(&f.template).unwrap();
+            let template = Assets::read_file(&PathBuf::from(&f.template)).unwrap();
             let render = hb
                 .render_template(&template, &state)
                 .expect("failed to render additional file template");

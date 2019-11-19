@@ -21,35 +21,37 @@ fn ignore_patterns() -> Vec<Pattern> {
 }
 
 // writes files in map
-pub fn write_files(path: &Path, map: HashMap<String, String>) {
+pub fn write_files(root: &Path, map: HashMap<String, String>) {
     let ignored = ignore_patterns();
-    // make sure directory exists
-    fs::create_dir_all(path).expect("failed to create directory");
     for (file, data) in map.iter() {
-        let path = path.join(&file);
+        let path = root.join(&file);
         if ignored.iter().any(|p| p.matches_path(&path)) {
             println!("ignoring file {}", path.to_str().unwrap_or(""));
             continue;
         }
+        println!("writing {}", &path.to_str().unwrap());
+        // create dirs if needed
+        fs::create_dir_all(path.parent().expect("failed to get parent dir"))
+            .expect("failed to create directory");
         fs::write(path, data).expect(&format!("failed to write file {}", &file));
     }
 }
 
-pub fn write_files_nopath(map: HashMap<String, String>) {
-    let ignored = ignore_patterns();
-    for (file, data) in map.iter() {
-        let mut path = PathBuf::from(file);
-        if ignored.iter().any(|p| p.matches_path(&path)) {
-            println!("ignoring file {}", path.to_str().unwrap_or(""));
-            continue;
-        }
-        // create directory from file path
-        path.pop();
-        fs::create_dir_all(path).expect("failed to create directory");
-        // write file
-        fs::write(file, data).expect(&format!("failed to write file {}", &file));
-    }
-}
+//pub fn write_files_nopath(rootpath: &Path, map: HashMap<String, String>) {
+//    let ignored = ignore_patterns();
+//    for (file, data) in map.iter() {
+//        let mut path = rootpath.join(file);
+//        if ignored.iter().any(|p| p.matches_path(&path)) {
+//            println!("ignoring file {}", path.to_str().unwrap_or(""));
+//            continue;
+//        }
+//        // create directory from file path
+//        path.pop();
+//        fs::create_dir_all(path).expect("failed to create directory");
+//        // write file
+//        fs::write(file, data).expect(&format!("failed to write file {}", &file));
+//    }
+//}
 
 // Returns model name from ref path
 pub fn model_name_from_ref(ref_path: &str) -> Option<String> {
