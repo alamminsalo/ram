@@ -1,0 +1,5 @@
+# Example ram config file
+
+# Target lang spec
+# Can be file or built-in yaml spec
+lang: "go"

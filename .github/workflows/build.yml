@@ -33,8 +33,14 @@ jobs:
       with:
         go-version: 1.12
 
-    - name: Generate Go
+    - name: Generate Go (models only)
       run: |
-        cd examples/go 
-        ram
-        go run main.go
+        ram -c examples/go/models_only/config.yaml -i examples/openapi/farm.yaml -o examples/go/models_only
+        cd examples/go/models_only
+        go build
+
+    - name: Generate Go (Echo server)
+      run: |
+        ram -c examples/go/echo/config.yaml -i examples/openapi/farm.yaml -o examples/go/echo
+        cd examples/go/echo
+        go build

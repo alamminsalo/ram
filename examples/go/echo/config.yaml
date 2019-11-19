@@ -1,0 +1,19 @@
+# [Echo](https://echo.labstack.com/) server config for ram
+
+# Target lang spec
+# Can be file or built-in yaml spec
+lang: go
+
+format:
+  pathparam: ":{{value}}"
+
+templates:
+  resource: templates/resource.template
+
+additional_files:
+  - filename: router.go
+    template: templates/router.template
+    in: resource
+
+paths:
+  resource: api
