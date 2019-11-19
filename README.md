@@ -87,7 +87,7 @@ Includes some built-in [custom helpers](https://handlebars-draft.knappi.org/guid
 * camelcase - camelCase
 * kebabcase - kebab-case
 * r - Formats reserved keywords according to language spec (Rust example: type -> r#type). Kept short for convenience.
-* ext - Places extension value (eg. With definition `x-go-custom-tag: json:"-"`, `{{ext "x-go-custom-tag}}"` => `json:"-"`)
+* ext - Places extension value (eg. With definition `x-go-custom-tag: json:"-"`, `{{ext "x-go-custom-tag"}}` => `json:"-"`)
 ```
 
 ## Ignoring files
