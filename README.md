@@ -102,7 +102,7 @@ src/some/**/*.rs
 
 ## TODO:
 * Implement more formatting helpers
-* Implement API generation from openapi paths-section
+* Implement resource param support
 * Add more lang-specs for most used languages
 * Test suite
 * Document template context objects
