@@ -1,18 +1,47 @@
 BEGIN;
 
-{{#each models}}
-{{#if is_object}}
+{{!-- loop all structs --}}
+{{~#each models}}
+{{~#if is_object}}
 DROP TABLE IF EXISTS {{snakecase name}};
 CREATE TABLE {{snakecase name}} (
   {{~#each fields}}
-  {{~#if is_array}}
-  {{r (snakecase name)}} bigint {{#unless nullable}}NOT NULL{{/unless}} references {{snakecase name}}_{{snakecase items.name}}(id) {{ext "x-sql"}},
+  {{~#if is_object}}
+  {{~#unless @first}},{{/unless}}
+  {{r (snakecase name)}} int {{#unless nullable}}NOT NULL{{/unless}} {{ext "x-sql"}}
   {{~else}}
-  {{r (snakecase name)}} {{type}} {{#unless nullable}}NOT NULL{{/unless}} {{ext "x-sql"}},
+  {{~#unless is_array}}
+  {{~#unless @first}},{{~/unless~}}
+  {{r (snakecase name)}} {{type}} {{#unless nullable}}NOT NULL{{/unless}} {{ext "x-sql"}}
+  {{~/unless}}
   {{~/if}}
   {{/each}}
 );
-{{/if}}
-{{/each}}
+{{~/if}}
+{{~/each}}
+
+{{!-- loop all objects and array fields again and make FK constraints and m2m tables --}}
+{{~#each models}}
+{{~#if is_object}}
+  {{~#each fields}}
+  {{!-- make m2m tables and set up foreign keys --}}
+  {{~#if is_array}}
+DROP TABLE IF EXISTS {{snakecase ../name}}_{{snakecase items.name}};
+CREATE TABLE {{snakecase ../name}}_{{snakecase items.name}} (
+  {{r (snakecase ../name)}}_id bigint NOT NULL references {{snakecase ../name}}(id) {{ext "x-sql"}},
+  {{r (snakecase items.name)}}_id bigint NOT NULL references {{snakecase name}}(id) {{ext "x-sql"}},
+  PRIMARY KEY ({{r (snakecase ../name)}}_id, {{r (snakecase items.name)}}_id)
+);
+  {{else}}
+  {{!-- add foreign key between two tables --}}
+  {{~#if is_object}}
+ALTER TABLE {{r (snakecase ../name)}} DROP CONSTRAINT IF EXISTS fk_{{r (snakecase ../name)}}_{{r (snakecase name)}};
+ALTER TABLE {{r (snakecase ../name)}} 
+ADD CONSTRAINT fk_{{r (snakecase ../name)}}_{{r (snakecase name)}} FOREIGN KEY ({{r (snakecase name)}}) REFERENCES {{snakecase type}}(id) {{ext "x-sql"}};
+  {{~/if}}
+  {{~/if}}
+  {{/each}}
+{{~/if}}
+{{~/each}}
 
 COMMIT;

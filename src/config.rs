@@ -1,3 +1,4 @@
+use super::util;
 use super::{AddFile, Lang};
 use failure::Fallible;
 use serde::{Deserialize, Serialize};
@@ -49,8 +50,14 @@ impl Config {
 
     pub fn get_lang(&self) -> Fallible<Lang> {
         let f = self.lang.as_ref().expect("no lang spec defined");
+
+        // if file has extension set, assume its a path to file and join path
+        let mut path = PathBuf::from(f);
+        if path.extension().is_some() {
+            path = util::join_relative(&self.path, &path);
+        }
         // load lang file
-        Lang::load_file(&PathBuf::from(f)).and_then(|mut lang| {
+        Lang::load_file(&path).and_then(|mut lang| {
             // add custom formatters to lang formatters
             lang.format.extend(self.format.clone());
             Ok(lang)
@@ -70,17 +77,9 @@ impl Config {
     pub fn get_template(&self, path_key: &str, lang: &Lang) -> PathBuf {
         self.templates
             .get(path_key)
-            .and_then(|t| Some(self.join_path(&PathBuf::from(&t))))
+            .and_then(|t| Some(util::join_relative(&self.path, &PathBuf::from(&t))))
             .or_else(|| Some(lang.default_template(path_key)))
             .unwrap()
-    }
-
-    fn join_path(&self, p: &Path) -> PathBuf {
-        if p.is_relative() {
-            self.path.join(p)
-        } else {
-            PathBuf::from(p)
-        }
     }
 
     pub fn get_additional_files(&self, lang: &Lang) -> Vec<AddFile> {
@@ -89,7 +88,10 @@ impl Config {
             .cloned()
             .chain(self.additional_files.iter().map(|f: &AddFile| {
                 // join relative cfg path
-                let template = self.path.join(&f.template).to_str().unwrap().to_owned();
+                let template = util::join_relative(&self.path, &PathBuf::from(&f.template))
+                    .to_str()
+                    .unwrap()
+                    .to_owned();
                 AddFile {
                     template,
                     ..f.clone()

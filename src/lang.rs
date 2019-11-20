@@ -12,6 +12,9 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Lang {
+    #[serde(skip)]
+    pub path: PathBuf,
+
     pub name: String,
     #[serde(default)]
     pub types: HashMap<String, Type>,
@@ -49,29 +52,35 @@ pub struct Format {
 
 impl Lang {
     pub fn load_file(path: &Path) -> Fallible<Self> {
+        let mut pathbuf = path.to_owned();
         let data = {
-            let mut path = path.to_owned();
-            // if not file, assume it's one of the built-in lang specs
-            if !path.is_file() {
+            // if no extension, assume its one of the built-in specs
+            if path.extension().is_none() {
                 // load from assets
-                path = PathBuf::from(&format!(
+                pathbuf = PathBuf::from(&format!(
                     "{lang}/{lang}.yaml",
                     lang = &path.to_str().unwrap()
                 ));
             }
 
-            Assets::read_file(&PathBuf::from(&path))?
+            Assets::read_file(&PathBuf::from(&pathbuf))?
         };
 
-        let ext = Path::new(path)
+        let ext = path
             .extension()
             .and_then(std::ffi::OsStr::to_str)
             .unwrap_or("yaml");
 
-        let lang: Self = match ext {
+        let mut lang: Self = match ext {
             "yaml" | "yml" => serde_yaml::from_str(&data)?,
             "json" | _ => serde_json::from_str(&data)?,
         };
+
+        // set lang spec path
+        lang.path = pathbuf
+            .parent()
+            .expect("failed to get lang parent dir")
+            .to_owned();
 
         Ok(lang)
     }
@@ -90,6 +99,7 @@ impl Lang {
             &self
                 .templates
                 .get(path)
+                .map(|p| util::join_relative(&self.path, &PathBuf::from(&p)))
                 .expect(&format!("failed to find default template: {}", path)),
         )
     }

@@ -237,3 +237,12 @@ fn iter_ref_paths<'a>(schema: &'a Schema) -> Box<dyn Iterator<Item = &'a String>
             ),
     )
 }
+
+// joins a + b if b is relative path, otherwise returns b
+pub fn join_relative(a: &Path, b: &Path) -> PathBuf {
+    if b.is_relative() {
+        a.join(b)
+    } else {
+        PathBuf::from(b)
+    }
+}
