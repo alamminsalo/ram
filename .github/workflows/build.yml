@@ -22,11 +22,11 @@ jobs:
     - name: Install bin
       run: cargo install --path .
 
-    - name: Generate Rust
-      run: |
-        cd examples/rust 
-        ram
-        cargo build
+    #- name: Generate Rust
+    #  run: |
+    #    cd examples/rust 
+    #    ram
+    #    cargo build
 
     - name: Setup Go
       uses: actions/setup-go@v1
