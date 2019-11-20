@@ -43,4 +43,5 @@ jobs:
       run: |
         ram -c examples/go/echo/config.yaml -i examples/openapi/farm.yaml -o examples/go/echo
         cd examples/go/echo
+        go get -u github.com/labstack/echo/...
         go build
