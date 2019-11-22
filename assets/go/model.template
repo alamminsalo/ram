@@ -1,14 +1,10 @@
 package model
 
-{{#if has_date}}
+{{#if has_datetime}}
 import (
   "time"
 )
-{{else}}{{#if has_datetime}}
-import (
-  "time"
-)
-{{/if}}{{/if}}
+{{/if}}
 
 {{#if is_object}}
 type {{pascalcase name}} struct {
