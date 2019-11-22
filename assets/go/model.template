@@ -9,7 +9,7 @@ import (
 {{#if is_object}}
 type {{pascalcase name}} struct {
 {{#each fields}}
-  {{ pascalcase name }} {{ type }} `json:"{{ snakecase name }}" {{ ext "x-go-custom-tag" }}`
+  {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ ext "x-go-custom-tag" }}`
 {{/each}}
 {{#if additional_fields}}
 {{#with additional_fields}}
