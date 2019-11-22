@@ -39,7 +39,7 @@ types:
       email:
         type: string
       date:
-        type: time.Time
+        type: string
       date-time:
         type: time.Time
       binary:
