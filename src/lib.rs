@@ -3,6 +3,7 @@ mod config;
 mod helper;
 mod lang;
 mod model;
+mod param;
 mod resource;
 mod state;
 mod util;
@@ -11,6 +12,7 @@ use assets::Assets;
 pub use config::Config;
 pub use lang::{AddFile, Lang};
 pub use model::Model;
+pub use param::Param;
 pub use resource::{GroupingStrategy, Resource, ResourceGroup};
 pub use state::State;
 
@@ -49,11 +51,9 @@ pub fn generate_files(
 
     // translate and format models and resource groups
     models = translate_models(&lang, models);
-    resource_groups = format_resource_groups(&lang, resource_groups);
+    resource_groups = translate_resource_groups(&lang, resource_groups);
 
     if lang.templates.contains_key("model") {
-        println!("generating models...");
-
         // write models
         println!("writing models...");
         let models_path = cfg.get_path("model", &lang);
@@ -65,7 +65,7 @@ pub fn generate_files(
 
     // write resources
     if cfg.templates.contains_key("resource") {
-        println!("generating resource groups...");
+        // translate resource params
         println!("writing resources...");
         let resources_path = cfg.get_path("resource", &lang);
         util::write_files(
@@ -97,13 +97,20 @@ fn translate_models(lang: &Lang, models: Vec<Model>) -> Vec<Model> {
     models.into_iter().map(|m| lang.translate(m)).collect()
 }
 
-fn format_resource_groups(lang: &Lang, resource_groups: Vec<ResourceGroup>) -> Vec<ResourceGroup> {
+fn translate_resource_groups(
+    lang: &Lang,
+    resource_groups: Vec<ResourceGroup>,
+) -> Vec<ResourceGroup> {
     resource_groups
         .into_iter()
         // run format on all resources
         .map(|rg| {
             let mut rg2 = rg.clone();
-            rg2.resources = rg2.resources.into_iter().map(|r| r.format(lang)).collect();
+            rg2.resources = rg2
+                .resources
+                .into_iter()
+                .map(|r| r.translate(lang))
+                .collect();
             rg2
         })
         .collect()
@@ -155,7 +162,34 @@ fn render_resources(
     resource_groups
         .iter()
         .map(|rg| {
-            let render = hb.render("resource", &rg).unwrap();
+            // translates param models
+            let tr_params = |params: Vec<Param>| {
+                params
+                    .into_iter()
+                    .map(|p| Param {
+                        model: lang.translate(p.model),
+                        ..p
+                    })
+                    .collect()
+            };
+            let resources: Vec<Resource> = rg
+                .resources
+                .iter()
+                .cloned()
+                .map(|resource| Resource {
+                    query_params: tr_params(resource.query_params),
+                    path_params: tr_params(resource.path_params),
+                    ..resource
+                })
+                .collect();
+
+            let resourcegroup = ResourceGroup {
+                name: rg.name.clone(),
+                grouping_strategy: rg.grouping_strategy,
+                resources,
+            };
+
+            let render = hb.render("resource", &resourcegroup).unwrap();
             (
                 lang.format("filename", &rg.name).unwrap(),
                 htmlescape::decode_html(&render).unwrap(),

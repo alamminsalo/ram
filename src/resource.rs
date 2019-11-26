@@ -1,3 +1,4 @@
+use super::param::{get_params, Param};
 use super::Lang;
 use itertools::Itertools;
 use openapi::v3_0::{Operation, PathItem};
@@ -20,6 +21,12 @@ pub struct Resource {
 
     /// Resource description
     pub description: Option<String>,
+
+    /// Path params
+    pub path_params: Vec<Param>,
+
+    /// Query params
+    pub query_params: Vec<Param>,
 }
 
 impl Resource {
@@ -34,14 +41,29 @@ impl Resource {
                 .clone(),
             summary: op.summary.clone(),
             description: op.description.clone(),
+            path_params: get_params(op, "path"),
+            query_params: get_params(op, "query"),
         }
     }
 
-    pub fn format(&self, lang: &Lang) -> Resource {
-        let s = self.clone();
+    pub fn translate(self, lang: &Lang) -> Resource {
+        // translates param models
+        let tr_params = |params: Vec<Param>| {
+            params
+                .into_iter()
+                .map(|p| Param {
+                    model: lang.translate(p.model),
+                    ..p
+                })
+                .collect()
+        };
+
         Resource {
-            path: lang.format_path(s.path),
-            ..s
+            // also formats path
+            path: lang.format_path(self.path),
+            query_params: tr_params(self.query_params),
+            path_params: tr_params(self.path_params),
+            ..self
         }
     }
 }
