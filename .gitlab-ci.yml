@@ -5,10 +5,6 @@ stages:
   - build
   - test-generate
 
-# Adds target bin folder to path
-variables:
-  PATH: $PATH:$CI_PROJECT_DIR/target/release
-
 build:
   image: rust:1.39-stretch
   stage: build 
@@ -29,7 +25,7 @@ rust-rocket:
   stage: test-generate
   image: rust:nightly
   script:
-    - ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/src
+    - target/release/ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/src
     - cd examples/rust/rocket
     - cargo build
 
@@ -37,7 +33,7 @@ rust-actix:
   stage: test-generate
   image: rust:1.39-stretch
   script:
-    - ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/src
+    - target/release/ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/src
     - cd examples/rust/actix
     - cargo build
 
@@ -45,7 +41,7 @@ go-models:
   stage: test-generate
   image: golang:1.13
   script:
-    - ram -c examples/go/models_only/config.yaml -i examples/openapi/farm.yaml -o examples/go/models_only
+    - target/release/ram -c examples/go/models_only/config.yaml -i examples/openapi/farm.yaml -o examples/go/models_only
     - cd examples/go/models_only
     - go build
 
@@ -53,7 +49,7 @@ go-echo:
   stage: test-generate
   image: golang:1.13
   script:
-    - ram -c examples/go/echo/config.yaml -i examples/openapi/farm.yaml -o examples/go/echo
+    - target/release/ram -c examples/go/echo/config.yaml -i examples/openapi/farm.yaml -o examples/go/echo
     - cd examples/go/echo
     - go get -u github.com/labstack/echo/...
     - go build
