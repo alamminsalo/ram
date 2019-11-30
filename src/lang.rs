@@ -104,6 +104,20 @@ impl Lang {
         )
     }
 
+    // Returns vec of additional files, with joined relative paths
+    pub fn additional_files_relative(&self) -> Vec<AddFile> {
+        self.additional_files
+            .iter()
+            .map(|af| AddFile {
+                template: util::join_relative(&self.path, &PathBuf::from(&af.template))
+                    .to_str()
+                    .unwrap()
+                    .into(),
+                ..af.clone()
+            })
+            .collect()
+    }
+
     /*
      * Formatter functions
      */

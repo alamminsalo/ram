@@ -1,9 +1,9 @@
-use super::param::{get_params, Param};
+use super::param::{get_params_operation, get_params_path, Param};
 use super::Lang;
 use itertools::Itertools;
-use openapi::v3_0::{Operation, PathItem};
+use openapi::v3_0::{Operation, Parameter, PathItem};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Resource {
@@ -30,7 +30,18 @@ pub struct Resource {
 }
 
 impl Resource {
-    pub fn new(path: &str, method: &str, op: &Operation) -> Resource {
+    pub fn new(
+        path: &str,
+        method: &str,
+        op: &Operation,
+        parameters: &HashMap<String, Parameter>,
+        mut path_params: Vec<Param>,
+        mut query_params: Vec<Param>,
+    ) -> Resource {
+        // extend route params with local method params
+        path_params.extend(get_params_operation(op, "path", parameters));
+        query_params.extend(get_params_operation(op, "query", parameters));
+
         Resource {
             path: path.into(),
             method: method.into(),
@@ -41,13 +52,12 @@ impl Resource {
                 .clone(),
             summary: op.summary.clone(),
             description: op.description.clone(),
-            path_params: get_params(op, "path"),
-            query_params: get_params(op, "query"),
+            path_params,
+            query_params,
         }
     }
 
     pub fn translate(self, lang: &Lang) -> Resource {
-        // translates param models
         let tr_params = |params: Vec<Param>| {
             params
                 .into_iter()
@@ -90,30 +100,83 @@ pub enum GroupingStrategy {
 pub fn group_resources(
     paths: &BTreeMap<String, PathItem>,
     grouping_strategy: GroupingStrategy,
+    parameters: &HashMap<String, Parameter>,
 ) -> Vec<ResourceGroup> {
     let iter = paths.iter().flat_map(|(path, item)| {
+        let path_params = get_params_path(item, "path", parameters);
+        let query_params = get_params_path(item, "query", parameters);
         vec![
-            (path.clone(), "GET", item.get.as_ref()),
-            (path.clone(), "PUT", item.put.as_ref()),
-            (path.clone(), "POST", item.post.as_ref()),
-            (path.clone(), "DELETE", item.delete.as_ref()),
-            (path.clone(), "OPTIONS", item.options.as_ref()),
-            (path.clone(), "HEAD", item.head.as_ref()),
-            (path.clone(), "PATCH", item.patch.as_ref()),
-            (path.clone(), "TRACE", item.trace.as_ref()),
+            (
+                path.clone(),
+                "GET",
+                item.get.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
+            (
+                path.clone(),
+                "PUT",
+                item.put.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
+            (
+                path.clone(),
+                "POST",
+                item.post.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
+            (
+                path.clone(),
+                "DELETE",
+                item.delete.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
+            (
+                path.clone(),
+                "OPTIONS",
+                item.options.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
+            (
+                path.clone(),
+                "HEAD",
+                item.head.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
+            (
+                path.clone(),
+                "PATCH",
+                item.patch.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
+            (
+                path.clone(),
+                "TRACE",
+                item.trace.as_ref(),
+                path_params.clone(),
+                query_params.clone(),
+            ),
         ]
         .into_iter()
-        .filter_map(|(path, method, op)| op.and_then(|op| Some((path, method, op))))
+        .filter_map(|(path, method, op, path_params, query_params)| {
+            op.and_then(|op| Some((path, method, op, path_params, query_params)))
+        })
     });
     let strat_iter = match grouping_strategy {
         GroupingStrategy::FirstTag => iter
-            .filter_map(|(path, method, op)| {
+            .filter_map(|(path, method, op, path_params, query_params)| {
                 op.tags
                     .as_ref()
                     .and_then(|tags| tags.get(0))
-                    .and_then(|tag| Some((path, method, op, tag)))
+                    .and_then(|tag| Some((path, method, op, tag, path_params, query_params)))
             })
-            .group_by(|(_, _, _, tag)| tag.clone()),
+            .group_by(|(_, _, _, tag, _, _)| tag.clone()),
         _ => panic!("not implemented"),
     };
 
@@ -124,7 +187,16 @@ pub fn group_resources(
             name: key.into(),
             resources: group
                 .into_iter()
-                .map(|(path, method, op, _)| Resource::new(path.as_str(), method, op))
+                .map(|(path, method, op, _, path_params, query_params)| {
+                    Resource::new(
+                        path.as_str(),
+                        method,
+                        op,
+                        parameters,
+                        path_params,
+                        query_params,
+                    )
+                })
                 .collect(),
             grouping_strategy,
         })

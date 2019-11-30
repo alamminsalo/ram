@@ -1,7 +1,7 @@
 /target
 **/*.rs.bk
-/examples/rust/src/models
-/examples/rust/src/api
-/examples/rust/target
+/examples/rust/**/model
+/examples/rust/**/api
+/examples/rust/**/target
 /examples/go/**/model
 /examples/go/**/api

@@ -1,6 +1,0 @@
-{{#each resources}}
-#[{{lowercase method}}("{{path}}")]
-pub fn {{name}}() -> String {
-  "".into()
-}
-{{/each}}

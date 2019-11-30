@@ -3,7 +3,7 @@ use failure::Fallible;
 use glob::Pattern;
 use handlebars::Handlebars;
 use itertools::Itertools;
-use openapi::v3_0::{ObjectOrReference, Schema, Spec};
+use openapi::v3_0::{ObjectOrReference, Parameter, Schema, Spec};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -78,63 +78,6 @@ pub fn handlebars() -> Handlebars {
 }
 
 pub fn collect_schemas<'a>(spec: &'a Spec, root: &'a Path) -> Fallible<HashMap<String, Schema>> {
-    // reads schemas from file
-    fn read_schemas(path: &Path) -> Fallible<HashMap<String, Schema>> {
-        let ext: Option<&str> = path.extension().and_then(std::ffi::OsStr::to_str);
-        let data = std::fs::read_to_string(path)?;
-
-        Ok(match ext {
-            Some("yaml") | Some("yml") => serde_yaml::from_str(&data)?,
-            Some("json") => serde_json::from_str(&data)?,
-            _ => failure::bail!("unsupported file type"),
-        })
-    }
-
-    // creates file path,
-    // removing everything after '#'
-    fn ref_file<'a>(ref_path: &'a String) -> Option<&'a str> {
-        ref_path
-            .split("#")
-            .next()
-            .and_then(|p| if !p.is_empty() { Some(p) } else { None })
-    }
-
-    fn schemas_from_ref(
-        root: &Path,
-        ref_path: &str,
-        a: &HashMap<String, Schema>,
-    ) -> Fallible<HashMap<String, Schema>> {
-        let mut path: PathBuf = root.join(&ref_path);
-
-        // read schemas from file to map b,
-        // filtering out schemas that are already in map a
-        let b: HashMap<String, Schema> = read_schemas(&path)?
-            .into_iter()
-            .filter(|(k, _)| !a.contains_key(k))
-            .collect();
-
-        // merge together in a map
-        let mut merged = a.clone();
-        merged.extend(b.clone());
-
-        // create next root path by popping filename from path
-        path.pop();
-
-        Ok(
-            // fold values in map b with map c
-            // (which contains now all the schemas)
-            // recursively so we keep track of collected schemas so far
-            b.values()
-                .fold(merged, |mut acc: HashMap<String, Schema>, schema| {
-                    for ref_path in iter_ref_paths(&schema).filter_map(ref_file).unique() {
-                        acc.extend(schemas_from_ref(&path, ref_path, &acc).unwrap());
-                    }
-
-                    acc
-                }),
-        )
-    }
-
     let component_schemas = spec
         .components
         .iter()
@@ -159,6 +102,28 @@ pub fn collect_schemas<'a>(spec: &'a Spec, root: &'a Path) -> Fallible<HashMap<S
         .flatten()
         .chain(component_schemas)
         .collect())
+}
+
+pub fn collect_parameters<'a>(
+    spec: &'a Spec,
+    root: &'a Path,
+) -> Fallible<HashMap<String, Parameter>> {
+    let component_parameters = spec
+        .components
+        .iter()
+        .flat_map(|components| {
+            components
+                .parameters
+                .iter()
+                .flatten()
+                .filter_map(|(k, v)| match v {
+                    ObjectOrReference::Object(t) => Some((k.clone(), t.clone())),
+                    _ => None,
+                })
+        })
+        .collect::<HashMap<String, Parameter>>();
+
+    Ok(component_parameters)
 }
 
 // iterates all the schemas in Spec
@@ -245,4 +210,61 @@ pub fn join_relative(a: &Path, b: &Path) -> PathBuf {
     } else {
         PathBuf::from(b)
     }
+}
+
+// reads schemas from file
+fn read_schemas(path: &Path) -> Fallible<HashMap<String, Schema>> {
+    let ext: Option<&str> = path.extension().and_then(std::ffi::OsStr::to_str);
+    let data = std::fs::read_to_string(path)?;
+
+    Ok(match ext {
+        Some("yaml") | Some("yml") => serde_yaml::from_str(&data)?,
+        Some("json") => serde_json::from_str(&data)?,
+        _ => failure::bail!("unsupported file type"),
+    })
+}
+
+// creates file path,
+// removing everything after '#'
+fn ref_file<'a>(ref_path: &'a String) -> Option<&'a str> {
+    ref_path
+        .split("#")
+        .next()
+        .and_then(|p| if !p.is_empty() { Some(p) } else { None })
+}
+
+fn schemas_from_ref(
+    root: &Path,
+    ref_path: &str,
+    a: &HashMap<String, Schema>,
+) -> Fallible<HashMap<String, Schema>> {
+    let mut path: PathBuf = root.join(&ref_path);
+
+    // read schemas from file to map b,
+    // filtering out schemas that are already in map a
+    let b: HashMap<String, Schema> = read_schemas(&path)?
+        .into_iter()
+        .filter(|(k, _)| !a.contains_key(k))
+        .collect();
+
+    // merge together in a map
+    let mut merged = a.clone();
+    merged.extend(b.clone());
+
+    // create next root path by popping filename from path
+    path.pop();
+
+    Ok(
+        // fold values in map b with map c
+        // (which contains now all the schemas)
+        // recursively so we keep track of collected schemas so far
+        b.values()
+            .fold(merged, |mut acc: HashMap<String, Schema>, schema| {
+                for ref_path in iter_ref_paths(&schema).filter_map(ref_file).unique() {
+                    acc.extend(schemas_from_ref(&path, ref_path, &acc).unwrap());
+                }
+
+                acc
+            }),
+    )
 }

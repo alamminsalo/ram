@@ -1,0 +1,15 @@
+{{#each resource_groups}}
+mod {{r (snakecase name)}};
+{{/each}}
+
+use rocket::Route;
+
+pub fn routes() -> Vec<Route> {
+  routes![
+  {{#each resource_groups}}
+  {{#each resources}}
+  {{r (snakecase ../name)}}::{{name}},
+  {{/each}}
+  {{/each}}
+  ]
+}

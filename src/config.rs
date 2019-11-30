@@ -83,9 +83,8 @@ impl Config {
     }
 
     pub fn get_additional_files(&self, lang: &Lang) -> Vec<AddFile> {
-        lang.additional_files
-            .iter()
-            .cloned()
+        lang.additional_files_relative()
+            .into_iter()
             .chain(self.additional_files.iter().map(|f: &AddFile| {
                 // join relative cfg path
                 let template = util::join_relative(&self.path, &PathBuf::from(&f.template))

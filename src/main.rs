@@ -31,7 +31,7 @@ fn main() {
     match spec {
         openapi::OpenApi::V3_0(spec) => {
             let models = ram::generate_models_v3(&spec, &specpath);
-            let resource_groups = ram::generate_resources_v3(&spec);
+            let resource_groups = ram::generate_resources_v3(&spec, &specpath);
             ram::generate_files(cfg, models, resource_groups, &output)
         }
         _ => {

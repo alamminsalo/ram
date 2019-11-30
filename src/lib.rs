@@ -21,17 +21,19 @@ use openapi::v3_0::Spec;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-pub fn generate_models_v3(spec: &Spec, rootpath: &Path) -> Vec<Model> {
+pub fn generate_models_v3(spec: &Spec, root: &Path) -> Vec<Model> {
     // iterate components + collected schemas and generate models
-    util::collect_schemas(spec, rootpath)
+    util::collect_schemas(spec, root)
         .expect("failed to collect schemas")
         .iter()
         .map(|(key, schema)| Model::new(key, schema))
         .collect()
 }
 
-pub fn generate_resources_v3(spec: &Spec) -> Vec<ResourceGroup> {
-    resource::group_resources(&spec.paths, GroupingStrategy::FirstTag)
+pub fn generate_resources_v3(spec: &Spec, root: &Path) -> Vec<ResourceGroup> {
+    let parameters_map =
+        util::collect_parameters(spec, root).expect("failed to collect parameters");
+    resource::group_resources(&spec.paths, GroupingStrategy::FirstTag, &parameters_map)
 }
 
 pub fn generate_files(
@@ -162,34 +164,34 @@ fn render_resources(
     resource_groups
         .iter()
         .map(|rg| {
-            // translates param models
-            let tr_params = |params: Vec<Param>| {
-                params
-                    .into_iter()
-                    .map(|p| Param {
-                        model: lang.translate(p.model),
-                        ..p
-                    })
-                    .collect()
-            };
-            let resources: Vec<Resource> = rg
-                .resources
-                .iter()
-                .cloned()
-                .map(|resource| Resource {
-                    query_params: tr_params(resource.query_params),
-                    path_params: tr_params(resource.path_params),
-                    ..resource
-                })
-                .collect();
+            // // translates param models
+            // let tr_params = |params: Vec<Param>| {
+            //     params
+            //         .into_iter()
+            //         .map(|p| Param {
+            //             model: lang.translate(p.model),
+            //             ..p
+            //         })
+            //         .collect()
+            // };
+            // let resources: Vec<Resource> = rg
+            //     .resources
+            //     .iter()
+            //     .cloned()
+            //     .map(|resource| Resource {
+            //         query_params: tr_params(resource.query_params),
+            //         path_params: tr_params(resource.path_params),
+            //         ..resource
+            //     })
+            //     .collect();
 
-            let resourcegroup = ResourceGroup {
-                name: rg.name.clone(),
-                grouping_strategy: rg.grouping_strategy,
-                resources,
-            };
+            // let resourcegroup = ResourceGroup {
+            //     name: rg.name.clone(),
+            //     grouping_strategy: rg.grouping_strategy,
+            //     resources,
+            // };
 
-            let render = hb.render("resource", &resourcegroup).unwrap();
+            let render = hb.render("resource", &rg).unwrap();
             (
                 lang.format("filename", &rg.name).unwrap(),
                 htmlescape::decode_html(&render).unwrap(),

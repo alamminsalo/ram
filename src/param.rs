@@ -1,6 +1,8 @@
+use super::util;
 use super::Model;
-use openapi::v3_0::{ObjectOrReference, Operation, Parameter};
+use openapi::v3_0::{ObjectOrReference, Operation, Parameter, PathItem};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Param {
@@ -19,15 +21,44 @@ fn from_param(p: &Parameter) -> Option<Param> {
     })
 }
 
-/// Returns (path, query) parameter lists
-pub fn get_params(operation: &Operation, location: &str) -> Vec<Param> {
+/// Returns parameter lists by location
+pub fn get_params_operation(
+    operation: &Operation,
+    location: &str,
+    parameters: &HashMap<String, Parameter>,
+) -> Vec<Param> {
     operation
         .parameters
         .iter()
         .flat_map(|params| {
             params.iter().filter_map(|p| match p {
                 ObjectOrReference::Object(t) => Some(t),
-                _ => None,
+                ObjectOrReference::Ref { ref_path } => {
+                    dbg!(&ref_path);
+                    util::model_name_from_ref(&ref_path).and_then(|name| parameters.get(&name))
+                }
+            })
+        })
+        .filter(|p| p.location == location)
+        .filter_map(from_param)
+        .collect()
+}
+
+/// Returns parameter lists by location
+pub fn get_params_path(
+    path: &PathItem,
+    location: &str,
+    parameters: &HashMap<String, Parameter>,
+) -> Vec<Param> {
+    path.parameters
+        .iter()
+        .flat_map(|params| {
+            params.iter().filter_map(|p| match p {
+                ObjectOrReference::Object(t) => Some(t),
+                ObjectOrReference::Ref { ref_path } => {
+                    dbg!(&ref_path);
+                    util::model_name_from_ref(&ref_path).and_then(|name| parameters.get(&name))
+                }
             })
         })
         .filter(|p| p.location == location)
