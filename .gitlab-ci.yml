@@ -23,11 +23,12 @@ build:
 # Tests for example configurations and templates
 rust-rocket:
   stage: test-generate
-  image: rust:nightly
+  image: rust:1.39-stretch
   script:
     - target/release/ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/src
     - cd examples/rust/rocket
-    - cargo build
+    - rustup toolchain add nightly
+    - cargo +nightly build
 
 rust-actix:
   stage: test-generate
