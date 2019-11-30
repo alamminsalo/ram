@@ -34,7 +34,6 @@ pub fn get_params_operation(
             params.iter().filter_map(|p| match p {
                 ObjectOrReference::Object(t) => Some(t),
                 ObjectOrReference::Ref { ref_path } => {
-                    dbg!(&ref_path);
                     util::model_name_from_ref(&ref_path).and_then(|name| parameters.get(&name))
                 }
             })
