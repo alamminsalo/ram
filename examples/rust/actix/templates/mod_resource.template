@@ -1,0 +1,14 @@
+{{#each resource_groups}}
+mod {{r (snakecase name)}};
+{{/each}}
+
+use actix_web::{web, Scope};
+
+pub fn routes() -> Scope {
+  web::scope("/")
+  {{#each resource_groups}}
+  {{#each resources}}
+    .route("{{path}}", web::{{lowercase method}}().to({{r (snakecase ../name)}}::{{name}}))
+  {{/each}}
+  {{/each}}
+}

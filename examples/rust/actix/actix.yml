@@ -1,0 +1,14 @@
+# [Actix](https://actix.rs) server config for ram
+
+lang: rust
+
+templates:
+  resource: templates/resource.template
+
+additional_files:
+  - filename: mod.rs
+    template: templates/mod_resource.template
+    in: resource
+
+paths:
+  resource: api

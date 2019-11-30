@@ -1,0 +1,7 @@
+use actix_web::{HttpRequest, Responder};
+
+{{#each resources}}
+pub fn {{name}}(req: HttpRequest) -> impl Responder {
+  format!("not implemented")
+}
+{{/each}}

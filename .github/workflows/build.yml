@@ -28,6 +28,12 @@ jobs:
         cd examples/rust/rocket
         cargo build
 
+    - name: Generate Rust (Actix)
+      run: |
+        ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/src
+        cd examples/rust/actix
+        cargo build
+
     - name: Setup Go
       uses: actions/setup-go@v1
       with:
