@@ -26,7 +26,8 @@ jobs:
       run: |
         ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/src
         cd examples/rust/rocket
-        cargo build
+        rustup install nightly
+        cargo build +nightly
 
     - name: Generate Rust (Actix)
       run: |
