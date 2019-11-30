@@ -7,7 +7,7 @@ stages:
 
 # Adds target bin folder to path
 variables:
-  PATH: $PATH:/$CI_PROJECT_DIR/target/release
+  PATH: $PATH:$CI_PROJECT_DIR/target/release
 
 build:
   image: rust:1.39-stretch
