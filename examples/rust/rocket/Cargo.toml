@@ -4,7 +4,7 @@ edition = "2018"
 name = "example"
 version = "0.1.0"
 [dependencies]
-rocket = "*"
+rocket = "0.4.2"
 
 [dependencies.chrono]
 features = ["serde"]
