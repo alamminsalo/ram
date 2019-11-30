@@ -106,7 +106,7 @@ pub fn collect_schemas<'a>(spec: &'a Spec, root: &'a Path) -> Fallible<HashMap<S
 
 pub fn collect_parameters<'a>(
     spec: &'a Spec,
-    root: &'a Path,
+    _root: &'a Path,
 ) -> Fallible<HashMap<String, Parameter>> {
     let component_parameters = spec
         .components
