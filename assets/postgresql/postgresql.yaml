@@ -2,7 +2,7 @@ name: postgresql
 
 # Dynamic formatting templates for things such as nullable types
 format:
- reserved: '"{{value}}"'
+ r: '"{{value}}"'
 
 # Additional files to generate, optional
 # These files are given the complete application state for free templating usage

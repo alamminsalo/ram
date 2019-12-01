@@ -130,7 +130,7 @@ impl Lang {
      */
     pub fn format(&self, template_key: &str, value: &String) -> Fallible<String> {
         match template_key {
-            "reserved" if !self.reserved.contains(&value) => Ok(value.clone()),
+            "r" if !self.reserved.contains(&value) => Ok(value.clone()),
             _ => {
                 let mut map = HashMap::new();
                 map.insert("value", value.as_str());
@@ -245,25 +245,6 @@ impl Lang {
     // adds helpers to handlebars instance
     pub fn add_helpers(&self, hb: &mut Handlebars) {
         {
-            let lang = self.clone();
-            let reserved = move |h: &Helper,
-                                 _: &Handlebars,
-                                 _: &Context,
-                                 _: &mut RenderContext,
-                                 out: &mut dyn Output|
-                  -> HelperResult {
-                // get parameter from helper or throw an error
-                let param = h
-                    .param(0)
-                    .and_then(|v| v.value().as_str())
-                    .unwrap_or("")
-                    .to_string();
-                out.write(&lang.format("reserved", &param).unwrap_or(param))?;
-                Ok(())
-            };
-            hb.register_helper("r", Box::new(reserved));
-        }
-        {
             let ext = move |h: &Helper,
                             _: &Handlebars,
                             c: &Context,
@@ -295,6 +276,27 @@ impl Lang {
                 Ok(())
             };
             hb.register_helper("ext", Box::new(ext));
+        }
+        // add custom formatter helpers
+        for k in self.format.keys() {
+            let lang = self.clone();
+            let key = k.clone();
+            let closure = move |h: &Helper,
+                                _: &Handlebars,
+                                _: &Context,
+                                _: &mut RenderContext,
+                                out: &mut dyn Output|
+                  -> HelperResult {
+                // get parameter from helper or throw an error
+                let param = h
+                    .param(0)
+                    .and_then(|v| v.value().as_str())
+                    .expect("parameter is missing")
+                    .to_string();
+                out.write(&lang.format(&key, &param).unwrap_or(param))?;
+                Ok(())
+            };
+            hb.register_helper(k, Box::new(closure));
         }
     }
 

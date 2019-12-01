@@ -12,7 +12,7 @@ format:
   # Formats nullable fields, optional
   nullable: "Option<{{value}}>"
   # Formats reserved language keywords, optional
-  reserved: "r#{{value}}"
+  r: "r#{{value}}"
   # Formats filenames
   filename: "{{snakecase value}}.rs"
 
