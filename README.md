@@ -104,7 +104,7 @@ src/some/**/*.rs
 Note that ignorefile currently only matches entries relative to current working directory, 
 so for example ignorefile in different output directory won't get matched.
 
-## Roadmap:
+## Roadmap
 * Add more lang-specs for most used languages
 * Test suite
 * Document template context objects
