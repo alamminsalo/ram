@@ -3,6 +3,7 @@
 
 stages:
   - build
+  - test
   - test-generate
 
 build:
@@ -19,6 +20,18 @@ build:
   artifacts:
     paths:
       - target/release/ram
+
+codecov:
+  image: xd009642/tarpaulin
+  stage: test
+  variables:
+    CARGO_HOME: $CI_PROJECT_DIR/cargo
+  cache:
+    paths:
+      - target/
+      - cargo/
+  script:
+    - cargo tarpaulin
 
 # Tests for example configurations and templates
 rust-rocket:
