@@ -190,6 +190,21 @@ impl Lang {
             additional_properties: m
                 .additional_properties
                 .and_then(|m| Some(Box::new(self.translate(*m)))),
+            primitive_properties: m
+                .primitive_properties
+                .into_iter()
+                .map(|m| Box::new(self.translate(*m)))
+                .collect(),
+            object_properties: m
+                .object_properties
+                .into_iter()
+                .map(|m| Box::new(self.translate(*m)))
+                .collect(),
+            array_properties: m
+                .array_properties
+                .into_iter()
+                .map(|m| Box::new(self.translate(*m)))
+                .collect(),
             ..m
         }
     }

@@ -164,33 +164,6 @@ fn render_resources(
     resource_groups
         .iter()
         .map(|rg| {
-            // // translates param models
-            // let tr_params = |params: Vec<Param>| {
-            //     params
-            //         .into_iter()
-            //         .map(|p| Param {
-            //             model: lang.translate(p.model),
-            //             ..p
-            //         })
-            //         .collect()
-            // };
-            // let resources: Vec<Resource> = rg
-            //     .resources
-            //     .iter()
-            //     .cloned()
-            //     .map(|resource| Resource {
-            //         query_params: tr_params(resource.query_params),
-            //         path_params: tr_params(resource.path_params),
-            //         ..resource
-            //     })
-            //     .collect();
-
-            // let resourcegroup = ResourceGroup {
-            //     name: rg.name.clone(),
-            //     grouping_strategy: rg.grouping_strategy,
-            //     resources,
-            // };
-
             let render = hb.render("resource", &rg).unwrap();
             (
                 lang.format("filename", &rg.name).unwrap(),
