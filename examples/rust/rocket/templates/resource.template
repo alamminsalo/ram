@@ -1,6 +1,6 @@
 {{#each resources}}
 #[{{lowercase method}}("{{path}}")]
-pub fn {{name}}(
+pub fn {{snakecase name}}(
   {{#each path_params}}
   {{r (snakecase name)}}: {{model.type}},
   {{/each}}

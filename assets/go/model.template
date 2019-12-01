@@ -8,12 +8,12 @@ import (
 
 {{#if is_object}}
 type {{pascalcase name}} struct {
-{{#each fields}}
+{{#each properties}}
   {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ ext "x-go-custom-tag" }}`
 {{/each}}
-{{#if additional_fields}}
-{{#with additional_fields}}
-{{#each fields}}
+{{#if additional_properties}}
+{{#with additional_properties}}
+{{#each properties}}
   {{ pascalcase name }} {{type}} `json:"-" {{ ext "x-go-custom-tag" }}`
 {{/each}}
 {{/with}}

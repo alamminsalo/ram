@@ -219,7 +219,7 @@ fn render_additional_files(
             let path = if let Some(ref abspath) = f.path {
                 // get from absolute path
                 abspath.clone()
-            } else if let Some(ref inpath) = f.r#in {
+            } else if let Some(ref inpath) = f.file_in {
                 // get location from 'in' using config.files
                 let path = state.cfg.get_path(inpath, lang);
                 let dir = Path::new(&path);

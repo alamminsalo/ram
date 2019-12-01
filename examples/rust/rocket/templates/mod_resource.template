@@ -8,7 +8,7 @@ pub fn routes() -> Vec<Route> {
   routes![
   {{#each resource_groups}}
   {{#each resources}}
-  {{r (snakecase ../name)}}::{{name}},
+  {{r (snakecase ../name)}}::{{snakecase name}},
   {{/each}}
   {{/each}}
   ]

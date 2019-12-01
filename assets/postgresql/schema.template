@@ -5,7 +5,7 @@ BEGIN;
 {{~#if is_object}}
 DROP TABLE IF EXISTS {{snakecase name}};
 CREATE TABLE {{snakecase name}} (
-  {{~#each fields}}
+  {{~#each properties}}
   {{~#if is_object}}
   {{~#unless @first}},{{/unless}}
   {{r (snakecase name)}} int {{#unless nullable}}NOT NULL{{/unless}} {{ext "x-sql"}}
@@ -20,10 +20,10 @@ CREATE TABLE {{snakecase name}} (
 {{~/if}}
 {{~/each}}
 
-{{!-- loop all objects and array fields again and make FK constraints and m2m tables --}}
+{{!-- loop all objects and array properties again and make FK constraints and m2m tables --}}
 {{~#each models}}
 {{~#if is_object}}
-  {{~#each fields}}
+  {{~#each properties}}
   {{!-- make m2m tables and set up foreign keys --}}
   {{~#if is_array}}
 DROP TABLE IF EXISTS {{snakecase ../name}}_{{snakecase items.name}};

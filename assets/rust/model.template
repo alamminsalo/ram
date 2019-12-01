@@ -12,12 +12,12 @@ use chrono::NaiveDateTime;
 
 #[derive(Serialize,Deserialize,Default)]
 pub struct {{pascalcase name}} {
-{{#each fields}}
+{{#each properties}}
     pub {{r (snakecase name)}}: {{type}},
 {{/each}}
-{{#if additional_fields}}
-{{#with additional_fields}}
-{{#each fields}}
+{{#if additional_properties}}
+{{#with additional_properties}}
+{{#each properties}}
     #[serde(skip)]
     pub {{r (snakecase name)}}: {{type}},
 {{/each}}

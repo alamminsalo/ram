@@ -34,7 +34,8 @@ pub struct Lang {
 pub struct AddFile {
     pub filename: String,
     pub template: String,
-    pub r#in: Option<String>,
+    #[serde(rename = "in")]
+    pub file_in: Option<String>,
     pub path: Option<String>,
 }
 
@@ -47,7 +48,8 @@ pub struct Type {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Format {
-    pub r#type: String,
+    #[serde(rename = "type")]
+    pub schema_type: String,
 }
 
 impl Lang {
@@ -163,7 +165,7 @@ impl Lang {
         } else {
             // this is a primitive language type
             self.translate_primitive(
-                &m.r#type,
+                &m.schema_type,
                 m.format.as_ref().unwrap_or(&String::from("default")),
             )
         };
@@ -176,14 +178,14 @@ impl Lang {
         };
 
         Model {
-            r#type: translated_type,
-            fields: m
-                .fields
+            schema_type: translated_type,
+            properties: m
+                .properties
                 .into_iter()
                 .map(|m| Box::new(self.translate(*m)))
                 .collect(),
-            additional_fields: m
-                .additional_fields
+            additional_properties: m
+                .additional_properties
                 .and_then(|m| Some(Box::new(self.translate(*m)))),
             ..m
         }
@@ -204,7 +206,7 @@ impl Lang {
         // array formatter
         self.format_map(
             "array",
-            &hashmap!["type" => child.r#type.as_str(), "name" => m.name.as_str()],
+            &hashmap!["type" => child.schema_type.as_str(), "name" => m.name.as_str()],
         )
     }
 
@@ -214,7 +216,7 @@ impl Lang {
             .iter()
             .find(|(name, t)| *name == _type || t.alias.contains(_type))
             .and_then(|(_, t)| t.format.get(format))
-            .map(|f| f.r#type.clone())
+            .map(|f| f.schema_type.clone())
             .expect(&format!(
                 "Error while processing {}: failed to find primitive type {}",
                 _type, format

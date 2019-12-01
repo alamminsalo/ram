@@ -8,7 +8,7 @@ pub fn routes() -> Scope {
   web::scope("/")
   {{#each resource_groups}}
   {{#each resources}}
-    .route("{{path}}", web::{{lowercase method}}().to({{r (snakecase ../name)}}::{{name}}))
+    .route("{{path}}", web::{{lowercase method}}().to({{r (snakecase ../name)}}::{{snakecase name}}))
   {{/each}}
   {{/each}}
 }
