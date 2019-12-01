@@ -2,22 +2,19 @@
 
 Generates API models from openapi spec using language-agnostic templating and spec system. When ready, should support any or most of the programming languages.
 
-Currently supports following languages out-of-box:
-* Rust
-* Go
+Examples available in the following use cases:
+* Rust (Rocket, Actix)
+* Go (Echo)
+* Postgresql schema
+* C (simple structs)
 
 However, a language can be implemented by supplying a language yaml file and some needed templates for generation. Contributions are welcome!
 
 ## Usage
 
-Start off with a `.ramconfig` file like this:
+Start off with an example `config.yaml`:
 
 ```
-# Example ram config file
-
-# OpenAPI specification file path, currently only supports openapi 3
-openapi: "./res/petstore.yaml"
-
 # Target lang spec
 # Can be file path or built-in yaml spec
 lang: "rust"
@@ -28,13 +25,13 @@ templates:
   model: "templates/custom_model.rs.template"
 
 # File paths, optional
-# This example places models to src/models
+# This example places models to <output>/src/models
 paths:
   root: "src",
   model: "models"
 ```
 
-With configuration file in-place, run `ram` in the directory to generate models from the spec.
+Then simply run `ram -c config.yaml -i <path/to/openapi.yaml> -o <output/folder>` to run code generation.
 
 ## Templating
 
@@ -42,38 +39,33 @@ Supports using built-in or custom templates by configuration.
 
 Templating uses [handlebars](https://handlebars-draft.knappi.org/guide) syntax, though [some features are missing in templating library](https://github.com/sunng87/handlebars-rust#limited-but-essential-control-structure-built-in).
 
-Example template file (default Rust model template):
-
+Example template file (from default golang model template):
 ```
-use super::*;
-{{#if is_object}}
-use serde::{Serialize,Deserialize};
-{{#if has_date}}
-use chrono::Date;
-{{/if}}
+package model
+
 {{#if has_datetime}}
-use chrono::DateTime;
+import (
+  "time"
+)
 {{/if}}
 
-#[derive(Serialize,Deserialize,Default)]
-pub struct {{name}} {
-{{#each fields}}
-    pub {{r name}}: {{type}},
+{{#if is_object}}
+type {{pascalcase name}} struct {
+{{#each properties}}
+  {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ ext "x-go-custom-tag" }}`
 {{/each}}
-{{#if additional_fields}}
-{{#each fields}}
-    #[serde(skip)]
-    pub {{r name}}: {{type}},
+{{#if additional_properties}}
+{{#with additional_properties}}
+{{#each properties}}
+  {{ pascalcase name }} {{type}} `json:"-" {{ ext "x-go-custom-tag" }}`
 {{/each}}
+{{/with}}
 {{/if}}
 }
 {{/if}}
-{{#if is_array}}
-pub type {{name}} = Vec<{{items.name}}>;
-{{/if}}
 ```
 
-Template white-space formatting can be a bit fiddly, so usage of a language formatter in Makefile or something similar is recommended.
+Template white-space formatting is cumbersome, so usage of a language formatter is recommended.
 
 ## Helpers
 
@@ -87,22 +79,25 @@ Includes some built-in [custom helpers](https://handlebars-draft.knappi.org/guid
 * camelcase - camelCase
 * kebabcase - kebab-case
 * r - Formats reserved keywords according to language spec (Rust example: type -> r#type). Kept short for convenience.
-* ext - Places extension value (eg. With definition `x-go-custom-tag: json:"-"`, `{{ext "x-go-custom-tag"}}` => `json:"-"`)
+* ext - Returns extension value (eg. With definition `x-go-custom-tag: json:"-"`, `{{ext "x-go-custom-tag"}}` => `json:"-"`)
 ```
+
+Also includes [all built-in helpers from handlebars lib](https://docs.rs/handlebars/3.0.0-beta.1/handlebars/#built-in-helpers).
 
 ## Ignoring files
 
 Ignoring files can be done with `.ramignore`, which follows `.gitignore` format:
-
 ```
 src/some/file/to/ignore.rs
 src/some/files/to/ignore/*.rs
 src/some/**/*.rs
 ```
 
+Note that ignorefile currently only matches entries relative to current working directory, 
+so for example ignorefile in different output directory won't get matched.
+
 ## TODO:
 * Implement more formatting helpers
-* Implement resource param support
 * Add more lang-specs for most used languages
 * Test suite
 * Document template context objects
