@@ -1,7 +1,7 @@
 # Rusty API Modeler
 
-[![pipeline](https://gitlab.com/alamminsalo/ram/badges/master/pipeline.svg)](https://gitlab.com/alamminsalo/ram/pipelines)
-
+[![pipeline status](https://gitlab.com/alamminsalo/ram/badges/master/pipeline.svg)](https://gitlab.com/alamminsalo/ram/commits/master)
+[![coverage report](https://gitlab.com/alamminsalo/ram/badges/master/coverage.svg)](https://gitlab.com/alamminsalo/ram/commits/master)
 
 Generates API models from openapi spec using language-agnostic templating and spec system. When ready, should support any or most of the programming languages.
 
