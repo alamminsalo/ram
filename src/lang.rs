@@ -1,6 +1,6 @@
 use super::assets::Assets;
 use super::util;
-use super::Model;
+use super::{Model, ModelType};
 use failure::Fallible;
 use handlebars::*;
 use itertools::Itertools;
@@ -153,26 +153,24 @@ impl Lang {
      */
     /// Translates model
     pub fn translate(&self, m: Model) -> Model {
-        // TODO: enum & match
-        let mut translated_type: String = if m.is_array {
-            self.translate_array(&m)
-        } else if m.is_object {
-            if let Some(ref refpath) = m.ref_path {
-                // this is a reference to another object
-                // get model name from ref_path
-                util::model_name_from_ref(&refpath)
-                    .map(|t| self.translate_modelname(&t))
-                    .expect("failed to get model name from ref")
-            } else {
-                // this is an inline object, which we name by it's key
-                self.translate_modelname(&m.name)
+        let mut translated_type = match m.model_type() {
+            ModelType::Array => self.translate_array(&m),
+            ModelType::Object => {
+                if let Some(ref refpath) = m.ref_path {
+                    // this is a reference to another object
+                    // get model name from ref_path
+                    util::model_name_from_ref(&refpath)
+                        .map(|t| self.translate_modelname(&t))
+                        .expect("failed to get model name from ref")
+                } else {
+                    // this is an inline object, which we name by it's key
+                    self.translate_modelname(&m.name)
+                }
             }
-        } else {
-            // this is a primitive language type
-            self.translate_primitive(
+            ModelType::Primitive => self.translate_primitive(
                 &m.schema_type,
                 m.format.as_ref().unwrap_or(&String::from("default")),
-            )
+            ),
         };
 
         // format if nullable
@@ -216,15 +214,15 @@ impl Lang {
     }
 
     // returns translated primitive type
-    fn translate_primitive(&self, _type: &String, format: &String) -> String {
+    fn translate_primitive(&self, schema_type: &String, format: &String) -> String {
         self.types
             .iter()
-            .find(|(name, t)| *name == _type || t.alias.contains(_type))
+            .find(|(name, t)| *name == schema_type || t.alias.contains(schema_type))
             .and_then(|(_, t)| t.format.get(format))
             .map(|f| f.schema_type.clone())
             .expect(&format!(
                 "Error while processing {}: failed to find primitive type {}",
-                _type, format
+                schema_type, format
             ))
     }
 

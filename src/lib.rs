@@ -11,7 +11,7 @@ mod util;
 use assets::Assets;
 pub use config::Config;
 pub use lang::{AddFile, Lang};
-pub use model::Model;
+pub use model::{Model, ModelType};
 pub use param::Param;
 pub use resource::{GroupingStrategy, Resource, ResourceGroup};
 pub use state::State;
@@ -94,8 +94,8 @@ pub fn generate_files(
     println!("generation OK")
 }
 
+// runs lang translations on all models
 fn translate_models(lang: &Lang, models: Vec<Model>) -> Vec<Model> {
-    // runs lang translations on all models
     models.into_iter().map(|m| lang.translate(m)).collect()
 }
 

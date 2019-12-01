@@ -3,6 +3,13 @@ use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+#[derive(Debug, Clone)]
+pub enum ModelType {
+    Primitive,
+    Object,
+    Array,
+}
+
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct Model {
     pub name: String,
@@ -159,5 +166,15 @@ impl Model {
             .cloned()
             .filter(|f| f.is_array)
             .collect()
+    }
+
+    pub fn model_type(&self) -> ModelType {
+        if self.is_array {
+            ModelType::Array
+        } else if self.is_object {
+            ModelType::Object
+        } else {
+            ModelType::Primitive
+        }
     }
 }
