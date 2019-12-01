@@ -37,22 +37,6 @@ pub fn write_files(root: &Path, map: HashMap<String, String>) {
     }
 }
 
-//pub fn write_files_nopath(rootpath: &Path, map: HashMap<String, String>) {
-//    let ignored = ignore_patterns();
-//    for (file, data) in map.iter() {
-//        let mut path = rootpath.join(file);
-//        if ignored.iter().any(|p| p.matches_path(&path)) {
-//            println!("ignoring file {}", path.to_str().unwrap_or(""));
-//            continue;
-//        }
-//        // create directory from file path
-//        path.pop();
-//        fs::create_dir_all(path).expect("failed to create directory");
-//        // write file
-//        fs::write(file, data).expect(&format!("failed to write file {}", &file));
-//    }
-//}
-
 // Returns model name from ref path
 pub fn model_name_from_ref(ref_path: &str) -> Option<String> {
     if let Some(idx) = ref_path.rfind('/') {
@@ -242,7 +226,8 @@ fn schemas_from_ref(
 
     // read schemas from file to map b,
     // filtering out schemas that are already in map a
-    let b: HashMap<String, Schema> = read_schemas(&path)?
+    let b: HashMap<String, Schema> = read_schemas(&path)
+        .expect("failed to read schemas!")
         .into_iter()
         .filter(|(k, _)| !a.contains_key(k))
         .collect();

@@ -1,46 +1,44 @@
 BEGIN;
 
-{{!-- loop all structs --}}
+-- base tables
 {{~#each models}}
 {{~#if is_object}}
+{{~#if (ne (ext "x-sql") "skip")}}
 DROP TABLE IF EXISTS {{snakecase name}};
 CREATE TABLE {{snakecase name}} (
-  {{~#each properties}}
-  {{~#if is_object}}
-  {{~#unless @first}},{{/unless}}
-  {{r (snakecase name)}} int {{#unless nullable}}NOT NULL{{/unless}} {{ext "x-sql"}}
-  {{~else}}
-  {{~#unless is_array}}
-  {{~#unless @first}},{{~/unless~}}
-  {{r (snakecase name)}} {{type}} {{#unless nullable}}NOT NULL{{/unless}} {{ext "x-sql"}}
-  {{~/unless}}
-  {{~/if}}
-  {{/each}}
+  {{~#each primitive_properties}}
+  {{r (snakecase name)}} {{type}} {{#unless nullable}}NOT NULL{{/unless}}{{#unless @last}},{{/unless}}
+  {{~/each}}
 );
+{{~/if}}
 {{~/if}}
 {{~/each}}
 
-{{!-- loop all objects and array properties again and make FK constraints and m2m tables --}}
+-- set primary keys
 {{~#each models}}
 {{~#if is_object}}
-  {{~#each properties}}
-  {{!-- make m2m tables and set up foreign keys --}}
-  {{~#if is_array}}
-DROP TABLE IF EXISTS {{snakecase ../name}}_{{snakecase items.name}};
-CREATE TABLE {{snakecase ../name}}_{{snakecase items.name}} (
-  {{r (snakecase ../name)}}_id bigint NOT NULL references {{snakecase ../name}}(id) {{ext "x-sql"}},
-  {{r (snakecase items.name)}}_id bigint NOT NULL references {{snakecase name}}(id) {{ext "x-sql"}},
-  PRIMARY KEY ({{r (snakecase ../name)}}_id, {{r (snakecase items.name)}}_id)
-);
-  {{else}}
-  {{!-- add foreign key between two tables --}}
-  {{~#if is_object}}
-ALTER TABLE {{r (snakecase ../name)}} DROP CONSTRAINT IF EXISTS fk_{{r (snakecase ../name)}}_{{r (snakecase name)}};
-ALTER TABLE {{r (snakecase ../name)}} 
-ADD CONSTRAINT fk_{{r (snakecase ../name)}}_{{r (snakecase name)}} FOREIGN KEY ({{r (snakecase name)}}) REFERENCES {{snakecase type}}(id) {{ext "x-sql"}};
-  {{~/if}}
-  {{~/if}}
-  {{/each}}
+{{~#if (ne (ext "x-sql") "skip")}}
+{{~#each primitive_properties}}
+{{~#if (eq (snakecase name) "id")}}
+CREATE SEQUENCE {{snakecase ../name}}_id_seq;
+ALTER TABLE {{snakecase ../name}} ALTER COLUMN {{r (snakecase name)}} SET DEFAULT nextval('{{snakecase ../name}}_id_seq');
+ALTER TABLE {{snakecase ../name}} ALTER COLUMN {{r (snakecase name)}} SET NOT NULL;
+ALTER SEQUENCE {{snakecase ../name}}_id_seq OWNED BY {{snakecase ../name}}.id;
+ALTER TABLE {{snakecase ../name}} ADD PRIMARY KEY (id);
+{{~/if}}
+{{~/each}}
+{{~/if}}
+{{~/if}}
+{{~/each}}
+
+-- fk relations
+{{~#each models}}
+{{~#if is_object}}
+{{~#if (ne (ext "x-sql") "skip")}}
+{{~#each object_properties}}
+ALTER TABLE {{snakecase ../name}} ADD COLUMN {{r (snakecase name)}} int {{#unless nullable}}NOT NULL{{/unless}} REFERENCES {{snakecase type}}(id);
+{{~/each}}
+{{~/if}}
 {{~/if}}
 {{~/each}}
 
