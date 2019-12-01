@@ -84,6 +84,11 @@ impl Lang {
             .expect("failed to get lang parent dir")
             .to_owned();
 
+        // set root path to "" if not set
+        if lang.paths.get("root") == None {
+            lang.paths.insert("root".into(), "".into());
+        }
+
         Ok(lang)
     }
 
@@ -206,7 +211,7 @@ impl Lang {
         // array formatter
         self.format_map(
             "array",
-            &hashmap!["type" => child.schema_type.as_str(), "name" => m.name.as_str()],
+            &hashmap!["value" => m.name.as_str(), "type" => child.schema_type.as_str(), "name" => m.name.as_str()],
         )
     }
 
