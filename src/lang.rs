@@ -209,12 +209,13 @@ impl Lang {
         }
     }
 
-    // applies `classname` and `object_field` to input str
+    // applies `classname` and `object_property` to input str
     fn translate_modelname(&self, name: &String) -> String {
         // format using `classname` formatter if present
         let modelname = self.format("classname", &name).unwrap_or(name.clone());
-        // format using `object_field` formatter if present
-        self.format("object_field", &modelname).unwrap_or(modelname)
+        // format using `object_property` formatter if present
+        self.format("object_property", &modelname)
+            .unwrap_or(modelname)
     }
 
     // translates to array type by child item
