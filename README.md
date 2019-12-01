@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.com/alamminsalo/ram/badges/master/pipeline.svg)](https://gitlab.com/alamminsalo/ram/commits/master)
 [![coverage report](https://gitlab.com/alamminsalo/ram/badges/master/coverage.svg)](https://gitlab.com/alamminsalo/ram/commits/master)
 
-Generates API models from openapi spec using language-agnostic templating and spec system. When ready, should support any or most of the programming languages.
+Language-agnostic openapi code generator.
 
 Examples available in the following use cases:
 * Rust (Rocket, Actix)
@@ -104,8 +104,7 @@ src/some/**/*.rs
 Note that ignorefile currently only matches entries relative to current working directory, 
 so for example ignorefile in different output directory won't get matched.
 
-## TODO:
-* Implement more formatting helpers
+## Roadmap:
 * Add more lang-specs for most used languages
 * Test suite
 * Document template context objects
