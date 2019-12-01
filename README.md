@@ -29,6 +29,11 @@ templates:
 paths:
   root: "src",
   model: "models"
+
+# Custom formatting rule example
+# Can be used in templates with {{anglebrackets "something"}}
+format:
+  anglebrackets: "<{{value}}>"
 ```
 
 Then simply run `ram -c config.yaml -i <path/to/openapi.yaml> -o <output/folder>` to run code generation.
