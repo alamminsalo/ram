@@ -1,0 +1,4 @@
+# postgresql schema generation config
+
+lang: postgresql
+

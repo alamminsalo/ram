@@ -5,3 +5,4 @@
 /examples/rust/**/target
 /examples/go/**/model
 /examples/go/**/api
+/examples/**/*.sql
