@@ -71,6 +71,11 @@ types:
       double:
         type: f64
 
+  boolean:
+    format:
+      default:
+        type: bool
+
 # list of reserved words
 reserved:
   - as

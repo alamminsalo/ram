@@ -57,6 +57,11 @@ types:
       double:
         type: double
 
+  boolean:
+    format:
+      default:
+        type: int
+
 # list of reserved words
 reserved:
   - auto

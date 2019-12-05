@@ -56,6 +56,11 @@ types:
       double:
         type: float64
 
+  boolean:
+    format:
+      default:
+        type: bool
+
 # list of reserved words
 reserved:
   - break
