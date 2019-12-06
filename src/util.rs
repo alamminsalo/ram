@@ -21,7 +21,7 @@ fn ignore_patterns() -> Vec<Pattern> {
 }
 
 // writes files in map
-pub fn write_files(root: &Path, map: HashMap<String, String>) {
+pub fn write_files(root: &Path, map: HashMap<PathBuf, String>) {
     let ignored = ignore_patterns();
     for (file, data) in map.iter() {
         let path = root.join(&file);
@@ -33,7 +33,7 @@ pub fn write_files(root: &Path, map: HashMap<String, String>) {
         // create dirs if needed
         fs::create_dir_all(path.parent().expect("failed to get parent dir"))
             .expect("failed to create directory");
-        fs::write(path, data).expect(&format!("failed to write file {}", &file));
+        fs::write(path, data).expect(&format!("failed to write file {}", &file.display()));
     }
 }
 

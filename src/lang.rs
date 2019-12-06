@@ -32,7 +32,7 @@ pub struct Lang {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AddFile {
-    pub filename: String,
+    pub filename: Option<String>,
     pub template: String,
     #[serde(rename = "in")]
     pub file_in: Option<String>,

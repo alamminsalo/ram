@@ -123,7 +123,7 @@ fn render_models(
     cfg: &Config,
     lang: &Lang,
     models: &Vec<Model>,
-) -> HashMap<String, String> {
+) -> HashMap<PathBuf, String> {
     // compile models template
     let template_path = cfg.get_template("model", &lang);
 
@@ -138,7 +138,7 @@ fn render_models(
         .map(|model| {
             let render = hb.render("model", &model).unwrap();
             (
-                lang.format("filename", &model.name).unwrap(),
+                PathBuf::from(lang.format("filename", &model.name).unwrap()),
                 htmlescape::decode_html(&render).unwrap(),
             )
         })
@@ -150,7 +150,7 @@ fn render_resources(
     cfg: &Config,
     lang: &Lang,
     resource_groups: &Vec<ResourceGroup>,
-) -> HashMap<String, String> {
+) -> HashMap<PathBuf, String> {
     // compile models template
     let template_path = cfg.get_template("resource", &lang);
 
@@ -166,7 +166,7 @@ fn render_resources(
         .map(|rg| {
             let render = hb.render("resource", &rg).unwrap();
             (
-                lang.format("filename", &rg.name).unwrap(),
+                PathBuf::from(lang.format("filename", &rg.name).unwrap()),
                 htmlescape::decode_html(&render).unwrap(),
             )
         })
@@ -179,29 +179,62 @@ fn render_additional_files(
     state: &State,
     lang: &Lang,
     additional_files: Vec<AddFile>,
-) -> HashMap<String, String> {
+) -> HashMap<PathBuf, String> {
     additional_files
         .into_iter()
-        .map(|f: AddFile| {
+        .flat_map(|f: AddFile| {
             // get data from assets and render it
             let template = Assets::read_file(&PathBuf::from(&f.template)).unwrap();
-            let render = hb
+            let mut render = hb
                 .render_template(&template, &state)
                 .expect("failed to render additional file template");
+            render = htmlescape::decode_html(&render).unwrap();
             // make path
-            let path = if let Some(ref abspath) = f.path {
+            let dirpath: PathBuf = if let Some(ref abspath) = f.path {
                 // get from absolute path
-                abspath.clone()
+                PathBuf::from(abspath)
             } else if let Some(ref inpath) = f.file_in {
                 // get location from 'in' using config.files
                 let path = state.cfg.get_path(inpath, lang);
-                let dir = Path::new(&path);
-                dir.join(&f.filename).to_str().unwrap().into()
+                path
             } else {
                 panic!("failed to get file render path")
             };
 
-            (path, htmlescape::decode_html(&render).unwrap())
+            // If file name is defined, use it as output for file.
+            // If not, then assume the filenames are found inside the templates
+            match f.filename {
+                Some(filename) => vec![(dirpath.join(filename), render)],
+                _ => {
+                    // split render at file tags
+                    render
+                        .split("^%filebegin=")
+                        .filter_map(move |substr| {
+                            let filename = substr
+                                .lines()
+                                .next()
+                                .expect("failed to get filename from render");
+
+                            if filename.is_empty() {
+                                None
+                            } else {
+                                let content: String = substr[filename.len()..].to_owned();
+                                Some((
+                                    dirpath.join(
+                                        filename
+                                            .split("%filebegin=")
+                                            .skip(1)
+                                            .next()
+                                            .unwrap()
+                                            .trim(),
+                                    ),
+                                    content,
+                                ))
+                            }
+                        })
+                        .collect::<Vec<(PathBuf, String)>>()
+                }
+            }
         })
         .collect()
 }
