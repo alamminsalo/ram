@@ -16,6 +16,7 @@ pub struct Model {
     #[serde(rename = "type")]
     pub schema_type: String,
     pub properties: Vec<Box<Model>>,
+    pub readonly: bool,
     pub additional_properties: Option<Box<Model>>,
     pub items: Option<Box<Model>>,
     pub description: Option<String>,
@@ -77,6 +78,7 @@ impl Model {
             description: schema.description.clone(),
             format: schema.format.clone(),
             extensions: schema.extensions.clone(),
+            readonly: schema.read_only.unwrap_or(false),
             schema_type,
             properties,
             additional_properties,
