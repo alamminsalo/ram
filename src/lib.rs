@@ -185,10 +185,10 @@ fn render_additional_files(
         .flat_map(|f: AddFile| {
             // get data from assets and render it
             let template = Assets::read_file(&PathBuf::from(&f.template)).unwrap();
-            let mut render = hb
+            let render = hb
                 .render_template(&template, &state)
                 .expect("failed to render additional file template");
-            render = htmlescape::decode_html(&render.trim()).unwrap();
+            // render = htmlescape::decode_html(&render.trim()).unwrap();
             // make path
             let dirpath: PathBuf = if let Some(ref abspath) = f.path {
                 // get from absolute path
@@ -214,7 +214,7 @@ fn render_additional_files(
 
                     for line in render.lines() {
                         // check if ran into filebegin mark
-                        if !line.is_empty() && &line.trim()[..10] == "%filebegin" {
+                        if line.len() > 10 && &line[..10] == "%filebegin" {
                             // if mark is set, push contents and reset
                             if mark.is_some() {
                                 filemap.push((mark.take().unwrap(), data.join("\n")));
@@ -223,11 +223,11 @@ fn render_additional_files(
                             } else {
                                 // set filebegin mark
                                 // concate with dirpath
-                                mark = Some(dirpath.join(&line.trim()[11..]));
+                                mark = Some(dirpath.join(&line[11..]));
                             }
                         } else if mark.is_some() {
                             // push to data
-                            data.push(line.trim());
+                            data.push(line);
                         }
                     }
 
