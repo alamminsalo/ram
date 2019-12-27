@@ -13,7 +13,7 @@ format:
 
 # default templates which can be overridden if needed
 templates:
-  model: "model.template"
+  model: "model.hbs"
 
 # default file paths
 paths:

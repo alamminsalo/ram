@@ -8,11 +8,11 @@ format:
   pathparam: ":{{value}}"
 
 templates:
-  resource: templates/resource.template
+  resource: templates/resource.hbs
 
 additional_files:
   - filename: router.go
-    template: templates/router.template
+    template: templates/router.hbs
     in: resource
 
 paths:

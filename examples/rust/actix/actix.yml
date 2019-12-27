@@ -3,11 +3,11 @@
 lang: rust
 
 templates:
-  resource: templates/resource.template
+  resource: templates/resource.hbs
 
 additional_files:
   - filename: mod.rs
-    template: templates/mod_resource.template
+    template: templates/mod_resource.hbs
     in: resource
 
 paths:
