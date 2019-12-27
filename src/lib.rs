@@ -188,7 +188,7 @@ fn render_additional_files(
             let mut render = hb
                 .render_template(&template, &state)
                 .expect("failed to render additional file template");
-            render = htmlescape::decode_html(&render).unwrap();
+            render = htmlescape::decode_html(&render.trim()).unwrap();
             // make path
             let dirpath: PathBuf = if let Some(ref abspath) = f.path {
                 // get from absolute path
@@ -198,7 +198,9 @@ fn render_additional_files(
                 let path = state.cfg.get_path(inpath, lang);
                 path
             } else {
-                panic!("failed to get file render path")
+                // use rootpath
+                let path = state.cfg.get_path("root", lang);
+                path
             };
 
             // If file name is defined, use it as output for file.
@@ -206,33 +208,30 @@ fn render_additional_files(
             match f.filename {
                 Some(filename) => vec![(dirpath.join(filename), render)],
                 _ => {
-                    // split render at file tags
-                    render
-                        .split("^%filebegin=")
-                        .filter_map(move |substr| {
-                            let filename = substr
-                                .lines()
-                                .next()
-                                .expect("failed to get filename from render");
+                    let mut filemap: Vec<(PathBuf, String)> = vec![];
+                    let mut mark: Option<PathBuf> = None;
+                    let mut data: Vec<&str> = vec![];
 
-                            if filename.is_empty() {
-                                None
+                    for line in render.lines() {
+                        // check if ran into filebegin mark
+                        if !line.is_empty() && &line.trim()[..10] == "%filebegin" {
+                            // if mark is set, push contents and reset
+                            if mark.is_some() {
+                                filemap.push((mark.take().unwrap(), data.join("\n")));
+                                assert_eq!(mark.is_some(), false);
+                                data.clear();
                             } else {
-                                let content: String = substr[filename.len()..].to_owned();
-                                Some((
-                                    dirpath.join(
-                                        filename
-                                            .split("%filebegin=")
-                                            .skip(1)
-                                            .next()
-                                            .unwrap()
-                                            .trim(),
-                                    ),
-                                    content,
-                                ))
+                                // set filebegin mark
+                                // concate with dirpath
+                                mark = Some(dirpath.join(&line.trim()[11..]));
                             }
-                        })
-                        .collect::<Vec<(PathBuf, String)>>()
+                        } else if mark.is_some() {
+                            // push to data
+                            data.push(line.trim());
+                        }
+                    }
+
+                    filemap
                 }
             }
         })
