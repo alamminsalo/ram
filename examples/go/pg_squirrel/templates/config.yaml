@@ -1,0 +1,11 @@
+# database-layer config for ram
+# using sqlx + squirrel
+
+lang: go
+
+additional_files:
+  - template: squirrel.hbs
+    in: db
+
+paths:
+  db: db

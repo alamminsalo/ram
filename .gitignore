@@ -2,7 +2,9 @@
 **/*.rs.bk
 /examples/rust/**/model
 /examples/rust/**/api
+/examples/rust/**/db
 /examples/rust/**/target
 /examples/go/**/model
 /examples/go/**/api
+/examples/go/**/db
 /examples/**/*.sql

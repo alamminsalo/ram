@@ -1,0 +1,104 @@
+{{#each models}}
+{{#if (ne (ext "x-sql") "skip")}}
+%filebegin={{snakecase name}}.go
+package db
+
+// Automatically generated file. Do not edit.
+
+import (
+  "log"
+
+  . "../model"
+  sq "github.com/Masterminds/squirrel"
+  "github.com/jmoiron/sqlx"
+)
+
+// Selects columns for {{classname name}}
+func Select{{classname name}}(prefix string) sq.SelectBuilder {
+	return sq.Select("").
+		{{~#each primitive_properties}}
+		Column(prefix + ".{{snakecase name}} AS {{name}}").
+		{{~/each}}
+		From("{{snakecase name}}" + " AS " + prefix)
+}
+
+// Inserts new {{classname name}}
+func Insert{{classname name}}(db *sqlx.DB, item {{classname name}}) (id int, err error) {
+	log.Print("Insert{{classname name}}:", item)
+
+	// make colmap
+	colmap := map[string]interface{}{
+		{{~#each primitive_properties}}
+		"{{snakecase name}}": item.{{pascalcase name}},
+		{{~/each}}
+	}
+
+	// delete id column entry if it exists
+	delete(colmap, "id")
+
+	err = sq.
+		Insert("{{snakecase name}}").
+		SetMap(colmap).
+		Suffix("RETURNING id").
+		RunWith(db).
+		QueryRow().
+		Scan(&id)
+
+	return
+}
+
+// Updates {{classname name}}
+func Update{{classname name}}(db *sqlx.DB, id int, item {{classname name}}) (err error) {
+	log.Print("Update{{classname name}}:", id, item)
+
+	// make colmap
+	colmap := map[string]interface{}{
+		{{~#each primitive_properties}}
+		"{{snakecase name}}": item.{{pascalcase name}},
+		{{~/each}}
+	}
+
+	// delete id column entry if it exists
+	delete(colmap, "id")
+
+	_, err = sq.
+		Update("{{snakecase name}}").
+		SetMap(colmap).
+		Where(sq.Eq{"id": id}).
+		RunWith(db).
+		Exec()
+
+	return
+}
+
+// Deletes {{classname name}} by id
+func Delete{{classname name}}(db *sqlx.DB, id int) (err error) {
+	log.Print("Delete{{classname name}}:", id)
+
+	_, err = sq.
+		Delete("{{snakecase name}}").
+		Where(sq.Eq{"id": id}).
+		RunWith(db).
+		Exec()
+
+	return
+}
+
+// Reads {{classname name}} from select query
+func Read{{classname name}}(db *sqlx.DB, b sq.SelectBuilder) (items []{{classname name}}, err error) {
+	var (
+		query string
+		args  []interface{}
+	)
+
+	query, args, err = b.ToSql()
+
+	if err == nil {
+		err = db.Select(&items, query, args...)
+	}
+
+	return
+}
+
+{{/if}}
+{{/each}}
