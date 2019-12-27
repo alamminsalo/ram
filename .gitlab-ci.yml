@@ -51,14 +51,6 @@ rust-actix:
     - cd examples/rust/actix
     - cargo build
 
-go-models:
-  stage: test-generate
-  image: golang:1.13
-  script:
-    - target/release/ram -c examples/go/models_only/config.yaml -i examples/openapi/farm.yaml -o examples/go/models_only
-    - cd examples/go/models_only
-    - go build
-
 go-echo:
   stage: test-generate
   image: golang:1.13
@@ -66,4 +58,14 @@ go-echo:
     - target/release/ram -c examples/go/echo/config.yaml -i examples/openapi/farm.yaml -o examples/go/echo
     - cd examples/go/echo
     - go get -u github.com/labstack/echo/...
+    - go build
+      
+go-squirrel:
+  stage: test-generate
+  image: golang:1.13
+  script:
+    - target/release/ram -c examples/go/squirrel/templates/config.yaml -i examples/openapi/farm.yaml -o examples/go/squirrel
+    - cd examples/go/squirrel
+    - go get -u github.com/Masterminds/squirrel
+    - go get -u github.com/jmoiron/sqlx
     - go build
