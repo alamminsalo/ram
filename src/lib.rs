@@ -188,7 +188,6 @@ fn render_additional_files(
             let render = hb
                 .render_template(&template, &state)
                 .expect("failed to render additional file template");
-            // render = htmlescape::decode_html(&render.trim()).unwrap();
             // make path
             let dirpath: PathBuf = if let Some(ref abspath) = f.path {
                 // get from absolute path
@@ -207,32 +206,7 @@ fn render_additional_files(
             // If not, then assume the filenames are found inside the templates
             match f.filename {
                 Some(filename) => vec![(dirpath.join(filename), render)],
-                _ => {
-                    let mut filemap: Vec<(PathBuf, String)> = vec![];
-                    let mut mark: Option<PathBuf> = None;
-                    let mut data: Vec<&str> = vec![];
-
-                    for line in render.lines() {
-                        // check if ran into filebegin mark
-                        if line.len() > 10 && &line[..10] == "%filebegin" {
-                            // if mark is set, push contents and reset
-                            if mark.is_some() {
-                                filemap.push((mark.take().unwrap(), data.join("\n")));
-                                assert_eq!(mark.is_some(), false);
-                                data.clear();
-                            } else {
-                                // set filebegin mark
-                                // concate with dirpath
-                                mark = Some(dirpath.join(&line[11..]));
-                            }
-                        } else if mark.is_some() {
-                            // push to data
-                            data.push(line);
-                        }
-                    }
-
-                    filemap
-                }
+                _ => util::split_files(render, dirpath),
             }
         })
         .collect()

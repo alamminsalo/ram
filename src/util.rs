@@ -253,3 +253,66 @@ fn schemas_from_ref(
             }),
     )
 }
+
+pub fn split_files(content: String, dirpath: PathBuf) -> Vec<(PathBuf, String)> {
+    let mut filemap: Vec<(PathBuf, String)> = vec![];
+    let mut mark: Option<PathBuf> = None;
+    let mut data: Vec<&str> = vec![];
+
+    for line in content.lines() {
+        let line_trimmed = line.trim();
+        // check if ran into filebegin mark
+        if line_trimmed.len() > 10 && &line_trimmed[..10] == "%filebegin" {
+            // if mark is set, push contents and reset
+            if mark.is_some() {
+                filemap.push((mark.take().unwrap(), data.join("\n")));
+            }
+            // clear previous data
+            data.clear();
+            // set filebegin mark
+            // concate with dirpath
+            mark = Some(dirpath.join(&line_trimmed[11..]));
+        } else if mark.is_some() {
+            // push to data line as it was
+            data.push(line);
+        }
+    }
+
+    // push last file
+    if mark.is_some() {
+        filemap.push((mark.take().unwrap(), data.join("\n")));
+    }
+
+    filemap
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_split_files() {
+        let input = "
+        %filebegin=a.bar
+        aaaaaaaaaaaaaaa
+        %filebegin=b.bar
+        aaaaaaaaaaaaaaa
+        %filebegin=c.bar
+        aaaaaaaaaaaaaaa
+        %filebegin=d.bar
+        aaaaaaaaaaaaaaa
+        %filebegin=e.bar
+        aaaaaaaaaaaaa
+        %filebegin=f.bar
+        aaaaaaaaaaaaaaa
+        %filebegin=g.bar
+        aaaaaaaaaaaaaaa
+        %filebegin=h.bar
+        aaaaaaaaaaaaaaa
+        ";
+
+        let output = split_files(input.into(), PathBuf::new());
+
+        assert_eq!(output.len(), 8);
+    }
+}
