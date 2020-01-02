@@ -1,5 +1,5 @@
 [package]
-version = "0.6.0"
+version = "0.6.2"
 authors = ["alamminsalo <antti.lamminsalo@protonmail.com>"]
 description = "Rusty API Modeler. Generates models from openapi spec."
 edition = "2018"
