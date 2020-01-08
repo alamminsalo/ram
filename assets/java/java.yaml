@@ -1,0 +1,59 @@
+name: java
+
+# Dynamic formatting templates for things such as nullable types
+format:
+  # How struct/class type definition names are formatted
+  classname: "{{pascalcase value}}"
+  # Array field format
+  array: "List<{{type}}>"
+  # Formats filenames
+  filename: "{{pascalcase value}}.java"
+
+# default templates which can be overridden if needed
+templates:
+  model: "model.hbs"
+
+# default file paths
+paths:
+  model: "model"
+
+# primitive type mapping
+types:
+  integer:
+    alias:
+      - int
+    format:
+      default:
+        type: Integer
+      int32: 
+        type: Integer
+      int64: 
+        type: Integer
+
+  string:
+    format:
+      default:
+        type: String
+      date:
+        type: Date
+      date-time:
+        type: Date
+      binary:
+        type: byte[]
+      byte:
+        type: byte[]
+
+  number:
+    format:
+      default:
+        type: Float
+      float:
+        type: Float
+      double:
+        type: Double
+
+  boolean:
+    format:
+      default:
+        type: Boolean
+

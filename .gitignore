@@ -8,3 +8,6 @@
 /examples/go/**/api
 /examples/go/**/db
 /examples/**/*.sql
+/examples/java/**/model
+/examples/java/**/api
+/examples/java/**/db

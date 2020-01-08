@@ -1,0 +1,38 @@
+package test.models;
+
+import java.util.List;
+import java.util.Date;
+
+{{#if is_object}}
+public class {{pascalcase name}} {
+{{#each properties}}
+  private {{type}} {{ camelcase name }};
+{{/each}}
+{{#if additional_properties}}
+{{#with additional_properties}}
+{{#each properties}}
+  private {{type}} {{ camelcase name }};
+{{/each}}
+{{/with}}
+{{/if}}
+{{#each properties}}
+  public {{type}} get{{ pascalcase name }}() {
+    return this.{{camelcase name}};
+  }
+
+  public {{type}} set{{ pascalcase name }}({{type}} {{camelcase name}}) {
+    this.{{camelcase name}} = {{camelcase name}};
+  }
+{{/each}}
+{{#with additional_properties}}
+  public {{type}} get{{ pascalcase name }}() {
+    return this.{{camelcase name}};
+  }
+
+  public {{type}} set{{ pascalcase name }}({{type}} {{camelcase name}}) {
+    this.{{camelcase name}} = {{camelcase name}};
+{{#each properties}}
+{{/each}}
+{{/with}}
+}
+{{/if}}
