@@ -69,3 +69,12 @@ go-squirrel:
     - go get -u github.com/Masterminds/squirrel
     - go get -u github.com/jmoiron/sqlx
     - go build
+
+java-models:
+  stage: test-generate
+  image: openjdk:latest
+  script:
+    - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models/src
+    - cd examples/java/models
+    # TODO: main file
+    - javac main.java
