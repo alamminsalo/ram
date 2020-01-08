@@ -234,7 +234,7 @@ impl Lang {
         self.types
             .iter()
             .find(|(name, t)| *name == schema_type || t.alias.contains(schema_type))
-            .and_then(|(_, t)| t.format.get(format))
+            .and_then(|(_, t)| t.format.get(format).or_else(|| t.format.get("default")))
             .map(|f| f.schema_type.clone())
             .expect(&format!(
                 "Error while processing {}: failed to find primitive type {}",
