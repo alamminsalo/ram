@@ -9,7 +9,7 @@ Examples available in the following use cases:
 * Rust (Rocket, Actix)
 * Go (Echo)
 * Postgresql schema
-* C (simple structs)
+* Java (classes)
 
 However, a language can be implemented by supplying a language yaml file and some needed templates for generation. Contributions are welcome!
 
