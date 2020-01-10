@@ -72,7 +72,7 @@ go-squirrel:
 
 java-models:
   stage: test-generate
-  image: openjdk:latest
+  image: maven:3-jdk-8
   script:
     - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models/src/main/java/
     - cd examples/java/models
