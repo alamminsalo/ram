@@ -1,0 +1,12 @@
+package ram.generated.controller;
+
+import spark.Request;
+import spark.Response;
+
+public class {{pascalcase name}} {
+  {{#each resources}}
+  public String {{camelcase name}}(Request req, Response res) throws java.lang.UnsupportedOperationException {
+    throw new UnsupportedOperationException("Not implemented: {{pascalcase ../name}}::{{camelcase name}}");
+  }
+  {{/each}}
+}

@@ -1,0 +1,18 @@
+package ram.generated.controller;
+
+import static spark.Spark.*;
+
+public class Routes {
+{{#each resource_groups}}
+  private static {{pascalcase name}} {{camelcase name}}Service;
+{{/each}}
+
+  // Initializes API routes
+  public static void build() {
+  {{#each resource_groups}}
+    {{#each resources}}
+      {{lowercase method}}("{{path}}", {{camelcase ../name}}Service::{{camelcase name}});
+    {{/each}}
+  {{/each}}
+  }
+}

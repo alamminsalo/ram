@@ -1,0 +1,15 @@
+lang: "java"
+
+format:
+  pathparam: ":{{value}}"
+
+templates:
+  resource: templates/controller.hbs
+
+additional_files:
+  - filename: Routes.java
+    template: templates/routes.hbs
+    in: resource
+
+paths:
+  resource: ram/generated/controller

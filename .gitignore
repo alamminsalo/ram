@@ -12,3 +12,4 @@
 /examples/java/**/api
 /examples/java/**/db
 /examples/java/**/target/
+/examples/java/**/generated/
