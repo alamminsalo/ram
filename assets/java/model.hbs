@@ -1,4 +1,4 @@
-package test.models;
+package ram.generated.model;
 
 import java.util.List;
 import java.util.Date;
@@ -20,18 +20,19 @@ public class {{pascalcase name}} {
     return this.{{camelcase name}};
   }
 
-  public {{type}} set{{ pascalcase name }}({{type}} {{camelcase name}}) {
+  public void set{{ pascalcase name }}({{type}} {{camelcase name}}) {
     this.{{camelcase name}} = {{camelcase name}};
   }
 {{/each}}
 {{#with additional_properties}}
+{{#each properties}}
   public {{type}} get{{ pascalcase name }}() {
     return this.{{camelcase name}};
   }
 
-  public {{type}} set{{ pascalcase name }}({{type}} {{camelcase name}}) {
+  public void set{{ pascalcase name }}({{type}} {{camelcase name}}) {
     this.{{camelcase name}} = {{camelcase name}};
-{{#each properties}}
+  }
 {{/each}}
 {{/with}}
 }

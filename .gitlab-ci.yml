@@ -74,7 +74,7 @@ java-models:
   stage: test-generate
   image: openjdk:latest
   script:
-    - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models/src
+    - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models/src/main/java/
     - cd examples/java/models
-    # TODO: main file
-    - javac main.java
+    - mvn install
+    - java -jar target/App-1.jar

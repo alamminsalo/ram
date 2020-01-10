@@ -15,7 +15,7 @@ templates:
 
 # default file paths
 paths:
-  model: "model"
+  model: "ram/generated/model"
 
 # primitive type mapping
 types:

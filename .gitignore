@@ -11,3 +11,4 @@
 /examples/java/**/model
 /examples/java/**/api
 /examples/java/**/db
+/examples/java/**/target/
