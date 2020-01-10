@@ -6,6 +6,10 @@ stages:
   - test
   - test-generate
 
+artifacts:
+  paths:
+    - examples/
+
 build:
   image: rust:1.39-stretch
   stage: build 
