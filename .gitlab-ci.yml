@@ -105,3 +105,13 @@ java-spark:
   artifacts:
     paths:
       - examples/java/spark/
+
+postgres-schema:
+  stage: test-generate
+  image: alpine:latest
+  script:
+    - target/release/ram -c examples/postgresql/postgresql.yaml -i examples/openapi/farm.yaml -o examples/postgresql/
+    - cat examples/postgresql/schema.sql
+  artifacts:
+    paths:
+      - examples/postgresql

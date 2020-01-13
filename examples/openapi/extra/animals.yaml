@@ -1,5 +1,6 @@
 Dog:
-  type: object
+  x-sql-table: "dog"
+  x-sql-pk: "id"
   properties:
     id:
       type: integer
@@ -9,7 +10,8 @@ Dog:
       type: string
 
 Cat:
-  type: object
+  x-sql-table: "cat"
+  x-sql-pk: "id"
   properties:
     id:
       type: integer
@@ -19,7 +21,8 @@ Cat:
       type: string
 
 Cow:
-  type: object
+  x-sql-table: "cow"
+  x-sql-pk: "id"
   properties:
     id:
       type: integer
