@@ -148,6 +148,12 @@ impl Model {
             .properties
             .iter()
             .cloned()
+            .chain(
+                self.additional_properties
+                    .iter()
+                    .cloned()
+                    .flat_map(|p| p.primitive_properties),
+            )
             .filter(|f| f.is_primitive)
             .collect();
     }
@@ -157,6 +163,12 @@ impl Model {
             .properties
             .iter()
             .cloned()
+            .chain(
+                self.additional_properties
+                    .iter()
+                    .cloned()
+                    .flat_map(|p| p.object_properties),
+            )
             .filter(|f| f.is_object)
             .collect()
     }
@@ -166,6 +178,12 @@ impl Model {
             .properties
             .iter()
             .cloned()
+            .chain(
+                self.additional_properties
+                    .iter()
+                    .cloned()
+                    .flat_map(|p| p.array_properties),
+            )
             .filter(|f| f.is_array)
             .collect()
     }
