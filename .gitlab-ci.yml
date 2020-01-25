@@ -38,7 +38,7 @@ rust-rocket:
   stage: test-generate
   image: rust:1.39-stretch
   script:
-    - target/release/ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/src
+    - target/release/ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/
     - cd examples/rust/rocket
     - rustup toolchain add nightly
     - cargo +nightly build
@@ -50,12 +50,24 @@ rust-actix:
   stage: test-generate
   image: rust:1.39-stretch
   script:
-    - target/release/ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/src
+    - target/release/ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/
     - cd examples/rust/actix
     - cargo build
   artifacts:
     paths:
       - examples/rust/actix/
+
+rust-models:
+  stage: test-generate
+  image: rust:1.39-stretch
+  script:
+    - target/release/ram -c examples/rust/models/config.yaml.yml -i examples/openapi/farm.yaml -o examples/rust/models/
+    - cd examples/rust/models
+    - cargo build
+  artifacts:
+    paths:
+      - examples/rust/models/
+
 
 go-echo:
   stage: test-generate

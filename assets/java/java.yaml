@@ -17,7 +17,7 @@ files:
 
 # default file paths
 paths:
-  model: ram/generated/model
+  model: src/main/java/ram/generated/model
 
 # primitive type mapping
 types:

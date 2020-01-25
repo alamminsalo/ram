@@ -1,0 +1,4 @@
+lang: rust
+
+paths:
+  model: src/model

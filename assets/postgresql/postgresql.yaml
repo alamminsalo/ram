@@ -6,7 +6,7 @@ format:
 
 # Additional files to generate, optional
 # These files are given the complete application state for free templating usage
-additional_files:
+files:
   - filename: "schema.sql"
     template: "schema.hbs"
     in: root

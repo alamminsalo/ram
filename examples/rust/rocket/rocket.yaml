@@ -5,7 +5,7 @@ lang: rust
 format:
   pathparam: "<{{snakecase value}}>"
 
-additional_files:
+files:
   - template: templates/resource.hbs
     in: resource
   - filename: mod.rs
@@ -13,6 +13,6 @@ additional_files:
     in: resource
 
 paths:
-  resource: api
+  resource: src/api
 
 

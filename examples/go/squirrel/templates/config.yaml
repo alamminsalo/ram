@@ -3,7 +3,7 @@
 
 lang: go
 
-additional_files:
+files:
   - template: squirrel.hbs
     in: db
 

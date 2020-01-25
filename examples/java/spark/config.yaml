@@ -3,7 +3,7 @@ lang: "java"
 format:
   pathparam: ":{{value}}"
 
-additional_files:
+files:
   - template: templates/controller.hbs
     in: resource
   - filename: Routes.java
@@ -11,4 +11,4 @@ additional_files:
     in: resource
 
 paths:
-  resource: ram/generated/controller
+  resource: src/main/java/ram/generated/controller

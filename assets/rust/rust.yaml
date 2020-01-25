@@ -23,14 +23,11 @@ files:
     in: model
   - filename: "mod.rs"
     template: "mod_model.hbs"
-    # Use either 'in' to specify file path from ram config
     in: model
-    # Or 'path' for absolute path to template
-    # path: path/to/template/template.hbs
 
 # default file paths
 paths:
-  model: "model"
+  model: src/model
 
 # primitive type mapping
 types:
