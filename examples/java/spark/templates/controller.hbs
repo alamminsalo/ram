@@ -2,10 +2,13 @@ package ram.generated.controller;
 
 import spark.Request;
 import spark.Response;
+import ram.generated.model.*;
+import java.util.List;
 
 public class {{pascalcase name}} {
   {{#each resources}}
-  public String {{camelcase name}}(Request req, Response res) throws java.lang.UnsupportedOperationException {
+      public {{#if (responses.200)}}{{responses.200.type}}{{/if}}{{~#unless (responses.200)}}Object{{/unless}} 
+      {{camelcase name}}(Request req, Response res) throws java.lang.UnsupportedOperationException {
     throw new UnsupportedOperationException("Not implemented: {{pascalcase ../name}}::{{camelcase name}}");
   }
   {{/each}}

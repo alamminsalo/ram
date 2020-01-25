@@ -1,6 +1,9 @@
 use super::param::{get_params_operation, get_params_path, Param};
+use super::util;
 use super::Lang;
+use super::Model;
 use itertools::Itertools;
+use openapi::v3_0::ObjectOrReference;
 use openapi::v3_0::{Operation, Parameter, PathItem};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
@@ -27,6 +30,9 @@ pub struct Resource {
 
     /// Query params
     pub query_params: Vec<Param>,
+
+    /// Result
+    pub responses: HashMap<String, Model>,
 }
 
 impl Resource {
@@ -54,6 +60,28 @@ impl Resource {
             description: op.description.clone(),
             path_params,
             query_params,
+            responses: op
+                .responses
+                .iter()
+                .filter_map(|(code, resp)| {
+                    match resp.content {
+                        Some(ref contentmap) => {
+                            // by default use application/json types
+                            // TODO how to parse multiple content types
+                            match contentmap.get("application/json") {
+                                Some(mediatype) => match &mediatype.schema {
+                                    Some(ObjectOrReference::Object(schema)) => {
+                                        Some((code.clone(), Model::new("", &schema)))
+                                    }
+                                    _ => None,
+                                },
+                                _ => None,
+                            }
+                        }
+                        _ => None,
+                    }
+                })
+                .collect(),
         }
     }
 
@@ -73,6 +101,11 @@ impl Resource {
             path: lang.format_path(self.path),
             query_params: tr_params(self.query_params),
             path_params: tr_params(self.path_params),
+            responses: self
+                .responses
+                .into_iter()
+                .map(|(key, model)| (key, lang.translate(model)))
+                .collect(),
             ..self
         }
     }
