@@ -64,7 +64,7 @@ rust-models:
   stage: test-generate
   image: rust:1.39-stretch
   script:
-    - target/release/ram -c examples/rust/models/config.yaml.yml -i examples/openapi/farm.yaml -o examples/rust/models/
+    - target/release/ram -c examples/rust/models/config.yaml -i examples/openapi/farm.yaml -o examples/rust/models/
     - cd examples/rust/models
     - cargo build
   artifacts:
