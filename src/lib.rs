@@ -43,7 +43,8 @@ pub fn generate_files(
     output: &Path, // output folder
 ) {
     println!("generating files...");
-    let mut hb = util::handlebars();
+    let mut hb = Handlebars::new();
+    util::init_handlebars(&mut hb);
 
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");

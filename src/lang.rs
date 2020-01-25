@@ -2,12 +2,13 @@ use super::assets::Assets;
 use super::util;
 use super::{Model, ModelType};
 use failure::Fallible;
+use handlebars::Handlebars;
 use handlebars::*;
 use itertools::Itertools;
 use maplit::hashmap;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -140,7 +141,8 @@ impl Lang {
     }
 
     pub fn format_map(&self, template_key: &str, map: &HashMap<&str, &str>) -> String {
-        let mut hb = util::handlebars();
+        let mut hb = Handlebars::new();
+        util::init_handlebars(&mut hb);
         self.add_helpers(&mut hb);
         self.format
             .get(template_key)
@@ -248,7 +250,7 @@ impl Lang {
             let ext = move |h: &Helper,
                             _: &Handlebars,
                             c: &Context,
-                            r: &mut RenderContext,
+                            _r: &mut RenderContext,
                             out: &mut dyn Output|
                   -> HelperResult {
                 // get parameter from helper or throw an error
@@ -257,20 +259,17 @@ impl Lang {
                     .and_then(|v| v.value().as_str())
                     .unwrap_or("")
                     .to_string();
+
                 // get value {param} from local context extensions
                 let value: String = c
-                    .navigate(".", &VecDeque::new(), &r.get_path(), &VecDeque::new())
-                    .map(|local| {
-                        local
-                            .as_json()
-                            .get("extensions")
-                            .and_then(|ext| ext.as_object())
-                            .and_then(|ext| ext.get(&param))
-                            .and_then(|val| val.as_str())
-                            .unwrap_or("")
-                            .to_owned()
-                    })
-                    .unwrap_or_default();
+                    .data()
+                    .get("extensions")
+                    .and_then(|ext| ext.as_object())
+                    .and_then(|ext| ext.get(&param))
+                    .and_then(|val| val.as_str())
+                    .unwrap_or("")
+                    .to_owned();
+
                 // write out value
                 out.write(&value)?;
                 Ok(())

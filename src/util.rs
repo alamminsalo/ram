@@ -46,9 +46,7 @@ pub fn model_name_from_ref(ref_path: &str) -> Option<String> {
     }
 }
 
-pub fn handlebars() -> Handlebars {
-    let mut hb = Handlebars::new();
-
+pub fn init_handlebars(hb: &mut Handlebars) {
     // set strict mode (fails on field not found)
     hb.set_strict_mode(true);
 
@@ -56,9 +54,7 @@ pub fn handlebars() -> Handlebars {
     hb.register_escape_fn(handlebars::no_escape);
 
     // register custom helpers
-    helper::register_helpers(&mut hb);
-
-    hb
+    helper::register_helpers(hb);
 }
 
 pub fn collect_schemas<'a>(spec: &'a Spec, root: &'a Path) -> Fallible<HashMap<String, Schema>> {

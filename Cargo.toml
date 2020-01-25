@@ -1,5 +1,4 @@
 [package]
-version = "0.6.3"
 authors = ["alamminsalo <antti.lamminsalo@protonmail.com>"]
 description = "Rusty API Modeler. Generates models from openapi spec."
 edition = "2018"
@@ -8,6 +7,7 @@ homepage = "https://github.com/alamminsalo/ram"
 license = "MIT"
 name = "ram"
 repository = "https://github.com/alamminsalo/ram"
+version = "0.6.3"
 [[bin]]
 name = "ram"
 path = "src/main.rs"
@@ -16,7 +16,7 @@ path = "src/main.rs"
 Inflector = "0.11.4"
 failure = "0.1.5"
 glob = "0.3.0"
-handlebars = "2.0.2"
+handlebars = "3.0.1"
 htmlescape = "0.3.1"
 itertools = "0.8.1"
 maplit = "1.0.2"
