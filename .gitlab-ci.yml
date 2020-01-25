@@ -123,7 +123,7 @@ java-spark:
 
 postgres-schema:
   stage: test-generate
-  image: alpine:latest
+  image: ubuntu:latest
   script:
     - target/release/ram -c examples/postgresql/postgresql.yaml -i examples/openapi/farm.yaml -o examples/postgresql/
     - cat examples/postgresql/schema.sql
