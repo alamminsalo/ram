@@ -1,5 +1,4 @@
 use super::param::{get_params_operation, get_params_path, Param};
-use super::util;
 use super::Lang;
 use super::Model;
 use itertools::Itertools;
@@ -61,25 +60,20 @@ impl Resource {
             path_params,
             query_params,
             responses: op
+                // Take 200 application/json from response content and apply that as type
                 .responses
                 .iter()
                 .filter_map(|(code, resp)| {
-                    match resp.content {
-                        Some(ref contentmap) => {
-                            // by default use application/json types
-                            // TODO how to parse multiple content types
-                            match contentmap.get("application/json") {
-                                Some(mediatype) => match &mediatype.schema {
-                                    Some(ObjectOrReference::Object(schema)) => {
-                                        Some((code.clone(), Model::new("", &schema)))
-                                    }
-                                    _ => None,
-                                },
+                    resp.content.as_ref().and_then(|contentmap| {
+                        contentmap.get("application/json").and_then(|mediatype| {
+                            match &mediatype.schema {
+                                Some(ObjectOrReference::Object(schema)) => {
+                                    Some((code.clone(), Model::new("", &schema)))
+                                }
                                 _ => None,
                             }
-                        }
-                        _ => None,
-                    }
+                        })
+                    })
                 })
                 .collect(),
         }
