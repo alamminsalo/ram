@@ -13,3 +13,6 @@
 /examples/java/**/db
 /examples/java/**/target/
 /examples/java/**/generated/
+examples/java/**/.classpath
+examples/java/**/.project
+examples/java/**/.settings/
