@@ -97,7 +97,7 @@ pub fn generate_files(
 
 // runs lang translations on all models
 fn translate_models(lang: &Lang, models: Vec<Model>) -> Vec<Model> {
-    models.into_iter().map(|m| lang.translate(m)).collect()
+    models.into_iter().map(|m| m.translate(lang)).collect()
 }
 
 fn translate_resource_groups(

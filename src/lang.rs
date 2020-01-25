@@ -1,6 +1,6 @@
 use super::assets::Assets;
 use super::util;
-use super::{Model, ModelType};
+use super::Model;
 use failure::Fallible;
 use handlebars::Handlebars;
 use handlebars::*;
@@ -150,69 +150,8 @@ impl Lang {
             .unwrap_or_else(|| map.get("value").unwrap().to_string())
     }
 
-    /*
-     * Model translation functions
-     */
-    /// Translates model
-    pub fn translate(&self, m: Model) -> Model {
-        let mut translated_type = match m.model_type() {
-            ModelType::Array => self.translate_array(&m),
-            ModelType::Object => {
-                if let Some(ref refpath) = m.ref_path {
-                    // this is a reference to another object
-                    // get model name from ref_path
-                    util::model_name_from_ref(&refpath)
-                        .map(|t| self.translate_modelname(&t))
-                        .expect("failed to get model name from ref")
-                } else {
-                    // this is an inline object, which we name by it's key
-                    self.translate_modelname(&m.name)
-                }
-            }
-            ModelType::Primitive => self.translate_primitive(
-                &m.schema_type,
-                m.format.as_ref().unwrap_or(&String::from("default")),
-            ),
-        };
-
-        // format if nullable
-        if m.nullable {
-            translated_type = self
-                .format("nullable", &translated_type)
-                .unwrap_or(translated_type)
-        };
-
-        Model {
-            schema_type: translated_type,
-            properties: m
-                .properties
-                .into_iter()
-                .map(|m| Box::new(self.translate(*m)))
-                .collect(),
-            additional_properties: m
-                .additional_properties
-                .and_then(|m| Some(Box::new(self.translate(*m)))),
-            primitive_properties: m
-                .primitive_properties
-                .into_iter()
-                .map(|m| Box::new(self.translate(*m)))
-                .collect(),
-            object_properties: m
-                .object_properties
-                .into_iter()
-                .map(|m| Box::new(self.translate(*m)))
-                .collect(),
-            array_properties: m
-                .array_properties
-                .into_iter()
-                .map(|m| Box::new(self.translate(*m)))
-                .collect(),
-            ..m
-        }
-    }
-
     // applies `classname` and `object_property` to input str
-    fn translate_modelname(&self, name: &String) -> String {
+    pub fn translate_modelname(&self, name: &String) -> String {
         // format using `classname` formatter if present
         let modelname = self.format("classname", &name).unwrap_or(name.clone());
         // format using `object_property` formatter if present
@@ -221,9 +160,14 @@ impl Lang {
     }
 
     // translates to array type by child item
-    fn translate_array(&self, m: &Model) -> String {
+    pub fn translate_array(&self, m: &Model) -> String {
         // translate child
-        let child = self.translate(*m.items.as_ref().expect("array child type is None").clone());
+        let child = m
+            .items
+            .as_ref()
+            .expect("array child type is None")
+            .clone()
+            .translate(self);
         // array formatter
         self.format_map(
             "array",
@@ -232,7 +176,7 @@ impl Lang {
     }
 
     // returns translated primitive type
-    fn translate_primitive(&self, schema_type: &String, format: &String) -> String {
+    pub fn translate_primitive(&self, schema_type: &String, format: &String) -> String {
         self.types
             .iter()
             .find(|(name, t)| *name == schema_type || t.alias.contains(schema_type))

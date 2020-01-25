@@ -84,7 +84,7 @@ impl Resource {
             params
                 .into_iter()
                 .map(|p| Param {
-                    model: lang.translate(p.model),
+                    model: p.model.translate(lang),
                     ..p
                 })
                 .collect()
@@ -98,7 +98,7 @@ impl Resource {
             responses: self
                 .responses
                 .into_iter()
-                .map(|(key, model)| (key, lang.translate(model)))
+                .map(|(key, model)| (key, model.translate(lang)))
                 .collect(),
             ..self
         }
