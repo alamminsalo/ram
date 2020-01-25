@@ -3,10 +3,9 @@ lang: "java"
 format:
   pathparam: ":{{value}}"
 
-templates:
-  resource: templates/controller.hbs
-
 additional_files:
+  - template: templates/controller.hbs
+    in: resource
   - filename: Routes.java
     template: templates/routes.hbs
     in: resource

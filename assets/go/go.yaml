@@ -12,8 +12,9 @@ format:
   filename: "{{snakecase value}}.go"
 
 # default templates which can be overridden if needed
-templates:
-  model: "model.hbs"
+files:
+  - template: "model.hbs"
+    in: model
 
 # default file paths
 paths:

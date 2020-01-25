@@ -1,4 +1,6 @@
-package ram.generated.model;
+{{#each models}}
+%filebegin={{filename name}}
+package {{pkg "model"}};
 
 import java.util.List;
 import java.util.Date;
@@ -37,3 +39,4 @@ public class {{pascalcase name}} {
 {{/with}}
 }
 {{/if}}
+{{/each}}

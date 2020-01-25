@@ -1,3 +1,5 @@
+{{#each resource_groups}}
+%filebegin={{filename name}}
 package api
 
 import (
@@ -9,4 +11,5 @@ import (
 func {{name}}(c echo.Context) error {
   return c.NoContent(501)
 }
+{{/each}}
 {{/each}}

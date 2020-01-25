@@ -26,7 +26,7 @@ pub struct Config {
 
     /// Additional files to generate
     #[serde(default)]
-    pub additional_files: Vec<AddFile>,
+    pub files: Vec<AddFile>,
 }
 
 impl Config {
@@ -82,10 +82,10 @@ impl Config {
             .unwrap()
     }
 
-    pub fn get_additional_files(&self, lang: &Lang) -> Vec<AddFile> {
-        lang.additional_files_relative()
+    pub fn get_files(&self, lang: &Lang) -> Vec<AddFile> {
+        lang.files_relative()
             .into_iter()
-            .chain(self.additional_files.iter().map(|f: &AddFile| {
+            .chain(self.files.iter().map(|f: &AddFile| {
                 // join relative cfg path
                 let template = util::join_relative(&self.path, &PathBuf::from(&f.template))
                     .to_str()

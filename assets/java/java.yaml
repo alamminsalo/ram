@@ -2,6 +2,7 @@ name: java
 
 # Dynamic formatting templates for things such as nullable types
 format:
+  pkg: "generated.ram.{{value}}"
   # How struct/class type definition names are formatted
   classname: "{{pascalcase value}}"
   # Array field format
@@ -10,12 +11,13 @@ format:
   filename: "{{pascalcase value}}.java"
 
 # default templates which can be overridden if needed
-templates:
-  model: "model.hbs"
+files:
+  - template: model.hbs
+    in: model
 
 # default file paths
 paths:
-  model: "ram/generated/model"
+  model: ram/generated/model
 
 # primitive type mapping
 types:

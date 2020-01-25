@@ -22,7 +22,7 @@ pub struct Lang {
     #[serde(default)]
     pub format: HashMap<String, String>,
     #[serde(default)]
-    pub additional_files: Vec<AddFile>,
+    pub files: Vec<AddFile>,
     #[serde(default)]
     pub paths: HashMap<String, String>,
     #[serde(default)]
@@ -113,8 +113,8 @@ impl Lang {
     }
 
     // Returns vec of additional files, with joined relative paths
-    pub fn additional_files_relative(&self) -> Vec<AddFile> {
-        self.additional_files
+    pub fn files_relative(&self) -> Vec<AddFile> {
+        self.files
             .iter()
             .map(|af| AddFile {
                 template: util::join_relative(&self.path, &PathBuf::from(&af.template))

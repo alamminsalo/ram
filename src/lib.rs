@@ -42,7 +42,7 @@ pub fn generate_files(
     mut resource_groups: Vec<ResourceGroup>,
     output: &Path, // output folder
 ) {
-    println!("generating files...");
+    println!("Generating files...");
     let mut hb = Handlebars::new();
     util::init_handlebars(&mut hb);
 
@@ -56,43 +56,19 @@ pub fn generate_files(
     models = translate_models(&lang, models);
     resource_groups = translate_resource_groups(&lang, resource_groups);
 
-    if lang.templates.contains_key("model") {
-        // write models
-        println!("writing models...");
-        let models_path = cfg.get_path("model", &lang);
-        util::write_files(
-            &output.join(&models_path),
-            render_models(&mut hb, &cfg, &lang, &models),
-        );
-    }
-
-    // write resources
-    if cfg.templates.contains_key("resource") {
-        // translate resource params
-        println!("writing resources...");
-        let resources_path = cfg.get_path("resource", &lang);
-        util::write_files(
-            &output.join(&resources_path),
-            render_resources(&mut hb, &cfg, &lang, &resource_groups),
-        );
-    }
-
-    // additional files
-    let additional_files: Vec<AddFile> = cfg.get_additional_files(&lang);
-    if !additional_files.is_empty() {
-        println!("writing additional lang files...");
+    // render files
+    let files: Vec<AddFile> = cfg.get_files(&lang);
+    if !files.is_empty() {
+        println!("Rendering templates...");
         let state = State {
             cfg,
             models,
             resource_groups,
         };
-        util::write_files(
-            &output,
-            render_additional_files(&mut hb, &state, &lang, additional_files),
-        );
+        util::write_files(&output, render_files(&mut hb, &state, &lang, files));
     }
 
-    println!("generation OK")
+    println!("All operations finished!")
 }
 
 // runs lang translations on all models
@@ -119,69 +95,14 @@ fn translate_resource_groups(
         .collect()
 }
 
-fn render_models(
-    hb: &mut Handlebars,
-    cfg: &Config,
-    lang: &Lang,
-    models: &Vec<Model>,
-) -> HashMap<PathBuf, String> {
-    // compile models template
-    let template_path = cfg.get_template("model", &lang);
-
-    // get data from assets and compile it
-    let data = Assets::read_file(&PathBuf::from(&template_path)).unwrap();
-    hb.register_template_string("model", &data)
-        .expect("failed to compile models template");
-
-    // render items
-    models
-        .iter()
-        .map(|model| {
-            let render = hb.render("model", &model).unwrap();
-            (
-                PathBuf::from(lang.format("filename", &model.name).unwrap()),
-                htmlescape::decode_html(&render).unwrap(),
-            )
-        })
-        .collect()
-}
-
-fn render_resources(
-    hb: &mut Handlebars,
-    cfg: &Config,
-    lang: &Lang,
-    resource_groups: &Vec<ResourceGroup>,
-) -> HashMap<PathBuf, String> {
-    // compile models template
-    let template_path = cfg.get_template("resource", &lang);
-
-    // get data from assets and compile it
-    let data = Assets::read_file(&PathBuf::from(&template_path)).unwrap();
-
-    hb.register_template_string("resource", &data)
-        .expect("failed to compile models template");
-
-    // render items
-    resource_groups
-        .iter()
-        .map(|rg| {
-            let render = hb.render("resource", &rg).unwrap();
-            (
-                PathBuf::from(lang.format("filename", &rg.name).unwrap()),
-                htmlescape::decode_html(&render).unwrap(),
-            )
-        })
-        .collect()
-}
-
 // Renders extra files
-fn render_additional_files(
+fn render_files(
     hb: &mut Handlebars,
     state: &State,
     lang: &Lang,
-    additional_files: Vec<AddFile>,
+    files: Vec<AddFile>,
 ) -> HashMap<PathBuf, String> {
-    additional_files
+    files
         .into_iter()
         .flat_map(|f: AddFile| {
             // get data from assets and render it

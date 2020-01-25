@@ -1,3 +1,5 @@
+{{#each resource_groups}}
+%filebegin={{filename name}}
 use super::model::*;
 
 {{#each resources}}
@@ -9,4 +11,5 @@ pub fn {{snakecase name}}(
   ) -> {{#if (responses.200)}}{{responses.200.type}}{{/if}}{{~#unless (responses.200)}}String{{/unless}} {
   "".into()
 }
+{{/each}}
 {{/each}}

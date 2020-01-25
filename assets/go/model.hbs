@@ -1,3 +1,5 @@
+{{#each models}}
+%filebegin={{filename name}}
 package model
 
 {{#if has_datetime}}
@@ -23,3 +25,4 @@ type {{pascalcase name}} struct {
 {{#if is_array}}
 type {{name}} {{type}}
 {{/if}}
+{{/each}}

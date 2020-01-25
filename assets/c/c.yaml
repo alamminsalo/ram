@@ -12,13 +12,13 @@ format:
   filename: "{{snakecase value}}.h"
 
 # default templates which can be overridden if needed
-templates:
-  model: "c/model.hbs"
+files:
+  - template: "c/model.hbs"
+    filename: "structs.h"
 
 # default file paths
 paths:
   root: "src"
-  model: "structs"
 
 # primitive type mapping
 types:

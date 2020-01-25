@@ -2,10 +2,9 @@
 
 lang: rust
 
-templates:
-  resource: templates/resource.hbs
-
 additional_files:
+  - template: templates/resource.hbs
+    in: resource
   - filename: mod.rs
     template: templates/mod_resource.hbs
     in: resource
