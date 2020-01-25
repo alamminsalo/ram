@@ -2,19 +2,19 @@ package model
 
 {{#if has_datetime}}
 import (
-  "time"
+  time
 )
 {{/if}}
 
 {{#if is_object}}
 type {{pascalcase name}} struct {
 {{#each properties}}
-  {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ ext "x-go-custom-tag" }}`
+  {{ pascalcase name }} {{ type }} `json:{{ camelcase name }} {{ x-go-custom-tag }}`
 {{/each}}
 {{#if additional_properties}}
 {{#with additional_properties}}
 {{#each properties}}
-  {{ pascalcase name }} {{type}} `json:"-" {{ ext "x-go-custom-tag" }}`
+  {{ pascalcase name }} {{type}} `json:- {{ x-go-custom-tag }}`
 {{/each}}
 {{/with}}
 {{/if}}

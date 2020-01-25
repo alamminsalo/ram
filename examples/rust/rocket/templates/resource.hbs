@@ -1,10 +1,12 @@
+use super::model::*;
+
 {{#each resources}}
 #[{{lowercase method}}("{{path}}")]
 pub fn {{snakecase name}}(
   {{#each path_params}}
   {{r (snakecase name)}}: {{model.type}},
   {{/each}}
-  ) -> String {
+  ) -> {{#if (responses.200)}}{{responses.200.type}}{{/if}}{{~#unless (responses.200)}}String{{/unless}} {
   "".into()
 }
 {{/each}}

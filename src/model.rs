@@ -25,6 +25,12 @@ pub struct Model {
     pub nullable: bool,
     #[serde(skip)]
     pub ref_path: Option<String>,
+
+    /// Model extensions.
+    /// Used for additional non-openapi specific information.
+    /// Examples: `x-sql-table`, `x-go-tag`
+    /// Flattened: use directly from model `{{ x-sql-name }}`
+    #[serde(flatten)]
     pub extensions: HashMap<String, String>,
 
     // additional helper properties, these are derived from the 'base' properties

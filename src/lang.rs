@@ -190,36 +190,6 @@ impl Lang {
 
     // adds helpers to handlebars instance
     pub fn add_helpers(&self, hb: &mut Handlebars) {
-        {
-            let ext = move |h: &Helper,
-                            _: &Handlebars,
-                            c: &Context,
-                            _r: &mut RenderContext,
-                            out: &mut dyn Output|
-                  -> HelperResult {
-                // get parameter from helper or throw an error
-                let param = h
-                    .param(0)
-                    .and_then(|v| v.value().as_str())
-                    .unwrap_or("")
-                    .to_string();
-
-                // get value {param} from local context extensions
-                let value: String = c
-                    .data()
-                    .get("extensions")
-                    .and_then(|ext| ext.as_object())
-                    .and_then(|ext| ext.get(&param))
-                    .and_then(|val| val.as_str())
-                    .unwrap_or("")
-                    .to_owned();
-
-                // write out value
-                out.write(&value)?;
-                Ok(())
-            };
-            hb.register_helper("ext", Box::new(ext));
-        }
         // add custom formatter helpers
         for k in self.format.keys() {
             let lang = self.clone();

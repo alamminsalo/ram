@@ -60,12 +60,12 @@ import (
 {{#if is_object}}
 type {{pascalcase name}} struct {
 {{#each properties}}
-  {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ ext "x-go-custom-tag" }}`
+  {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ x-go-custom-tag }}`
 {{/each}}
 {{#if additional_properties}}
 {{#with additional_properties}}
 {{#each properties}}
-  {{ pascalcase name }} {{type}} `json:"-" {{ ext "x-go-custom-tag" }}`
+  {{ pascalcase name }} {{type}} `json:"-" {{ x-go-custom-tag }}`
 {{/each}}
 {{/with}}
 {{/if}}
@@ -87,7 +87,6 @@ Includes some built-in [custom helpers](https://handlebars-draft.knappi.org/guid
 * camelcase - camelCase
 * kebabcase - kebab-case
 * r - Formats reserved keywords according to language spec (Rust example: type -> r#type). Kept short for convenience.
-* ext - Returns extension value (eg. With definition `x-go-custom-tag: json:"-"`, `{{ext "x-go-custom-tag"}}` => `json:"-"`)
 ```
 
 Also includes [all built-in helpers from handlebars lib](https://docs.rs/handlebars/3.0.0-beta.1/handlebars/#built-in-helpers).
