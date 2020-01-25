@@ -15,4 +15,4 @@ files:
     in: resource
 
 paths:
-  resource: src/api
+  resource: api

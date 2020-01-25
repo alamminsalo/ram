@@ -18,7 +18,7 @@ files:
 
 # default file paths
 paths:
-  model: src/model
+  model: model
 
 # primitive type mapping
 types:
