@@ -98,7 +98,7 @@ java-models:
   stage: test-generate
   image: maven:3-jdk-8
   script:
-    - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models/src/main/java/
+    - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models
     - cd examples/java/models
     - mvn install
     - java -jar target/App-1.jar
@@ -110,7 +110,7 @@ java-spark:
   stage: test-generate
   image: maven:3-jdk-8
   script:
-    - target/release/ram -c examples/java/spark/config.yaml -i examples/openapi/farm.yaml -o examples/java/spark/src/main/java/
+    - target/release/ram -c examples/java/spark/config.yaml -i examples/openapi/farm.yaml -o examples/java/spark
     - cd examples/java/spark
     - mvn install
     - java -jar target/SparkApp-1.jar

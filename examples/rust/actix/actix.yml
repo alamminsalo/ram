@@ -10,4 +10,4 @@ files:
     in: resource
 
 paths:
-  resource: api
+  resource: src/api
