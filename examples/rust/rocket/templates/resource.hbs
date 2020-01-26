@@ -1,10 +1,15 @@
+{{#each resource_groups}}
+%filebegin={{filename name}}
+use std::panic;
+
 {{#each resources}}
 #[{{lowercase method}}("{{path}}")]
 pub fn {{snakecase name}}(
   {{#each path_params}}
   {{r (snakecase name)}}: {{model.type}},
   {{/each}}
-  ) -> String {
-  "".into()
+  ) -> () {
+  panic!("not implemented")
 }
+{{/each}}
 {{/each}}

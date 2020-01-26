@@ -4,13 +4,12 @@
 # Can be file or built-in yaml spec
 lang: go
 
-format:
+helpers:
   pathparam: ":{{value}}"
 
-templates:
-  resource: templates/resource.hbs
-
-additional_files:
+files:
+  - template: templates/resource.hbs
+    in: resource
   - filename: router.go
     template: templates/router.hbs
     in: resource

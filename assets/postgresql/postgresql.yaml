@@ -1,12 +1,11 @@
-name: postgresql 
-
+# Postgres spec file
 # Dynamic formatting templates for things such as nullable types
-format:
+helpers:
  r: '"{{value}}"'
 
 # Additional files to generate, optional
 # These files are given the complete application state for free templating usage
-additional_files:
+files:
   - filename: "schema.sql"
     template: "schema.hbs"
     in: root

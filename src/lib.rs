@@ -18,6 +18,7 @@ pub use state::State;
 
 use handlebars::Handlebars;
 use openapi::v3_0::Spec;
+use serde_json::json;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -30,74 +31,61 @@ pub fn generate_models_v3(spec: &Spec, root: &Path) -> Vec<Model> {
         .collect()
 }
 
-pub fn generate_resources_v3(spec: &Spec, root: &Path) -> Vec<ResourceGroup> {
+pub fn generate_resources_v3(
+    spec: &Spec,
+    root: &Path,
+    grouping_strategy: GroupingStrategy,
+) -> Vec<ResourceGroup> {
     let parameters_map =
         util::collect_parameters(spec, root).expect("failed to collect parameters");
-    resource::group_resources(&spec.paths, GroupingStrategy::FirstTag, &parameters_map)
+    resource::group_resources(&spec.paths, grouping_strategy, &parameters_map)
 }
 
-pub fn generate_files(
+/// Creates ready to use state value with translated models
+pub fn create_state(
     cfg: Config,
     mut models: Vec<Model>,
     mut resource_groups: Vec<ResourceGroup>,
-    output: &Path, // output folder
-) {
-    println!("generating files...");
-    let mut hb = Handlebars::new();
-    util::init_handlebars(&mut hb);
-
+) -> State {
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");
-
-    // add lang helpers to hb
-    lang.add_helpers(&mut hb);
 
     // translate and format models and resource groups
     models = translate_models(&lang, models);
     resource_groups = translate_resource_groups(&lang, resource_groups);
 
-    if lang.templates.contains_key("model") {
-        // write models
-        println!("writing models...");
-        let models_path = cfg.get_path("model", &lang);
-        util::write_files(
-            &output.join(&models_path),
-            render_models(&mut hb, &cfg, &lang, &models),
-        );
+    State {
+        cfg,
+        models,
+        resource_groups,
+        lang,
+    }
+}
+
+pub fn generate_files(
+    state: State,
+    output: &Path, // output folder
+) {
+    println!("Generating files...");
+    let mut hb = Handlebars::new();
+    util::init_handlebars(&mut hb);
+
+    // add lang helpers to hb
+    state.lang.add_helpers(&mut hb);
+
+    // render files
+    let files: Vec<AddFile> = state.cfg.get_files(&state.lang);
+    if !files.is_empty() {
+        println!("Rendering templates...");
+        util::write_files(&output, render_files(&mut hb, &state, files));
     }
 
-    // write resources
-    if cfg.templates.contains_key("resource") {
-        // translate resource params
-        println!("writing resources...");
-        let resources_path = cfg.get_path("resource", &lang);
-        util::write_files(
-            &output.join(&resources_path),
-            render_resources(&mut hb, &cfg, &lang, &resource_groups),
-        );
-    }
-
-    // additional files
-    let additional_files: Vec<AddFile> = cfg.get_additional_files(&lang);
-    if !additional_files.is_empty() {
-        println!("writing additional lang files...");
-        let state = State {
-            cfg,
-            models,
-            resource_groups,
-        };
-        util::write_files(
-            &output,
-            render_additional_files(&mut hb, &state, &lang, additional_files),
-        );
-    }
-
-    println!("generation OK")
+    println!("All operations finished!")
 }
 
 // runs lang translations on all models
 fn translate_models(lang: &Lang, models: Vec<Model>) -> Vec<Model> {
-    models.into_iter().map(|m| lang.translate(m)).collect()
+    models.into_iter().map(|m| m.translate(lang)).collect()
 }
 
 fn translate_resource_groups(
@@ -119,75 +107,23 @@ fn translate_resource_groups(
         .collect()
 }
 
-fn render_models(
-    hb: &mut Handlebars,
-    cfg: &Config,
-    lang: &Lang,
-    models: &Vec<Model>,
-) -> HashMap<PathBuf, String> {
-    // compile models template
-    let template_path = cfg.get_template("model", &lang);
-
-    // get data from assets and compile it
-    let data = Assets::read_file(&PathBuf::from(&template_path)).unwrap();
-    hb.register_template_string("model", &data)
-        .expect("failed to compile models template");
-
-    // render items
-    models
-        .iter()
-        .map(|model| {
-            let render = hb.render("model", &model).unwrap();
-            (
-                PathBuf::from(lang.format("filename", &model.name).unwrap()),
-                htmlescape::decode_html(&render).unwrap(),
-            )
-        })
-        .collect()
-}
-
-fn render_resources(
-    hb: &mut Handlebars,
-    cfg: &Config,
-    lang: &Lang,
-    resource_groups: &Vec<ResourceGroup>,
-) -> HashMap<PathBuf, String> {
-    // compile models template
-    let template_path = cfg.get_template("resource", &lang);
-
-    // get data from assets and compile it
-    let data = Assets::read_file(&PathBuf::from(&template_path)).unwrap();
-
-    hb.register_template_string("resource", &data)
-        .expect("failed to compile models template");
-
-    // render items
-    resource_groups
-        .iter()
-        .map(|rg| {
-            let render = hb.render("resource", &rg).unwrap();
-            (
-                PathBuf::from(lang.format("filename", &rg.name).unwrap()),
-                htmlescape::decode_html(&render).unwrap(),
-            )
-        })
-        .collect()
-}
-
 // Renders extra files
-fn render_additional_files(
+fn render_files(
     hb: &mut Handlebars,
     state: &State,
-    lang: &Lang,
-    additional_files: Vec<AddFile>,
+    files: Vec<AddFile>,
 ) -> HashMap<PathBuf, String> {
-    additional_files
+    // state to serde json value
+    let statejson = json!(&state);
+
+    // render files
+    files
         .into_iter()
         .flat_map(|f: AddFile| {
             // get data from assets and render it
             let template = Assets::read_file(&PathBuf::from(&f.template)).unwrap();
             let render = hb
-                .render_template(&template, &state)
+                .render_template(&template, &statejson)
                 .expect("failed to render additional file template");
             // make path
             let dirpath: PathBuf = if let Some(ref abspath) = f.path {
@@ -195,11 +131,11 @@ fn render_additional_files(
                 PathBuf::from(abspath)
             } else if let Some(ref inpath) = f.file_in {
                 // get location from 'in' using config.files
-                let path = state.cfg.get_path(inpath, lang);
+                let path = state.cfg.get_path(inpath, &state.lang);
                 path
             } else {
                 // use rootpath
-                let path = state.cfg.get_path("root", lang);
+                let path = state.cfg.get_path("root", &state.lang);
                 path
             };
 

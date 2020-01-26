@@ -16,7 +16,8 @@ build:
       - target/
       - cargo/
   script:
-    cargo build --release
+    - git submodule update --init --recursive
+    - cargo build --release
   artifacts:
     paths:
       - target/release/ram
@@ -31,14 +32,18 @@ codecov:
       - target/
       - cargo/
   script:
-    - cargo tarpaulin
+    - git submodule update --init --recursive
+    - cargo tarpaulin --exclude-files openapi/**/*.rs -o Html
+  artifacts:
+    paths:
+      - tarpaulin-report.html
 
 # Tests for example configurations and templates
 rust-rocket:
   stage: test-generate
   image: rust:1.39-stretch
   script:
-    - target/release/ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/src
+    - target/release/ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/
     - cd examples/rust/rocket
     - rustup toolchain add nightly
     - cargo +nightly build
@@ -50,12 +55,24 @@ rust-actix:
   stage: test-generate
   image: rust:1.39-stretch
   script:
-    - target/release/ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/src
+    - target/release/ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/
     - cd examples/rust/actix
     - cargo build
   artifacts:
     paths:
       - examples/rust/actix/
+
+rust-models:
+  stage: test-generate
+  image: rust:1.39-stretch
+  script:
+    - target/release/ram -c examples/rust/models/config.yaml -i examples/openapi/farm.yaml -o examples/rust/models/
+    - cd examples/rust/models
+    - cargo build
+  artifacts:
+    paths:
+      - examples/rust/models/
+
 
 go-echo:
   stage: test-generate
@@ -86,7 +103,7 @@ java-models:
   stage: test-generate
   image: maven:3-jdk-8
   script:
-    - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models/src/main/java/
+    - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models
     - cd examples/java/models
     - mvn install
     - java -jar target/App-1.jar
@@ -98,7 +115,7 @@ java-spark:
   stage: test-generate
   image: maven:3-jdk-8
   script:
-    - target/release/ram -c examples/java/spark/config.yaml -i examples/openapi/farm.yaml -o examples/java/spark/src/main/java/
+    - target/release/ram -c examples/java/spark/config.yaml -i examples/openapi/farm.yaml -o examples/java/spark
     - cd examples/java/spark
     - mvn install
     - java -jar target/SparkApp-1.jar
@@ -108,10 +125,11 @@ java-spark:
 
 postgres-schema:
   stage: test-generate
-  image: alpine:latest
+  image: ubuntu:latest
   script:
     - target/release/ram -c examples/postgresql/postgresql.yaml -i examples/openapi/farm.yaml -o examples/postgresql/
     - cat examples/postgresql/schema.sql
   artifacts:
     paths:
       - examples/postgresql
+

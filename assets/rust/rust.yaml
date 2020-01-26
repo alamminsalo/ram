@@ -1,8 +1,6 @@
-# Rust lang spec file
-name: rust
-
+# Rust spec file
 # Dynamic formatting templates for things such as nullable types
-format:
+helpers:
   # How struct/class type definition names are formatted
   classname: "{{pascalcase value}}"
   # Formats properties of object type, optional
@@ -18,21 +16,16 @@ format:
 
 # Additional files to generate, optional
 # These files are given the complete application state for free templating usage
-additional_files:
+files:
+  - template: "model.hbs"
+    in: model
   - filename: "mod.rs"
     template: "mod_model.hbs"
-    # Use either 'in' to specify file path from ram config
     in: model
-    # Or 'path' for absolute path to template
-    # path: path/to/template/template.hbs
-
-# default templates which can be overridden if needed
-templates:
-  model: "model.hbs"
 
 # default file paths
 paths:
-  model: "model"
+  model: src/model
 
 # primitive type mapping
 types:

@@ -1,17 +1,15 @@
+{{#each models}}
 {{#if is_object}}
 struct {{pascalcase name}} {
-{{#each properties}}
+{{#each primitive_properties}}
   {{type}} {{snakecase name}};
 {{/each}}
-{{#if additional_properties}}
-{{#with additional_properties}}
-{{#each properties}}
-  {{type}} {{snakecase name}};
-{{/each}}
-{{/with}}
-{{/if}}
 };
 {{/if}}
+{{/each}}
+
+{{#each models}}
 {{#if is_array}}
 typedef {{type}}
 {{/if}}
+{{/each}}

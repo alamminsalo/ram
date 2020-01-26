@@ -1,5 +1,5 @@
 {{#each models}}
-{{#if (ne (ext "x-sql") "skip")}}
+{{#if (ne (x-sql) "skip")}}
 %filebegin={{snakecase name}}.go
 package db
 

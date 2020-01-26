@@ -47,9 +47,6 @@ pub fn model_name_from_ref(ref_path: &str) -> Option<String> {
 }
 
 pub fn init_handlebars(hb: &mut Handlebars) {
-    // set strict mode (fails on field not found)
-    hb.set_strict_mode(true);
-
     // disable html escaping
     hb.register_escape_fn(handlebars::no_escape);
 

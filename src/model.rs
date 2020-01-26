@@ -1,3 +1,4 @@
+use super::lang::Lang;
 use super::util;
 use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
@@ -24,6 +25,12 @@ pub struct Model {
     pub nullable: bool,
     #[serde(skip)]
     pub ref_path: Option<String>,
+
+    /// Model extensions.
+    /// Used for additional non-openapi specific information.
+    /// Examples: `x-sql-table`, `x-go-tag`
+    /// Flattened: use directly from model `{{ x-sql-name }}`
+    #[serde(flatten)]
     pub extensions: HashMap<String, String>,
 
     // additional helper properties, these are derived from the 'base' properties
@@ -195,6 +202,64 @@ impl Model {
             ModelType::Object
         } else {
             ModelType::Primitive
+        }
+    }
+
+    // translates model
+    pub fn translate(self, lang: &Lang) -> Model {
+        let mut translated_type = match self.model_type() {
+            ModelType::Array => lang.translate_array(&self),
+            ModelType::Object => {
+                if let Some(ref refpath) = self.ref_path {
+                    // this is a reference to another object
+                    // get model name from ref_path
+                    util::model_name_from_ref(&refpath)
+                        .map(|t| lang.translate_modelname(&t))
+                        .expect("failed to get model name from ref")
+                } else {
+                    // this is an inline object, which we name by it's key
+                    lang.translate_modelname(&self.name)
+                }
+            }
+            ModelType::Primitive => lang.translate_primitive(
+                &self.schema_type,
+                self.format.as_ref().unwrap_or(&String::from("default")),
+            ),
+        };
+
+        // format if nullable
+        if self.nullable {
+            translated_type = lang
+                .format("nullable", &translated_type)
+                .unwrap_or(translated_type)
+        };
+
+        Model {
+            schema_type: translated_type,
+            properties: self
+                .properties
+                .into_iter()
+                .map(|m| Box::new(m.translate(lang)))
+                .collect(),
+            additional_properties: self
+                .additional_properties
+                .and_then(|m| Some(Box::new(m.translate(lang)))),
+            primitive_properties: self
+                .primitive_properties
+                .into_iter()
+                .map(|m| Box::new(m.translate(lang)))
+                .collect(),
+            object_properties: self
+                .object_properties
+                .into_iter()
+                .map(|m| Box::new(m.translate(lang)))
+                .collect(),
+            array_properties: self
+                .array_properties
+                .into_iter()
+                .map(|m| Box::new(m.translate(lang)))
+                .collect(),
+            ..self
         }
     }
 }

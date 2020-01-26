@@ -1,7 +1,10 @@
+{{#each resource_groups}}
+%filebegin={{filename name}}
 use actix_web::{HttpRequest, Responder};
 
 {{#each resources}}
 pub fn {{snakecase name}}(req: HttpRequest) -> impl Responder {
   format!("not implemented")
 }
+{{/each}}
 {{/each}}

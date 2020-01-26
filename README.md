@@ -49,6 +49,8 @@ Templating uses [handlebars](https://handlebars-draft.knappi.org/guide) syntax, 
 
 Example template file (from default golang model template):
 ```
+{{#each models}}
+%filebegin={{filename name}}
 package model
 
 {{#if has_datetime}}
@@ -60,17 +62,18 @@ import (
 {{#if is_object}}
 type {{pascalcase name}} struct {
 {{#each properties}}
-  {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ ext "x-go-custom-tag" }}`
+  {{ pascalcase name }} {{ type }} `json:"{{ camelcase name }}" {{ x-go-custom-tag }}`
 {{/each}}
 {{#if additional_properties}}
 {{#with additional_properties}}
 {{#each properties}}
-  {{ pascalcase name }} {{type}} `json:"-" {{ ext "x-go-custom-tag" }}`
+  {{ pascalcase name }} {{type}} `json:"-" {{ x-go-custom-tag }}`
 {{/each}}
 {{/with}}
 {{/if}}
 }
 {{/if}}
+{{/each}}
 ```
 
 Template white-space formatting is cumbersome, so usage of a language formatter is recommended.
@@ -87,7 +90,6 @@ Includes some built-in [custom helpers](https://handlebars-draft.knappi.org/guid
 * camelcase - camelCase
 * kebabcase - kebab-case
 * r - Formats reserved keywords according to language spec (Rust example: type -> r#type). Kept short for convenience.
-* ext - Returns extension value (eg. With definition `x-go-custom-tag: json:"-"`, `{{ext "x-go-custom-tag"}}` => `json:"-"`)
 ```
 
 Also includes [all built-in helpers from handlebars lib](https://docs.rs/handlebars/3.0.0-beta.1/handlebars/#built-in-helpers).
@@ -104,7 +106,8 @@ src/some/**/*.rs
 Note that ignorefile currently only matches entries relative to current working directory, 
 so for example ignorefile in different output directory won't get matched.
 
-## Roadmap
-* Add more lang-specs for most used languages
-* Test suite
-* Document template context objects
+## Debugging json state
+
+Every template is passed the whole state object with translated field names and other preprocessed data.
+To output this state as a json object: use the `--debug-state` flag.
+

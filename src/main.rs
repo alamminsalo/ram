@@ -1,4 +1,4 @@
-use ram::Config;
+use ram::{Config, GroupingStrategy};
 use std::panic;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -17,6 +17,10 @@ struct Arguments {
     /// output path
     #[structopt(short, long)]
     output: Option<PathBuf>,
+
+    /// prints state passed to templates as json
+    #[structopt(short, long)]
+    debug_state: bool,
 }
 
 fn main() {
@@ -31,8 +35,21 @@ fn main() {
     match spec {
         openapi::OpenApi::V3_0(spec) => {
             let models = ram::generate_models_v3(&spec, &specpath);
-            let resource_groups = ram::generate_resources_v3(&spec, &specpath);
-            ram::generate_files(cfg, models, resource_groups, &output)
+            let resource_groups = ram::generate_resources_v3(
+                &spec,
+                &specpath,
+                cfg.grouping_strategy.unwrap_or(GroupingStrategy::FirstTag),
+            );
+            let state = ram::create_state(cfg, models, resource_groups);
+
+            if args.debug_state {
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&state).expect("failed to serialize state!")
+                );
+            } else {
+                ram::generate_files(state, &output)
+            }
         }
         _ => {
             panic!("unsupported openapi version");

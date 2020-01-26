@@ -1,7 +1,6 @@
-name: c
-
+# C spec file
 # Dynamic formatting templates for things such as nullable types
-format:
+helpers:
   # How struct/class type definition names are formatted
   classname: "{{pascalcase value}}"
   # Array field format
@@ -12,13 +11,13 @@ format:
   filename: "{{snakecase value}}.h"
 
 # default templates which can be overridden if needed
-templates:
-  model: "c/model.hbs"
+files:
+  - template: "c/model.hbs"
+    filename: "structs.h"
 
 # default file paths
 paths:
   root: "src"
-  model: "structs"
 
 # primitive type mapping
 types:

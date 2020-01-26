@@ -84,7 +84,7 @@ impl Resource {
             params
                 .into_iter()
                 .map(|p| Param {
-                    model: lang.translate(p.model),
+                    model: p.model.translate(lang),
                     ..p
                 })
                 .collect()
@@ -98,7 +98,7 @@ impl Resource {
             responses: self
                 .responses
                 .into_iter()
-                .map(|(key, model)| (key, lang.translate(model)))
+                .map(|(key, model)| (key, model.translate(lang)))
                 .collect(),
             ..self
         }
@@ -118,9 +118,10 @@ pub struct ResourceGroup {
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum GroupingStrategy {
-    FirstTag,
+    Nothing,
     Path,
-    Separate,
+    FirstTag,
+    Operation,
 }
 
 /// Groups resources with given grouping strategy
@@ -195,26 +196,48 @@ pub fn group_resources(
             op.and_then(|op| Some((path, method, op, path_params, query_params)))
         })
     });
-    let strat_iter = match grouping_strategy {
-        GroupingStrategy::FirstTag => iter
-            .filter_map(|(path, method, op, path_params, query_params)| {
-                op.tags
-                    .as_ref()
-                    .and_then(|tags| tags.get(0))
-                    .and_then(|tag| Some((path, method, op, tag, path_params, query_params)))
-            })
-            .group_by(|(_, _, _, tag, _, _)| tag.clone()),
-        _ => panic!("not implemented"),
-    };
+    let strat_iter = iter.filter_map(|(path, method, op, path_params, query_params)| {
+        match grouping_strategy {
+            // everything is in same group
+            GroupingStrategy::Nothing => {
+                Some(("".into(), path, method, op, path_params, query_params))
+            }
+
+            // groups by path
+            GroupingStrategy::Path => {
+                Some((path.clone(), path, method, op, path_params, query_params))
+            }
+
+            // groups by first tag
+            GroupingStrategy::FirstTag => op
+                .tags
+                .as_ref()
+                .and_then(|tags| tags.get(0))
+                .and_then(|tag| Some((tag.clone(), path, method, op, path_params, query_params))),
+
+            // groups by operation id
+            GroupingStrategy::Operation => op.operation_id.as_ref().and_then(|operationid| {
+                Some((
+                    operationid.clone(),
+                    path,
+                    method,
+                    op,
+                    path_params,
+                    query_params,
+                ))
+            }),
+        }
+    });
 
     // collect resourcegroups
     strat_iter
+        .group_by(|(key, _, _, _, _, _)| key.clone())
         .into_iter()
         .map(|(key, group)| ResourceGroup {
             name: key.into(),
             resources: group
                 .into_iter()
-                .map(|(path, method, op, _, path_params, query_params)| {
+                .map(|(_, path, method, op, path_params, query_params)| {
                     Resource::new(
                         path.as_str(),
                         method,

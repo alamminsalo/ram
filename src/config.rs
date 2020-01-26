@@ -1,5 +1,5 @@
 use super::util;
-use super::{AddFile, Lang};
+use super::{AddFile, GroupingStrategy, Lang};
 use failure::Fallible;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -12,21 +12,22 @@ pub struct Config {
     #[serde(skip)]
     pub path: PathBuf,
 
-    pub lang: Option<String>,
-
-    #[serde(default)]
-    pub templates: HashMap<String, String>,
+    // Defines language or direct path to custom lang spec
+    pub lang: String,
 
     #[serde(default)]
     pub paths: HashMap<String, String>,
 
     // custom formatters, these are added to lang formatters
     #[serde(default)]
-    pub format: HashMap<String, String>,
+    pub helpers: HashMap<String, String>,
 
     /// Additional files to generate
     #[serde(default)]
-    pub additional_files: Vec<AddFile>,
+    pub files: Vec<AddFile>,
+
+    #[serde(default)]
+    pub grouping_strategy: Option<GroupingStrategy>,
 }
 
 impl Config {
@@ -49,7 +50,7 @@ impl Config {
     }
 
     pub fn get_lang(&self) -> Fallible<Lang> {
-        let f = self.lang.as_ref().expect("no lang spec defined");
+        let f = &self.lang;
 
         // if file has extension set, assume its a path to file and join path
         let mut path = PathBuf::from(f);
@@ -59,7 +60,7 @@ impl Config {
         // load lang file
         Lang::load_file(&path).and_then(|mut lang| {
             // add custom formatters to lang formatters
-            lang.format.extend(self.format.clone());
+            lang.helpers.extend(self.helpers.clone());
             Ok(lang)
         })
     }
@@ -73,19 +74,10 @@ impl Config {
             .unwrap()
     }
 
-    // Returns template or language default
-    pub fn get_template(&self, path_key: &str, lang: &Lang) -> PathBuf {
-        self.templates
-            .get(path_key)
-            .and_then(|t| Some(util::join_relative(&self.path, &PathBuf::from(&t))))
-            .or_else(|| Some(lang.default_template(path_key)))
-            .unwrap()
-    }
-
-    pub fn get_additional_files(&self, lang: &Lang) -> Vec<AddFile> {
-        lang.additional_files_relative()
+    pub fn get_files(&self, lang: &Lang) -> Vec<AddFile> {
+        lang.files_relative()
             .into_iter()
-            .chain(self.additional_files.iter().map(|f: &AddFile| {
+            .chain(self.files.iter().map(|f: &AddFile| {
                 // join relative cfg path
                 let template = util::join_relative(&self.path, &PathBuf::from(&f.template))
                     .to_str()

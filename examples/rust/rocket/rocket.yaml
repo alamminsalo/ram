@@ -2,18 +2,17 @@
 
 lang: rust
 
-format:
+helpers:
   pathparam: "<{{snakecase value}}>"
 
-templates:
-  resource: templates/resource.hbs
-
-additional_files:
+files:
+  - template: templates/resource.hbs
+    in: resource
   - filename: mod.rs
     template: templates/mod_resource.hbs
     in: resource
 
 paths:
-  resource: api
+  resource: src/api
 
 

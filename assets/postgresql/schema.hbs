@@ -2,25 +2,25 @@ BEGIN;
 
 -- base tables
 {{~#each models}}
-    {{~#if (ext "x-sql-table")}}
-DROP TABLE IF EXISTS {{ext "x-sql-table"}} CASCADE;
-CREATE TABLE {{ext "x-sql-table"}} (
+    {{~#if (x-sql-table)}}
+DROP TABLE IF EXISTS {{x-sql-table}} CASCADE;
+CREATE TABLE {{x-sql-table}} (
       {{~#each primitive_properties}}
       {{r (snakecase name)}} 
-      {{~#if (ext "x-sql-type")}} {{ext "x-sql-type"}}{{/if}}
-      {{~#unless (ext "x-sql-type")}} {{type}}{{/unless}}
+      {{~#if (x-sql-type)}} {{x-sql-type}}{{/if}}
+      {{~#unless (x-sql-type)}} {{type}}{{/unless}}
       {{~#unless nullable}} NOT NULL{{/unless}}
-      {{~#if (ext "x-sql-unique")}} UNIQUE{{~/if}}
+      {{~#if (x-sql-unique)}} UNIQUE{{~/if}}
       {{~#unless @last}},{{/unless}}
       {{~/each}}
 );
-	{{~#if (ext "x-sql-pk")}}
+	{{~#if (x-sql-pk)}}
 -- primary key
-CREATE SEQUENCE {{ext "x-sql-table"}}_{{ext "x-sql-pk"}}_seq;
-ALTER TABLE {{ext "x-sql-table"}} ALTER COLUMN {{ext "x-sql-pk"}} SET DEFAULT nextval('{{ext "x-sql-table"}}_{{ext "x-sql-pk"}}_seq');
-ALTER TABLE {{ext "x-sql-table"}} ALTER COLUMN {{ext "x-sql-pk"}} SET NOT NULL;
-ALTER SEQUENCE {{ext "x-sql-table"}}_{{ext "x-sql-pk"}}_seq OWNED BY {{ext "x-sql-table"}}.{{ext "x-sql-pk"}};
-ALTER TABLE {{ext "x-sql-table"}} ADD PRIMARY KEY ({{ext "x-sql-pk"}});
+CREATE SEQUENCE {{x-sql-table}}_{{x-sql-pk}}_seq;
+ALTER TABLE {{x-sql-table}} ALTER COLUMN {{x-sql-pk}} SET DEFAULT nextval('{{x-sql-table}}_{{x-sql-pk}}_seq');
+ALTER TABLE {{x-sql-table}} ALTER COLUMN {{x-sql-pk}} SET NOT NULL;
+ALTER SEQUENCE {{x-sql-table}}_{{x-sql-pk}}_seq OWNED BY {{x-sql-table}}.{{x-sql-pk}};
+ALTER TABLE {{x-sql-table}} ADD PRIMARY KEY ({{x-sql-pk}});
 
 	{{~/if}}
     {{~/if}}
@@ -28,14 +28,14 @@ ALTER TABLE {{ext "x-sql-table"}} ADD PRIMARY KEY ({{ext "x-sql-pk"}});
 
 -- foreign keys and indexes
 {{~#each models}}
-	{{~#if (ext "x-sql-table")}}
+	{{~#if (x-sql-table)}}
 	    {{~#each primitive_properties}}
-	      {{~#if (ext "x-sql-fk")}}
-ALTER TABLE {{../extensions/x-sql-table}}
-ADD CONSTRAINT fk_{{../extensions/x-sql-table}}_{{snakecase name}} FOREIGN KEY ({{snakecase name}}) REFERENCES {{ext "x-sql-fk"}} ON DELETE CASCADE;
+	      {{~#if (x-sql-fk)}}
+ALTER TABLE {{../x-sql-table}}
+ADD CONSTRAINT fk_{{../x-sql-table}}_{{snakecase name}} FOREIGN KEY ({{snakecase name}}) REFERENCES {{x-sql-fk}} ON DELETE CASCADE;
 	      {{~/if}}
-	      {{~#if (ext "x-sql-index")}}
-CREATE INDEX idx_{{../extensions/x-sql-table}}_{{snakecase name}} ON {{../extensions/x-sql-table}} USING {{ext "x-sql-index"}} ({{snakecase name}});
+	      {{~#if (x-sql-index)}}
+CREATE INDEX idx_{{../x-sql-table}}_{{snakecase name}} ON {{../x-sql-table}} USING {{x-sql-index}} ({{snakecase name}});
 	      {{~/if}}
 	    {{~/each}}
 	{{~/if}}
@@ -43,14 +43,14 @@ CREATE INDEX idx_{{../extensions/x-sql-table}}_{{snakecase name}} ON {{../extens
 
 -- many2many tables
 {{~#each models}}
-	{{~#if (ext "x-sql-table")}}
+	{{~#if (x-sql-table)}}
 	    {{~#each array_properties}}
-	      {{~#if (ext "x-sql-m2m")}}
-DROP TABLE IF EXISTS {{ext "x-sql-m2m"}} CASCADE;
-CREATE TABLE {{ext "x-sql-m2m"}} (
-    {{../extensions/x-sql-table}}_{{../extensions/x-sql-pk}} BIGINT NOT NULL REFERENCES {{../extensions/x-sql-table}}({{../extensions/x-sql-pk}}) ON DELETE CASCADE,
-    {{ext "x-sql-m2m-table"}}_{{ext "x-sql-m2m-pk"}} BIGINT NOT NULL REFERENCES {{ext "x-sql-m2m-table"}}({{ext "x-sql-m2m-pk"}}) ON DELETE CASCADE,
-    PRIMARY KEY ({{../extensions/x-sql-table}}_{{../extensions/x-sql-pk}}, {{ext "x-sql-m2m-table"}}_{{ext "x-sql-m2m-pk"}})
+	      {{~#if (x-sql-m2m)}}
+DROP TABLE IF EXISTS {{x-sql-m2m}} CASCADE;
+CREATE TABLE {{x-sql-m2m}} (
+    {{../x-sql-table}}_{{../x-sql-pk}} BIGINT NOT NULL REFERENCES {{../x-sql-table}}({{../x-sql-pk}}) ON DELETE CASCADE,
+    {{x-sql-m2m-table}}_{{x-sql-m2m-pk}} BIGINT NOT NULL REFERENCES {{x-sql-m2m-table}}({{x-sql-m2m-pk}}) ON DELETE CASCADE,
+    PRIMARY KEY ({{../x-sql-table}}_{{../x-sql-pk}}, {{x-sql-m2m-table}}_{{x-sql-m2m-pk}})
 );
 	      {{~/if}}
 	    {{~/each}}
