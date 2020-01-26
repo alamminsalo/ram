@@ -1,7 +1,6 @@
-name: postgresql 
-
+# Postgres spec file
 # Dynamic formatting templates for things such as nullable types
-format:
+helpers:
  r: '"{{value}}"'
 
 # Additional files to generate, optional

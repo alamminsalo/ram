@@ -2,7 +2,7 @@
 
 lang: rust
 
-format:
+helpers:
   pathparam: "<{{snakecase value}}>"
 
 files:

@@ -22,7 +22,7 @@ pub struct Config {
 
     // custom formatters, these are added to lang formatters
     #[serde(default)]
-    pub format: HashMap<String, String>,
+    pub helpers: HashMap<String, String>,
 
     /// Additional files to generate
     #[serde(default)]
@@ -59,7 +59,7 @@ impl Config {
         // load lang file
         Lang::load_file(&path).and_then(|mut lang| {
             // add custom formatters to lang formatters
-            lang.format.extend(self.format.clone());
+            lang.helpers.extend(self.helpers.clone());
             Ok(lang)
         })
     }

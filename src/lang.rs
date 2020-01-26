@@ -15,12 +15,10 @@ use std::path::{Path, PathBuf};
 pub struct Lang {
     #[serde(skip)]
     pub path: PathBuf,
-
-    pub name: String,
     #[serde(default)]
     pub types: HashMap<String, Type>,
     #[serde(default)]
-    pub format: HashMap<String, String>,
+    pub helpers: HashMap<String, String>,
     #[serde(default)]
     pub files: Vec<AddFile>,
     #[serde(default)]
@@ -144,7 +142,7 @@ impl Lang {
         let mut hb = Handlebars::new();
         util::init_handlebars(&mut hb);
         self.add_helpers(&mut hb);
-        self.format
+        self.helpers
             .get(template_key)
             .and_then(|template| hb.render_template(template, map).ok())
             .unwrap_or_else(|| map.get("value").unwrap().to_string())
@@ -191,7 +189,7 @@ impl Lang {
     // adds helpers to handlebars instance
     pub fn add_helpers(&self, hb: &mut Handlebars) {
         // add custom formatter helpers
-        for k in self.format.keys() {
+        for k in self.helpers.keys() {
             let lang = self.clone();
             let key = k.clone();
             let closure = move |h: &Helper,
@@ -217,7 +215,7 @@ impl Lang {
     pub fn format_path(&self, p: String) -> String {
         // TODO: clean this mess
         let re = Regex::new(r"^\{(\w+)\}$").unwrap();
-        self.format
+        self.helpers
             .get("pathparam")
             .map(|_| {
                 format!(

@@ -1,6 +1,6 @@
 lang: "java"
 
-format:
+helpers:
   pathparam: ":{{value}}"
 
 files:

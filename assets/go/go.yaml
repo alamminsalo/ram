@@ -1,7 +1,6 @@
-name: go
-
+# Go spec file
 # Dynamic formatting templates for things such as nullable types
-format:
+helpers:
   # How struct/class type definition names are formatted
   classname: "{{pascalcase value}}"
   # Array field format
