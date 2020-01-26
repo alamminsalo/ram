@@ -49,6 +49,8 @@ Templating uses [handlebars](https://handlebars-draft.knappi.org/guide) syntax, 
 
 Example template file (from default golang model template):
 ```
+{{#each models}}
+%filebegin={{filename name}}
 package model
 
 {{#if has_datetime}}
@@ -71,6 +73,7 @@ type {{pascalcase name}} struct {
 {{/if}}
 }
 {{/if}}
+{{/each}}
 ```
 
 Template white-space formatting is cumbersome, so usage of a language formatter is recommended.
@@ -103,7 +106,8 @@ src/some/**/*.rs
 Note that ignorefile currently only matches entries relative to current working directory, 
 so for example ignorefile in different output directory won't get matched.
 
-## Roadmap
-* Add more lang-specs for most used languages
-* Test suite
-* Document template context objects
+## Debugging json state
+
+Every template is passed the whole state object with translated field names and other preprocessed data.
+To output this state as a json object: use the `--debug-state` flag.
+

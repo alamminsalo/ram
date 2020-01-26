@@ -17,6 +17,10 @@ struct Arguments {
     /// output path
     #[structopt(short, long)]
     output: Option<PathBuf>,
+
+    /// prints state passed to templates as json
+    #[structopt(short, long)]
+    debug_state: bool,
 }
 
 fn main() {
@@ -36,7 +40,16 @@ fn main() {
                 &specpath,
                 cfg.grouping_strategy.unwrap_or(GroupingStrategy::FirstTag),
             );
-            ram::generate_files(cfg, models, resource_groups, &output)
+            let state = ram::create_state(cfg, models, resource_groups);
+
+            if args.debug_state {
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&state).expect("failed to serialize state!")
+                );
+            } else {
+                ram::generate_files(state, &output)
+            }
         }
         _ => {
             panic!("unsupported openapi version");
