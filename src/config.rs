@@ -12,10 +12,8 @@ pub struct Config {
     #[serde(skip)]
     pub path: PathBuf,
 
-    pub lang: Option<String>,
-
-    #[serde(default)]
-    pub templates: HashMap<String, String>,
+    // Defines language or direct path to custom lang spec
+    pub lang: String,
 
     #[serde(default)]
     pub paths: HashMap<String, String>,
@@ -49,7 +47,7 @@ impl Config {
     }
 
     pub fn get_lang(&self) -> Fallible<Lang> {
-        let f = self.lang.as_ref().expect("no lang spec defined");
+        let f = &self.lang;
 
         // if file has extension set, assume its a path to file and join path
         let mut path = PathBuf::from(f);
@@ -70,15 +68,6 @@ impl Config {
             .get(path_key)
             .and_then(|p| Some(PathBuf::from(&p)))
             .or_else(|| Some(lang.default_path(path_key)))
-            .unwrap()
-    }
-
-    // Returns template or language default
-    pub fn get_template(&self, path_key: &str, lang: &Lang) -> PathBuf {
-        self.templates
-            .get(path_key)
-            .and_then(|t| Some(util::join_relative(&self.path, &PathBuf::from(&t))))
-            .or_else(|| Some(lang.default_template(path_key)))
             .unwrap()
     }
 

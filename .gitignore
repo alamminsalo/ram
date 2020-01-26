@@ -16,3 +16,4 @@
 examples/java/**/.classpath
 examples/java/**/.project
 examples/java/**/.settings/
+tests_output/

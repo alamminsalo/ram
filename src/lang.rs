@@ -24,8 +24,6 @@ pub struct Lang {
     #[serde(default)]
     pub paths: HashMap<String, String>,
     #[serde(default)]
-    pub templates: HashMap<String, String>,
-    #[serde(default)]
     pub reserved: Vec<String>,
 }
 
@@ -97,16 +95,6 @@ impl Lang {
                 .paths
                 .get(path)
                 .expect(&format!("failed to find default path: {}", path)),
-        )
-    }
-
-    pub fn default_template(&self, path: &str) -> PathBuf {
-        PathBuf::from(
-            &self
-                .templates
-                .get(path)
-                .map(|p| util::join_relative(&self.path, &PathBuf::from(&p)))
-                .expect(&format!("failed to find default template: {}", path)),
         )
     }
 

@@ -25,9 +25,6 @@ build:
 codecov:
   image: xd009642/tarpaulin
   stage: test
-  only:
-    - master
-    - tags
   variables:
     CARGO_HOME: $CI_PROJECT_DIR/cargo
   cache:
