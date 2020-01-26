@@ -1,5 +1,5 @@
 use super::util;
-use super::{AddFile, Lang};
+use super::{AddFile, GroupingStrategy, Lang};
 use failure::Fallible;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -25,6 +25,9 @@ pub struct Config {
     /// Additional files to generate
     #[serde(default)]
     pub files: Vec<AddFile>,
+
+    #[serde(default)]
+    pub grouping_strategy: Option<GroupingStrategy>,
 }
 
 impl Config {

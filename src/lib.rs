@@ -30,10 +30,14 @@ pub fn generate_models_v3(spec: &Spec, root: &Path) -> Vec<Model> {
         .collect()
 }
 
-pub fn generate_resources_v3(spec: &Spec, root: &Path) -> Vec<ResourceGroup> {
+pub fn generate_resources_v3(
+    spec: &Spec,
+    root: &Path,
+    grouping_strategy: GroupingStrategy,
+) -> Vec<ResourceGroup> {
     let parameters_map =
         util::collect_parameters(spec, root).expect("failed to collect parameters");
-    resource::group_resources(&spec.paths, GroupingStrategy::FirstTag, &parameters_map)
+    resource::group_resources(&spec.paths, grouping_strategy, &parameters_map)
 }
 
 pub fn generate_files(

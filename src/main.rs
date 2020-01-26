@@ -1,4 +1,4 @@
-use ram::Config;
+use ram::{Config, GroupingStrategy};
 use std::panic;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -31,7 +31,11 @@ fn main() {
     match spec {
         openapi::OpenApi::V3_0(spec) => {
             let models = ram::generate_models_v3(&spec, &specpath);
-            let resource_groups = ram::generate_resources_v3(&spec, &specpath);
+            let resource_groups = ram::generate_resources_v3(
+                &spec,
+                &specpath,
+                cfg.grouping_strategy.unwrap_or(GroupingStrategy::FirstTag),
+            );
             ram::generate_files(cfg, models, resource_groups, &output)
         }
         _ => {

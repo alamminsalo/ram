@@ -5,6 +5,9 @@ info:
 paths:
   /farm:
     get:
+      operationId: getFarm
+      tags:
+        - Farm
       responses:
         '200':
           description: "get farm content"
