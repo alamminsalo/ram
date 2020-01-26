@@ -125,10 +125,12 @@ java-spark:
 
 postgres-schema:
   stage: test-generate
-  image: ubuntu:latest
+  image: postgres:10
+  services:
+    - name: postgres:10
   script:
     - target/release/ram -c examples/postgresql/postgresql.yaml -i examples/openapi/farm.yaml -o examples/postgresql/
-    - cat examples/postgresql/schema.sql
+    - psql -U postgres -h postgres -p 5432 < examples/postgresql/schema.sql
   artifacts:
     paths:
       - examples/postgresql
