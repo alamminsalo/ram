@@ -33,7 +33,7 @@ codecov:
       - cargo/
   script:
     - git submodule update --init --recursive
-    - cargo tarpaulin --exclude-files openapi/**/*.rs -o Html
+    - cargo tarpaulin --exclude-files openapi/** --exclude-files cargo/** -o Html
   artifacts:
     paths:
       - tarpaulin-report.html
