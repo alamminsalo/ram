@@ -32,6 +32,7 @@ codecov:
       - target/
       - cargo/
   script:
+    - git submodule update --init --recursive
     - cargo tarpaulin
 
 # Tests for example configurations and templates
