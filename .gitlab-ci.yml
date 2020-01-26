@@ -33,7 +33,10 @@ codecov:
       - cargo/
   script:
     - git submodule update --init --recursive
-    - cargo tarpaulin
+    - cargo tarpaulin --exclude-files openapi/**/*.rs -o Html
+  artifacts:
+    paths:
+      - tarpaulin-report.html
 
 # Tests for example configurations and templates
 rust-rocket:
@@ -129,3 +132,4 @@ postgres-schema:
   artifacts:
     paths:
       - examples/postgresql
+
