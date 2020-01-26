@@ -1,6 +1,5 @@
 {{#each resource_groups}}
 %filebegin={{filename name}}
-use super::model::*;
 use std::panic;
 
 {{#each resources}}
@@ -9,7 +8,7 @@ pub fn {{snakecase name}}(
   {{#each path_params}}
   {{r (snakecase name)}}: {{model.type}},
   {{/each}}
-  ) -> {{#if (responses.200)}}{{responses.200.type}}{{/if}}{{~#unless (responses.200)}}String{{/unless}} {
+  ) -> () {
   panic!("not implemented")
 }
 {{/each}}
