@@ -62,8 +62,6 @@ fn it_generates_models_rust() {
 
     // gather some variables from models
     for model in models {
-        dbg!(&model);
-
         let props_iter = model.properties.iter().chain(
             model
                 .additional_properties
@@ -153,7 +151,7 @@ fn it_generates_models_rust() {
 
 #[test]
 fn it_generates_resources_rust() {
-    let cfg = Config::load_file(&PathBuf::from("examples/rust/actix/actix.yml")).unwrap();
+    let cfg = Config::load_file(&PathBuf::from("examples/rust/rocket/rocket.yaml")).unwrap();
     let output = PathBuf::from("tests_output/res");
 
     let spec = openapi::from_path("examples/openapi/farm.yaml").unwrap();
@@ -191,6 +189,30 @@ fn it_generates_resources_rust() {
 
     // gather some variables from models
     for group in resource_groups {
-        dbg!(&group);
+        // do some regex checking
+        let contents: String = std::fs::read_to_string(
+            files
+                .get(&format!("{}.rs", &group.name.to_snake_case()))
+                .unwrap()
+                .path(),
+        )
+        .unwrap();
+
+        assert_eq!(
+            Regex::new(r"#\[get(.+)\]")
+                .unwrap()
+                .find_iter(&contents)
+                .count(),
+            group.resources.iter().filter(|r| r.method == "GET").count()
+        );
+
+        assert_eq!(
+            Regex::new(r"Box<.+>").unwrap().find_iter(&contents).count(),
+            group
+                .resources
+                .iter()
+                .filter(|r| r.responses.get("200").is_some())
+                .count()
+        );
     }
 }
