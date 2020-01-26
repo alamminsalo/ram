@@ -16,7 +16,8 @@ build:
       - target/
       - cargo/
   script:
-    cargo build --release
+    - git submodule update --init --recursive
+    - cargo build --release
   artifacts:
     paths:
       - target/release/ram
