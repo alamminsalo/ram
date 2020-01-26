@@ -42,8 +42,8 @@ components:
             items:
               type: integer
           dogId:
-            type: int
+            type: integer
             x-sql-fk: "dog(id)"
           catId:
-            type: int
+            type: integer
             x-sql-fk: "cat(id)"
