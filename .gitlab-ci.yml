@@ -16,7 +16,6 @@ build:
       - target/
       - cargo/
   script:
-    - git submodule update --init --recursive
     - cargo build --release
   artifacts:
     paths:
@@ -32,7 +31,6 @@ codecov:
       - target/
       - cargo/
   script:
-    - git submodule update --init --recursive
     - cargo tarpaulin --exclude-files openapi/** --exclude-files cargo/** -o Html
   artifacts:
     paths:
