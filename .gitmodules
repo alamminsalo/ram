@@ -1,4 +1,0 @@
-[submodule "openapi"]
-	path = openapi
-	url = https://github.com/alamminsalo/openapi
-	branch = ram
