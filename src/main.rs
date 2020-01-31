@@ -32,7 +32,8 @@ fn main() {
     let mut specpath = args.input;
     specpath.pop();
 
-    match spec {
+    // assemble state variable
+    let state = match spec {
         openapi::OpenApi::V3_0(spec) => {
             let models = ram::generate_models_v3(&spec, &specpath);
             let resource_groups = ram::generate_resources_v3(
@@ -40,19 +41,22 @@ fn main() {
                 &specpath,
                 cfg.grouping_strategy.unwrap_or(GroupingStrategy::FirstTag),
             );
-            let state = ram::create_state(cfg, models, resource_groups);
-
-            if args.debug_state {
-                println!(
-                    "{}",
-                    serde_json::to_string_pretty(&state).expect("failed to serialize state!")
-                );
-            } else {
-                ram::generate_files(state, &output)
-            }
+            ram::create_state(cfg, models, resource_groups)
         }
         _ => {
             panic!("unsupported openapi version");
         }
     };
+
+    if args.debug_state {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&state).expect("failed to serialize state!")
+        );
+    } else {
+        let files = ram::generate_files(state);
+        ram::util::write_files(&output, files);
+    }
+
+    println!("All operations finished!")
 }

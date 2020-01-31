@@ -8,6 +8,7 @@ license = "MIT"
 name = "ram"
 repository = "https://github.com/alamminsalo/ram"
 version = "1.0.0"
+
 [[bin]]
 name = "ram"
 path = "src/main.rs"
@@ -37,3 +38,4 @@ version = "^1.0"
 [lib]
 name = "ram"
 path = "src/lib.rs"
+

@@ -6,7 +6,7 @@ mod model;
 mod param;
 mod resource;
 mod state;
-mod util;
+pub mod util;
 
 use assets::Assets;
 pub use config::Config;
@@ -62,10 +62,7 @@ pub fn create_state(
     }
 }
 
-pub fn generate_files(
-    state: State,
-    output: &Path, // output folder
-) {
+pub fn generate_files(state: State) -> HashMap<PathBuf, String> {
     println!("Generating files...");
     let mut hb = Handlebars::new();
     util::init_handlebars(&mut hb);
@@ -75,12 +72,9 @@ pub fn generate_files(
 
     // render files
     let files: Vec<AddFile> = state.cfg.get_files(&state.lang);
-    if !files.is_empty() {
-        println!("Rendering templates...");
-        util::write_files(&output, render_files(&mut hb, &state, files));
-    }
 
-    println!("All operations finished!")
+    println!("Rendering templates...");
+    render_files(&mut hb, &state, files)
 }
 
 // runs lang translations on all models
