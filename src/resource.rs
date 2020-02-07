@@ -1,6 +1,7 @@
 use super::param::{get_params_operation, get_params_path, Param};
 use super::Lang;
 use super::Model;
+use indexmap::IndexMap;
 use itertools::Itertools;
 use openapi::v3_0::ObjectOrReference;
 use openapi::v3_0::{Operation, Parameter, PathItem};
@@ -126,7 +127,7 @@ pub enum GroupingStrategy {
 
 /// Groups resources with given grouping strategy
 pub fn group_resources(
-    paths: &BTreeMap<String, PathItem>,
+    paths: &IndexMap<String, PathItem>,
     grouping_strategy: GroupingStrategy,
     parameters: &HashMap<String, Parameter>,
 ) -> Vec<ResourceGroup> {
