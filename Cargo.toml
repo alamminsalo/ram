@@ -27,7 +27,7 @@ structopt = "^0.3"
 
 [dependencies.openapi]
 branch = "ram"
-path = "../openapi"
+git = "https://github.com/alamminsalo/openapi"
 
 [dependencies.serde]
 features = ["derive"]
@@ -41,5 +41,3 @@ version = "^0.8"
 
 [lib]
 name = "ram"
-git = "https://github.com/alamminsalo/openapi"
-

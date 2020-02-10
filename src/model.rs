@@ -3,7 +3,6 @@ use super::util;
 use indexmap::IndexMap;
 use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub enum ModelType {

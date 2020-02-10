@@ -6,7 +6,7 @@ use itertools::Itertools;
 use openapi::v3_0::ObjectOrReference;
 use openapi::v3_0::{Operation, Parameter, PathItem};
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Resource {
