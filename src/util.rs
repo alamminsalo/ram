@@ -37,6 +37,13 @@ pub fn write_files(root: &Path, map: HashMap<PathBuf, String>) {
     }
 }
 
+pub fn extract_model_name(schema: &Schema) -> Option<String> {
+    schema
+        .ref_path
+        .as_ref()
+        .and_then(|ref_path| model_name_from_ref(&ref_path))
+}
+
 // Returns model name from ref path
 pub fn model_name_from_ref(ref_path: &str) -> Option<String> {
     if let Some(idx) = ref_path.rfind('/') {

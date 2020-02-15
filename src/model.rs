@@ -3,6 +3,7 @@ use super::util;
 use indexmap::IndexMap;
 use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub enum ModelType {
@@ -13,6 +14,7 @@ pub enum ModelType {
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct Model {
+    pub def: String,
     pub name: String,
     #[serde(rename = "type")]
     pub schema_type: String,
@@ -45,19 +47,19 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new(name: &str, schema: &Schema) -> Self {
+    pub fn new(name: &str, schema: &Schema, def: &str) -> Self {
         let properties: Vec<Box<Model>> = schema
             .properties
             .iter()
             .flatten()
-            .map(|(name, schema)| Box::new(Model::new(&name, schema)))
+            .map(|(name, schema)| Box::new(Model::new(&name, schema, "")))
             .collect();
 
         let additional_properties: Option<Box<Model>> = schema
             .additional_properties
             .as_ref()
             .and_then(|obj_or_ref| match obj_or_ref {
-                ObjectOrReference::Object(s) => Some(Box::new(Model::new("", &s))),
+                ObjectOrReference::Object(s) => Some(Box::new(Model::new("", &s, ""))),
                 _ => None,
             });
 
@@ -67,25 +69,27 @@ impl Model {
             .unwrap_or(&String::from("object"))
             .to_owned();
 
+        // If input name is "", try to extract one from ref_path.
+        // Otherwise use the name.
+        let def: String = if def == "" {
+            util::extract_model_name(schema).unwrap_or_default()
+        } else {
+            def.into()
+        };
+
         let mut model = Model {
             name: name.into(),
             ref_path: schema.ref_path.clone(),
             items: schema.items.as_ref().map(|s| {
-                let name = s
-                    .ref_path
-                    .as_ref()
-                    .map(|ref_path| {
-                        util::model_name_from_ref(&ref_path)
-                            .expect("failed to get model name from ref_path")
-                    })
-                    .unwrap_or(String::new());
-                Box::new(Model::new(&name, &s))
+                let name = util::extract_model_name(s).unwrap_or_default();
+                Box::new(Model::new(&name, &s, ""))
             }),
             nullable: schema.nullable.unwrap_or(false),
             description: schema.description.clone(),
             format: schema.format.clone(),
             extensions: schema.extensions.clone(),
             readonly: schema.read_only.unwrap_or(false),
+            def,
             schema_type,
             properties,
             additional_properties,
@@ -259,6 +263,49 @@ impl Model {
                 .into_iter()
                 .map(|m| Box::new(m.translate(lang)))
                 .collect(),
+            ..self
+        }
+    }
+
+    // normalizes child refs (clones object from input map)
+    pub fn normalize(self, models_map: &HashMap<String, Self>) -> Self {
+        Self {
+            object_properties: self
+                .object_properties
+                .into_iter()
+                .map(|m| {
+                    models_map
+                        .get(&m.def)
+                        .expect(&format!("failed to get model '{}' from map", &m.def))
+                })
+                .cloned()
+                .map(Box::new)
+                .collect(),
+
+            array_properties: self
+                .array_properties
+                .into_iter()
+                .map(|m| {
+                    let mut items: Box<Model> = m.items.expect("array item was None").clone();
+                    if items.is_object {
+                        items = Box::new(
+                            models_map
+                                .get(&items.def)
+                                .expect(&format!(
+                                    "failed to get array item '{}' from map",
+                                    &items.def
+                                ))
+                                .clone(),
+                        )
+                    }
+                    Model {
+                        items: Some(items),
+                        ..*m
+                    }
+                })
+                .map(Box::new)
+                .collect(),
+
             ..self
         }
     }

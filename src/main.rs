@@ -56,7 +56,6 @@ fn main() {
     } else {
         let files = ram::generate_files(state);
         ram::util::write_files(&output, files);
+        println!("All operations finished!")
     }
-
-    println!("All operations finished!")
 }

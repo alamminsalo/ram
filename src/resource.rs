@@ -69,7 +69,7 @@ impl Resource {
                         contentmap.get("application/json").and_then(|mediatype| {
                             match &mediatype.schema {
                                 Some(ObjectOrReference::Object(schema)) => {
-                                    Some((code.clone(), Model::new("", &schema)))
+                                    Some((code.clone(), Model::new("", &schema, "")))
                                 }
                                 _ => None,
                             }

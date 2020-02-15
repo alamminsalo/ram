@@ -15,7 +15,7 @@ fn from_param(p: &Parameter) -> Option<Param> {
     p.schema.as_ref().and_then(|schema| {
         Some(Param {
             name: p.name.clone(),
-            model: Model::new(&p.name, &schema),
+            model: Model::new(&p.name, &schema, ""),
             required: p.required.unwrap_or(false),
         })
     })

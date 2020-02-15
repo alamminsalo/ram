@@ -22,12 +22,27 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+fn normalize_models(models: Vec<Model>) -> Vec<Model> {
+    // map top-level models by name
+    let models_map = models
+        .iter()
+        .map(|m| (m.def.clone(), m.clone()))
+        .collect::<HashMap<String, Model>>();
+
+    // normalize models
+    models
+        .into_iter()
+        .map(|m| m.normalize(&models_map))
+        .collect()
+}
+
 pub fn generate_models_v3(spec: &Spec, root: &Path) -> Vec<Model> {
-    // iterate components + collected schemas and generate models
+    // iterate components
+    // + generate models
     util::collect_schemas(spec, root)
         .expect("failed to collect schemas")
         .iter()
-        .map(|(key, schema)| Model::new(key, schema))
+        .map(|(key, schema)| Model::new(key, schema, key))
         .collect()
 }
 
@@ -51,7 +66,7 @@ pub fn create_state(
     let lang = cfg.get_lang().expect("failed to create lang spec!");
 
     // translate and format models and resource groups
-    models = translate_models(&lang, models);
+    models = normalize_models(translate_models(&lang, models));
     resource_groups = translate_resource_groups(&lang, resource_groups);
 
     State {
