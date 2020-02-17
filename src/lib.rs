@@ -22,6 +22,7 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+#[allow(dead_code)]
 fn normalize_models(models: Vec<Model>) -> Vec<Model> {
     // map top-level models by name
     let models_map = models
@@ -66,7 +67,7 @@ pub fn create_state(
     let lang = cfg.get_lang().expect("failed to create lang spec!");
 
     // translate and format models and resource groups
-    models = normalize_models(translate_models(&lang, models));
+    models = translate_models(&lang, models);
     resource_groups = translate_resource_groups(&lang, resource_groups);
 
     State {
