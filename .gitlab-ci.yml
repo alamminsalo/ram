@@ -126,6 +126,7 @@ postgres-schema:
   image: postgres:10
   services:
     - name: postgres:10
+      alias: postgres
   script:
     - target/release/ram -c examples/postgresql/postgresql.yaml -i examples/openapi/farm.yaml -o examples/postgresql/
     - psql -U postgres -h postgres -p 5432 < examples/postgresql/schema.sql
