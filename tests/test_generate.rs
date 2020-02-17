@@ -43,7 +43,7 @@ fn it_generates_models_rust() {
             models = ram::generate_models_v3(&spec, &specpath);
             assert_eq!(models.len(), models_count);
             let state = ram::create_state(cfg, models.clone(), vec![]);
-            ram::generate_files(state, &output)
+            ram::util::write_files(&output, ram::generate_files(state));
         }
         _ => {}
     };
@@ -171,7 +171,7 @@ fn it_generates_resources_rust() {
             );
             assert_eq!(resource_groups.len(), res_count);
             let state = ram::create_state(cfg, vec![], resource_groups.clone());
-            ram::generate_files(state, &output)
+            ram::util::write_files(&output, ram::generate_files(state));
         }
         _ => {}
     };
