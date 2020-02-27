@@ -90,8 +90,9 @@ pub fn generate_files(state: State) -> HashMap<PathBuf, String> {
 
     // render files
     let files: Vec<AddFile> = state.cfg.get_files(match state.no_defaults {
-        true => Some(&state.lang),
-        false => None,
+        // by default (false), include language-defined templates
+        false => Some(&state.lang),
+        _ => None,
     });
 
     println!("Rendering templates...");

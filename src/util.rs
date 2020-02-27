@@ -14,6 +14,8 @@ fn ignore_patterns() -> Vec<Pattern> {
         .and_then(|contents| {
             Ok(contents
                 .split("\n")
+                .filter(|l| l.is_empty())
+                .filter(|l| l.starts_with("#"))
                 .filter_map(|line| Pattern::new(line).ok())
                 .collect())
         })
