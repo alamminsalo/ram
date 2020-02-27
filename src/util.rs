@@ -9,13 +9,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 // returns ignore patterns from '.ramignore'
-fn ignore_patterns() -> Vec<Pattern> {
+pub fn ignore_patterns() -> Vec<Pattern> {
     fs::read_to_string(".ramignore")
         .and_then(|contents| {
             Ok(contents
                 .split("\n")
-                .filter(|l| l.is_empty())
-                .filter(|l| l.starts_with("#"))
+                .filter(|l| !l.is_empty())
+                .filter(|l| !l.starts_with("#"))
                 .filter_map(|line| Pattern::new(line).ok())
                 .collect())
         })
