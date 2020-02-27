@@ -62,6 +62,7 @@ pub fn create_state(
     cfg: Config,
     mut models: Vec<Model>,
     mut resource_groups: Vec<ResourceGroup>,
+    no_defaults: bool,
 ) -> State {
     // get lang config
     let lang = cfg.get_lang().expect("failed to create lang spec!");
@@ -75,6 +76,7 @@ pub fn create_state(
         models,
         resource_groups,
         lang,
+        no_defaults,
     }
 }
 
@@ -87,7 +89,10 @@ pub fn generate_files(state: State) -> HashMap<PathBuf, String> {
     state.lang.add_helpers(&mut hb);
 
     // render files
-    let files: Vec<AddFile> = state.cfg.get_files(&state.lang);
+    let files: Vec<AddFile> = state.cfg.get_files(match state.no_defaults {
+        true => Some(&state.lang),
+        false => None,
+    });
 
     println!("Rendering templates...");
     render_files(&mut hb, &state, files)

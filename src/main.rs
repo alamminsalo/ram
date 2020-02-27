@@ -21,6 +21,10 @@ struct Arguments {
     /// prints state passed to templates as json
     #[structopt(short, long)]
     debug_state: bool,
+
+    /// skips generating default asset files
+    #[structopt(short, long)]
+    no_defaults: bool,
 }
 
 fn main() {
@@ -41,7 +45,7 @@ fn main() {
                 &specpath,
                 cfg.grouping_strategy.unwrap_or(GroupingStrategy::FirstTag),
             );
-            ram::create_state(cfg, models, resource_groups)
+            ram::create_state(cfg, models, resource_groups, args.no_defaults)
         }
         _ => {
             panic!("unsupported openapi version");

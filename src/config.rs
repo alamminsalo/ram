@@ -74,20 +74,22 @@ impl Config {
             .unwrap()
     }
 
-    pub fn get_files(&self, lang: &Lang) -> Vec<AddFile> {
-        lang.files_relative()
-            .into_iter()
-            .chain(self.files.iter().map(|f: &AddFile| {
-                // join relative cfg path
-                let template = util::join_relative(&self.path, &PathBuf::from(&f.template))
-                    .to_str()
-                    .unwrap()
-                    .to_owned();
-                AddFile {
-                    template,
-                    ..f.clone()
-                }
-            }))
+    pub fn get_files(&self, lang: Option<&Lang>) -> Vec<AddFile> {
+        let config_files = self.files.iter().map(|f: &AddFile| {
+            // join relative cfg path
+            let template = util::join_relative(&self.path, &PathBuf::from(&f.template))
+                .to_str()
+                .unwrap()
+                .to_owned();
+            AddFile {
+                template,
+                ..f.clone()
+            }
+        });
+
+        lang.into_iter()
+            .flat_map(|l| l.files_relative())
+            .chain(config_files)
             .collect()
     }
 }

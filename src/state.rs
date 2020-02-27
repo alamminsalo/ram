@@ -8,4 +8,5 @@ pub struct State {
     pub cfg: Config,
     pub lang: Lang,
     pub resource_groups: Vec<ResourceGroup>,
+    pub no_defaults: bool,
 }
