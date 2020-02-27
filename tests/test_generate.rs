@@ -42,7 +42,7 @@ fn it_generates_models_rust() {
         openapi::OpenApi::V3_0(spec) => {
             models = ram::generate_models_v3(&spec, &specpath);
             assert_eq!(models.len(), models_count);
-            let state = ram::create_state(cfg, models.clone(), vec![]);
+            let state = ram::create_state(cfg, models.clone(), vec![], false);
             ram::util::write_files(&output, ram::generate_files(state));
         }
         _ => {}
@@ -170,7 +170,7 @@ fn it_generates_resources_rust() {
                 cfg.grouping_strategy.unwrap_or(GroupingStrategy::FirstTag),
             );
             assert_eq!(resource_groups.len(), res_count);
-            let state = ram::create_state(cfg, vec![], resource_groups.clone());
+            let state = ram::create_state(cfg, vec![], resource_groups.clone(), false);
             ram::util::write_files(&output, ram::generate_files(state));
         }
         _ => {}
