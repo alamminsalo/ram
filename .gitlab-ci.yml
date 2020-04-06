@@ -25,6 +25,8 @@ build:
 codecov:
   image: xd009642/tarpaulin
   stage: test
+  except:
+    - tags
   variables:
     CARGO_HOME: $CI_PROJECT_DIR/cargo
   cache:
@@ -41,6 +43,8 @@ codecov:
 rust-rocket:
   stage: test-generate
   image: rust:1.39-stretch
+  except:
+    - tags
   script:
     - target/release/ram -c examples/rust/rocket/rocket.yaml -i examples/openapi/farm.yaml -o examples/rust/rocket/
     - cd examples/rust/rocket
@@ -53,6 +57,8 @@ rust-rocket:
 rust-actix:
   stage: test-generate
   image: rust:1.39-stretch
+  except:
+    - tags
   script:
     - target/release/ram -c examples/rust/actix/actix.yml -i examples/openapi/farm.yaml -o examples/rust/actix/
     - cd examples/rust/actix
@@ -64,6 +70,8 @@ rust-actix:
 rust-models:
   stage: test-generate
   image: rust:1.39-stretch
+  except:
+    - tags
   script:
     - target/release/ram -c examples/rust/models/config.yaml -i examples/openapi/farm.yaml -o examples/rust/models/
     - cd examples/rust/models
@@ -76,6 +84,8 @@ rust-models:
 go-echo:
   stage: test-generate
   image: golang:1.13
+  except:
+    - tags
   script:
     - target/release/ram -c examples/go/echo/config.yaml -i examples/openapi/farm.yaml -o examples/go/echo
     - cd examples/go/echo
@@ -88,6 +98,8 @@ go-echo:
 go-squirrel:
   stage: test-generate
   image: golang:1.13
+  except:
+    - tags
   script:
     - target/release/ram -c examples/go/squirrel/templates/config.yaml -i examples/openapi/farm.yaml -o examples/go/squirrel
     - cd examples/go/squirrel
@@ -101,6 +113,8 @@ go-squirrel:
 java-models:
   stage: test-generate
   image: maven:3-jdk-8
+  except:
+    - tags
   script:
     - target/release/ram -c examples/java/models/config.yaml -i examples/openapi/farm.yaml -o examples/java/models
     - cd examples/java/models
@@ -113,6 +127,8 @@ java-models:
 java-spark:
   stage: test-generate
   image: maven:3-jdk-8
+  except:
+    - tags
   script:
     - target/release/ram -c examples/java/spark/config.yaml -i examples/openapi/farm.yaml -o examples/java/spark
     - cd examples/java/spark
@@ -125,6 +141,8 @@ java-spark:
 postgres-schema:
   stage: test-generate
   image: postgres:10
+  except:
+    - tags
   script:
     - target/release/ram -c examples/postgresql/postgresql.yaml -i examples/openapi/farm.yaml -o examples/postgresql/
   artifacts:
@@ -138,7 +156,7 @@ deploy-dockerhub:
   only:
     - tags
   script:
-    - docker login -u alam0 -p $DOCKER_TOKEN
+    - docker login -u alam0 -p "$DOCKER_TOKEN"
     - docker build -t ram .
     - docker tag ram alam0/ram:$CI_COMMIT_TAG
     - docker push alam0/ram:$CI_COMMIT_TAG
