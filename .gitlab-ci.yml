@@ -158,7 +158,6 @@ deploy-dockerhub:
   only:
     - tags
   script:
-    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin
+    - docker login -u "$DOCKERHUB_USER" -p "$DOCKERHUB_TOKEN"
     - docker build -t alam0/ram:$CI_COMMIT_TAG .
     - docker push alam0/ram:$CI_COMMIT_TAG
-    - docker push alam0/ram:latest
