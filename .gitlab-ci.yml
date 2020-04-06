@@ -159,9 +159,10 @@ build-musl:
   image: ekidd/rust-musl-builder
   script:
     - cargo build --release
+    - cp -r target/x86_64-unknown-linux-musl/release target/release
   artifacts:
     paths:
-      - target/release/ram
+      - /target/release/ram
 
 deploy-dockerhub:
   stage: deploy
