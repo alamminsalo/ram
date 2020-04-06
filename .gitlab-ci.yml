@@ -153,6 +153,8 @@ postgres-schema:
 deploy-dockerhub:
   stage: deploy
   image: docker:latest
+  service:
+    - docker:dind
   only:
     - tags
   script:
