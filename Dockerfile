@@ -1,3 +1,5 @@
 FROM ubuntu:latest
 COPY target/release/ram /
-CMD /ram
+WORKDIR /src
+CMD [""]
+ENTRYPOINT ["/ram"]
