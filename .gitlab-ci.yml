@@ -21,8 +21,6 @@ build:
   artifacts:
     paths:
       - target/release/ram
-  except:
-    - tags
 
 codecov:
   image: xd009642/tarpaulin
@@ -151,18 +149,7 @@ postgres-schema:
     paths:
       - examples/postgresql
 
-# ---- Tags build musl version & deploy on dockerhub -----
-build-musl:
-  stage: build
-  only:
-    - tags
-  image: ekidd/rust-musl-builder
-  script:
-    - cargo build --release --target-dir target/release
-  artifacts:
-    paths:
-      - /target/release/ram
-
+# ---- Deploy on dockerhub -----
 deploy-dockerhub:
   stage: deploy
   only:

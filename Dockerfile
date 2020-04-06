@@ -1,4 +1,4 @@
-FROM scratch
+FROM ubuntu
 COPY target/release/ram /
 WORKDIR /src
 CMD [""]
