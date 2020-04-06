@@ -152,7 +152,8 @@ postgres-schema:
 # ---- Deploy -----
 deploy-dockerhub:
   stage: deploy
-  image: docker/dind
+  services:
+    - docker:dind
   only:
     - tags
   script:
