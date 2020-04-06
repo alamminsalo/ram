@@ -158,8 +158,7 @@ build-musl:
     - tags
   image: ekidd/rust-musl-builder
   script:
-    - cargo build --release
-    - cp -r target/x86_64-unknown-linux-musl/release target/release
+    - cargo build --release --target-dir target/release
   artifacts:
     paths:
       - /target/release/ram
