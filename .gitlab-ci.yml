@@ -144,6 +144,5 @@ deploy-dockerhub:
     - docker login -u alam0 -p $DOCKER_TOKEN
     - docker build -t ram .
     - docker tag ram alam0/ram:$CI_COMMIT_TAG
-    - docker tag ram alam0/ram:latest
     - docker push alam0/ram:$CI_COMMIT_TAG
     - docker push alam0/ram:latest
