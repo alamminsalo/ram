@@ -42,6 +42,7 @@ codecov:
 # Tests for example configurations and templates
 rust-rocket:
   stage: test-generate
+  image: rustlang/rust:nightly-slim
   except:
     - tags
   script:
