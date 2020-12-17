@@ -17,6 +17,7 @@ pub use resource::{GroupingStrategy, Resource, ResourceGroup};
 pub use state::State;
 
 use handlebars::Handlebars;
+use log::info;
 use openapi::v3_0::Spec;
 use serde_json::json;
 use std::collections::HashMap;
@@ -81,7 +82,7 @@ pub fn create_state(
 }
 
 pub fn generate_files(state: State) -> HashMap<PathBuf, String> {
-    println!("Generating files...");
+    info!("Generating files...");
     let mut hb = Handlebars::new();
     util::init_handlebars(&mut hb);
 
@@ -95,7 +96,7 @@ pub fn generate_files(state: State) -> HashMap<PathBuf, String> {
         _ => None,
     });
 
-    println!("Rendering templates...");
+    info!("Rendering templates...");
     render_files(&mut hb, &state, files)
 }
 

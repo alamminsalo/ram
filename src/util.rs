@@ -3,6 +3,7 @@ use failure::Fallible;
 use glob::Pattern;
 use handlebars::Handlebars;
 use itertools::Itertools;
+use log::info;
 use openapi::v3_0::{ObjectOrReference, Parameter, Schema, Spec};
 use std::collections::HashMap;
 use std::fs;
@@ -28,10 +29,10 @@ pub fn write_files(root: &Path, map: HashMap<PathBuf, String>) {
     for (file, data) in map.iter() {
         let path = root.join(&file);
         if ignored.iter().any(|p| p.matches_path(&path)) {
-            println!("ignoring file {}", path.to_str().unwrap_or(""));
+            info!("ignoring file {}", path.to_str().unwrap_or(""));
             continue;
         }
-        println!("writing {}", &path.to_str().unwrap());
+        info!("writing {}", &path.to_str().unwrap());
         // create dirs if needed
         fs::create_dir_all(path.parent().expect("failed to get parent dir"))
             .expect("failed to create directory");

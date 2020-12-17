@@ -1,3 +1,4 @@
+use log::{info, LevelFilter};
 use ram::{Config, GroupingStrategy};
 use std::panic;
 use std::path::PathBuf;
@@ -25,10 +26,32 @@ struct Arguments {
     /// skips generating default asset files
     #[structopt(short, long)]
     no_defaults: bool,
+
+    /// quiet logging level
+    #[structopt(short, long)]
+    quiet: bool,
+}
+
+fn init_logging(quiet: bool) {
+    env_logger::builder()
+        .format_timestamp(None)
+        .format_module_path(false)
+        .format_level(true)
+        .filter(
+            None,
+            match quiet {
+                true => LevelFilter::Error,
+                _ => LevelFilter::Info,
+            },
+        )
+        .init();
 }
 
 fn main() {
     let args = Arguments::from_args();
+
+    init_logging(args.quiet);
+
     let cfg = Config::load_file(&args.config).unwrap();
     let spec = openapi::from_path(&args.input).unwrap();
 
@@ -63,6 +86,6 @@ fn main() {
     if let Some(output) = args.output {
         let files = ram::generate_files(state);
         ram::util::write_files(&output, files);
-        println!("All operations finished!")
+        info!("All operations finished!")
     }
 }
