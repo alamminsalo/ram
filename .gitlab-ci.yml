@@ -8,7 +8,7 @@ stages:
   - deploy
 
 build:
-  image: rust:1.39-stretch
+  image: rust:1.48-stretch
   stage: build 
   variables:
     CARGO_HOME: $CI_PROJECT_DIR/cargo
