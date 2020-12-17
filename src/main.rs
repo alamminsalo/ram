@@ -20,7 +20,7 @@ struct Arguments {
 
     /// prints state passed to templates as json
     #[structopt(short, long)]
-    debug_state: bool,
+    json: bool,
 
     /// skips generating default asset files
     #[structopt(short, long)]
@@ -31,7 +31,6 @@ fn main() {
     let args = Arguments::from_args();
     let cfg = Config::load_file(&args.config).unwrap();
     let spec = openapi::from_path(&args.input).unwrap();
-    let output = args.output.unwrap_or(PathBuf::from("./"));
 
     let mut specpath = args.input;
     specpath.pop();
@@ -52,12 +51,16 @@ fn main() {
         }
     };
 
-    if args.debug_state {
+    // output raw state as json
+    if args.json {
         println!(
             "{}",
-            serde_json::to_string_pretty(&state).expect("failed to serialize state!")
+            serde_json::to_string(&state).expect("failed to serialize state!")
         );
-    } else {
+    }
+
+    // if output defined, write files
+    if let Some(output) = args.output {
         let files = ram::generate_files(state);
         ram::util::write_files(&output, files);
         println!("All operations finished!")

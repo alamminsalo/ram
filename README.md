@@ -109,5 +109,5 @@ so for example ignorefile in different output directory won't get matched.
 ## Debugging json state
 
 Every template is passed the whole state object with translated field names and other preprocessed data.
-To output this state as a json object: use the `--debug-state` flag.
+To output this state as a json object: use the `--json` flag.
 
