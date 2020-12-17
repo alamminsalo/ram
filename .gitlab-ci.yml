@@ -42,7 +42,7 @@ codecov:
 # Tests for example configurations and templates
 rust-rocket:
   stage: test-generate
-  image: rust:1.39-stretch
+  image: rust:1.48-stretch
   except:
     - tags
   script:
@@ -56,7 +56,7 @@ rust-rocket:
 
 rust-actix:
   stage: test-generate
-  image: rust:1.39-stretch
+  image: rust:1.48-stretch
   except:
     - tags
   script:
@@ -69,7 +69,7 @@ rust-actix:
 
 rust-models:
   stage: test-generate
-  image: rust:1.39-stretch
+  image: rust:1.48-stretch
   except:
     - tags
   script:
