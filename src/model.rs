@@ -3,6 +3,7 @@ use super::util;
 use indexmap::IndexMap;
 use openapi::v3_0::{ObjectOrReference, Schema};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -33,7 +34,7 @@ pub struct Model {
     /// Examples: `x-sql-table`, `x-go-tag`
     /// Flattened: use directly from model `{{ x-sql-name }}`
     #[serde(flatten)]
-    pub extensions: IndexMap<String, String>,
+    pub extensions: IndexMap<String, Value>,
 
     // additional helper properties, these are derived from the 'base' properties
     pub is_object: bool,
