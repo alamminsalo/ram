@@ -26,6 +26,7 @@ pub struct Model {
     pub description: Option<String>,
     pub format: Option<String>,
     pub nullable: bool,
+    pub default: Option<Value>,
     #[serde(skip)]
     pub ref_path: Option<String>,
 
@@ -88,6 +89,7 @@ impl Model {
             nullable: schema.nullable.unwrap_or(false),
             description: schema.description.clone(),
             format: schema.format.clone(),
+            default: schema.default.clone(),
             extensions: schema.extensions.clone(),
             readonly: schema.read_only.unwrap_or(false),
             def,
